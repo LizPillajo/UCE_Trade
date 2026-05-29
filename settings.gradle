@@ -1,0 +1,5 @@
+rootProject.name = 'uce-trade-backend'
+
+// Registers the microservices as sub-modules
+include 'ms2-product-command'
+include 'ms3-catalog-query'
