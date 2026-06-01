@@ -36,9 +36,17 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
+    - name: Determine Docker Tag
+      run: |
+        if [ "${{ github.ref_name }}" == "main" ]; then
+          echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+        else
+          echo "IMAGE_TAG=qa" >> $GITHUB_ENV
+        fi
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: ./ms2-product-command
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/ms2-product-command:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/ms2-product-command:${{ env.IMAGE_TAG }}
