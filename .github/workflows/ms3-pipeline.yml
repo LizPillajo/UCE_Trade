@@ -17,6 +17,10 @@ jobs:
       with:
         go-version: '1.21'
 
+    - name: Run Unit Tests
+      working-directory: ./ms3-catalog-query
+      run: go test -v ./...
+
     - name: Build Go App
       working-directory: ./ms3-catalog-query
       run: go build -v ./...
