@@ -24,5 +24,11 @@ services:
       - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
 
+  ms3-mongo:
+    image: mongo:latest
+    container_name: uce_trade_ms3_db
+    ports:
+      - "27017:27017"
+
 volumes:
   ms2_db_data:
