@@ -1,6 +1,6 @@
 module uce-trade/ms3-catalog-query
 
-go 1.26.3
+go 1.21
 
 require (
 	github.com/confluentinc/confluent-kafka-go v1.9.2
