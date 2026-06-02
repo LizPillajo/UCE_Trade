@@ -1,49 +1,74 @@
 package ec.edu.uce.trade.product.application.usecases;
 
 import ec.edu.uce.trade.product.domain.model.Venture;
+import ec.edu.uce.trade.product.domain.ports.out.ImageStoragePort;
+import ec.edu.uce.trade.product.domain.ports.out.VentureEventPort;
 import ec.edu.uce.trade.product.domain.ports.out.VentureRepositoryPort;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class CreateVentureUseCaseTest {
 
     @Mock
     private VentureRepositoryPort repositoryPort;
 
+    @Mock
+    private VentureEventPort eventPort;
+
+    @Mock
+    private ImageStoragePort imageStoragePort;
+
     @InjectMocks
-    private CreateVentureUseCase useCase;
+    private CreateVentureUseCase createVentureUseCase;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
-    void shouldCreateVentureWithPendingStatusAndId() {
-        // 1. Arrange (Prepare test data)
+    void shouldCreateVentureAndUploadImageSuccessfully() {
+        // 1. Fake data
         Venture newVenture = new Venture();
         newVenture.setStudentId(UUID.randomUUID());
         newVenture.setTitle("Emprendimiento de Prueba");
-        newVenture.setPrice(new BigDecimal("10.00"));
+        newVenture.setPrice(new BigDecimal("15.50"));
 
-        // Simulate that the database returns what we sent it
+        // Create a fake photo
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getOriginalFilename()).thenReturn("foto.jpg");
+
+        // Assume that Supabase returns a valid URL
+        when(imageStoragePort.uploadImage(any(), anyString()))
+                .thenReturn("https://supabase.com/foto.jpg");
+
+        // Assume that the database saves and returns the same object
         when(repositoryPort.save(any(Venture.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // 2. Act (Execute the business logic)
-        Venture savedVenture = useCase.execute(newVenture);
+        // 2. Execute the use case (Act)
+        Venture savedVenture = createVentureUseCase.execute(newVenture, mockFile);
 
-        // 3. Assert (Verify that the rules were followed)
-        assertNotNull(savedVenture.getId(), "The ID should not be null");
-        assertNotNull(savedVenture.getCreatedAt(), "The creation date should not be null");
-        assertEquals("PENDING", savedVenture.getStatus(), "The initial status should be PENDING");
+        // 3. Verify the results (Assert)
+        assertNotNull(savedVenture.getId());
+        assertNotNull(savedVenture.getCreatedAt());
+        assertEquals("PENDING", savedVenture.getStatus());
+        assertEquals("https://supabase.com/foto.jpg", savedVenture.getImageUrl());
 
-        // Verify that the database port was called exactly once
+        // Verify that the ports were called exactly once
+        verify(imageStoragePort, times(1)).uploadImage(any(), anyString());
         verify(repositoryPort, times(1)).save(any(Venture.class));
+        verify(eventPort, times(1)).publishVentureCreatedEvent(any(Venture.class));
     }
 }
