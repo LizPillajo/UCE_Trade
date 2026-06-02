@@ -12,7 +12,8 @@ public class Venture {
     private BigDecimal price;
     private String status; 
     private LocalDateTime createdAt;
-    
+    private String imageUrl; 
+
     public Venture() {}
 
     // Getters y Setters
@@ -36,4 +37,7 @@ public class Venture {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }    
 }
