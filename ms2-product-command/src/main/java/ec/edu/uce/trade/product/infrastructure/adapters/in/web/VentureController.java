@@ -15,9 +15,12 @@ public class VentureController {
         this.createVentureUseCase = createVentureUseCase;
     }
 
-    @PostMapping
-    public ResponseEntity<Venture> createVenture(@RequestBody Venture venture) {
-        Venture createdVenture = createVentureUseCase.execute(venture);
-        return ResponseEntity.ok(createdVenture);
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<Venture> createVenture(
+            @ModelAttribute Venture venture, 
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        
+        Venture createdVenture = createVentureUseCase.execute(venture, file);
+        return ResponseEntity.status(201).body(createdVenture);
     }
 }

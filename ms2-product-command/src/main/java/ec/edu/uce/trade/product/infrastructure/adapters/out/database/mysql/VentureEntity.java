@@ -19,6 +19,7 @@ public class VentureEntity {
     private BigDecimal price;
     private String status;
     private LocalDateTime createdAt;
+    private String imageUrl;
 
     public VentureEntity() {}
 
@@ -37,4 +38,6 @@ public class VentureEntity {
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }
