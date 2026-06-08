@@ -4,7 +4,6 @@ application-secrets.properties
 
 build/
 .gradle/
-out/
 node_modules/
 
 # VS Code
