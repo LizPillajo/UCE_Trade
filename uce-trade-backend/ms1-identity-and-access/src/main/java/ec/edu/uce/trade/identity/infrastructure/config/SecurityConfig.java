@@ -19,11 +19,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-           
+            .csrf(csrf -> csrf.disable())           
             .authorizeHttpRequests(auth -> auth
+
                 .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/api/v1/users/**").permitAll() 
+                .requestMatchers("/api/v1/users/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll() 
                 .anyRequest().authenticated()
             );
             
