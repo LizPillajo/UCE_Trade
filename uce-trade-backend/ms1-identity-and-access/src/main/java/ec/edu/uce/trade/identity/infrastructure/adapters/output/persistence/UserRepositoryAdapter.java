@@ -19,17 +19,29 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
         UserEntity entity = new UserEntity();
         entity.setUid(user.getUid());
         entity.setEmail(user.getEmail());
+        entity.setFullName(user.getFullName());
+        entity.setFaculty(user.getFaculty());
         entity.setRole(user.getRole());
+        entity.setCreatedAt(user.getCreatedAt());
         
         UserEntity saved = repository.save(entity);
-        user.setUid(saved.getUid());
-        return user;
+        return mapToDomain(saved);
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        // Implementación futura
-        return Optional.empty();
+    public Optional<User> findById(String uid) {
+        return repository.findById(uid).map(this::mapToDomain);
+    }
+
+    private User mapToDomain(UserEntity entity) {
+        User user = new User();
+        user.setUid(entity.getUid());
+        user.setEmail(entity.getEmail());
+        user.setFullName(entity.getFullName());
+        user.setFaculty(entity.getFaculty());
+        user.setRole(entity.getRole());
+        user.setCreatedAt(entity.getCreatedAt());
+        return user;
     }
 }
 
