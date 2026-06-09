@@ -9,16 +9,14 @@ export const useWebSocket = () => {
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   
-  // Mantener la instancia del cliente entre renderizados
   const clientRef = useRef(null);
 
   useEffect(() => {
-    // Si no hay usuario o ya hay una conexión activa, no hacer nada
     if (!user || clientRef.current) return;
 
     console.log("🔌 Iniciando conexión WebSocket...");
 
-    const WS_URL = 'http://3.225.220.112:8080/ws';
+    const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/ws';
     
     const client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),

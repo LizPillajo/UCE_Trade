@@ -35,4 +35,4 @@ out/
 
 ### VS Code ###
 .vscode/
-uce-trade-firebase-service-account.json
+firebase-service-account.json

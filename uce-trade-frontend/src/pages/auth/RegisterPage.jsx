@@ -15,13 +15,11 @@ import FacultySelect from "../../components/common/FacultySelect";
 import AuthSplitLayout from "../../components/layout/AuthSplitLayout";
 
 import { useAuthStore } from "../../store/authStore";
-import { registerUser, googleLogin } from "../../services/api";
-import { auth, googleProvider } from "../../services/firebase";
-import { signInWithPopup } from "firebase/auth";
-
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import { authenticateWithMS1 } from "../../services/authService";
 import { updateUserProfile } from "../../services/userService";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, googleProvider } from "../../services/firebase";
+import { signInWithPopup } from "firebase/auth";
 
 const registerSchema = z
   .object({
@@ -81,33 +79,28 @@ const RegisterPage = () => {
 
   const handleFirebaseSignUp = async () => {
     try {
-      setServerError("");
+      setServerError('');
       const result = await signInWithPopup(auth, googleProvider);
       const token = await result.user.getIdToken();
-      const data = await googleLogin(token);
-
+      
+      const ms1User = await authenticateWithMS1(token);
+  
       login({
-        name: data.name,
-        role: data.role,
-        email: result.user.email,
-        avatar: data.avatar || result.user.photoURL,
-        faculty: data.faculty,
-        phoneNumber: data.phoneNumber,
-        description: data.description,
-        githubUser: data.githubUser,
+        uid: ms1User.uid,
+        name: ms1User.fullName || result.user.displayName, 
+        role: ms1User.role, 
+        email: ms1User.email, 
+        avatar: result.user.photoURL,
+        faculty: ms1User.faculty
       });
-
-      const path =
-        data.role === "ADMIN"
-          ? "/admin/dashboard"
-          : data.role === "STUDENT"
-            ? "/student/dashboard"
-            : "/explore";
+      
+      const path = ms1User.role === 'ADMIN' ? '/admin/dashboard' : (ms1User.role === 'STUDENT' ? '/student/dashboard' : '/explore');
       navigate(path);
+  
     } catch (err) {
       console.error(err);
-      if (err.code !== "auth/popup-closed-by-user") {
-        setServerError("Error registering with Google.");
+      if (err.code !== 'auth/popup-closed-by-user') {
+         setServerError("Error al registrarse con Google.");
       }
     }
   };

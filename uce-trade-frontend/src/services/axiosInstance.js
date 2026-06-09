@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore'; 
 import { toast } from 'react-toastify';
 
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 const api = axios.create({
   baseURL: BASE_URL, 
@@ -15,7 +15,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
         const logout = useAuthStore.getState().logout;      
         logout();
         
@@ -26,7 +26,7 @@ api.interceptors.response.use(
 
         setTimeout(() => {
             window.location.href = '/login';
-        }, 3000);
+        }, 1500);
     }
     return Promise.reject(error);
   }

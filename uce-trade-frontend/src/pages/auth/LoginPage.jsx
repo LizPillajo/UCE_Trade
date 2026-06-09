@@ -16,10 +16,8 @@ import { useAuthStore } from "../../store/authStore";
 
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../services/firebase";
-import { googleLogin, loginUser } from "../../services/api";
-
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { authenticateWithMS1 } from "../../services/authService";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
