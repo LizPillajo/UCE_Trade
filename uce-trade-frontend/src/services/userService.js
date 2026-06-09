@@ -1,29 +1,11 @@
 import api from './axiosInstance';
 
-// --- PERFIL ---
-export const fetchUserProfile = async (userId) => {
-  const response = await api.get(`/users/${userId}/profile`);
+export const fetchUserProfile = async (uid) => {
+  const response = await api.get(`/v1/users/${uid}`);
   return response.data;
 };
 
-export const updateUserProfile = async (userData) => {
-  const response = await api.put('/users/profile', userData);
-  return response.data;
-};
-
-// --- NOTIFICACIONES ---
-export const fetchNotifications = async () => {
-    const response = await api.get('/notifications/my-notifications');
-    return response.data;
-};
-
-// --- PAGOS ---
-export const downloadInvoice = async (ventureId) => {
-  const response = await api.get(`/payments/invoice/${ventureId}`, { responseType: 'blob' });
-  return response.data;
-};
-
-export const confirmPayment = async (ventureId) => {
-  const response = await api.post(`/payments/confirm/${ventureId}`);
+export const updateUserProfile = async (uid, userData) => {
+  const response = await api.put(`/v1/users/${uid}`, userData);
   return response.data;
 };
