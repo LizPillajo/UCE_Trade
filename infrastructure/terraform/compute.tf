@@ -114,11 +114,9 @@ resource "aws_launch_template" "ms1_lt" {
               sudo dnf update -y
               sudo dnf install -y docker
               sudo systemctl start docker
-              sudo systemctl enable docker
-              
-              # Run the MS1 container injecting the DB credentials created by Terraform
-              sudo docker run -d -p 8080:8080 \
-                -e SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.ms1_postgres.endpoint}/${aws_db_instance.ms1_postgres.db_name} \
+              sudo systemctl enable docker            
+              sudo docker run -d --restart always -p 8080:8080 \
+                -e SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.ms1_postgres.endpoint}/uce_trade_ms1 \
                 -e SPRING_DATASOURCE_USERNAME=${aws_db_instance.ms1_postgres.username} \
                 -e SPRING_DATASOURCE_PASSWORD=root1234 \
                 lizpillajo/ms1-identity-and-access:qa
