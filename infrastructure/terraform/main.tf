@@ -26,3 +26,9 @@ provider "aws" {
     }
   }
 }
+
+variable "rds_snapshot_id" {
+  type        = string
+  default     = ""
+  description = "RDS snapshot ID for restoring the data. Leave this blank if this is your first time."
+}
