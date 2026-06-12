@@ -51,12 +51,13 @@ resource "aws_db_instance" "ms1_postgres" {
   engine                 = "postgres"
   engine_version         = "15" 
   instance_class         = "db.t3.micro"
-  db_name                = "uce_trade_ms1"
+  db_name                = var.rds_snapshot_id == "" ? "uce_trade_ms1" : null 
   username               = "postgres"
   password               = "root1234" 
   parameter_group_name   = "default.postgres15"
   skip_final_snapshot    = false 
-  final_snapshot_identifier = "uce-trade-ms1-final-snapshot"
+  final_snapshot_identifier = "uce-trade-ms1-final-snapshot"  
+  snapshot_identifier    = var.rds_snapshot_id != "" ? var.rds_snapshot_id : null
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
 
