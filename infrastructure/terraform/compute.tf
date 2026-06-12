@@ -73,7 +73,7 @@ resource "aws_lb_target_group" "ms1_tg" {
   target_type = "instance"
 
   health_check {
-    path                = "/api/v1/swagger-ui/index.html" 
+    path                = "/swagger-ui/index.html" 
     port                = "8080"
     healthy_threshold   = 3
     unhealthy_threshold = 3
@@ -119,7 +119,7 @@ resource "aws_launch_template" "ms1_lt" {
                 -e SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.ms1_postgres.endpoint}/uce_trade_ms1 \
                 -e SPRING_DATASOURCE_USERNAME=${aws_db_instance.ms1_postgres.username} \
                 -e SPRING_DATASOURCE_PASSWORD=root1234 \
-                lizpillajo/ms1-identity-and-access:qa
+                lizdaisy/ms1-identity-and-access:qa
               EOF
   )
 
