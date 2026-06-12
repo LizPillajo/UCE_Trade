@@ -15,15 +15,18 @@ public class FirebaseConfig {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
                 InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-service-account.json");
-                if (serviceAccount != null) {
-                    FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .build();
-                    FirebaseApp.initializeApp(options);
+                
+                if (serviceAccount == null) {
+                    throw new RuntimeException("firebase-service-account.json not found in classpath.");
                 }
+                
+                FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+                FirebaseApp.initializeApp(options);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Fallo crítico en la inicialización de Firebase", e);
+            throw new RuntimeException("Critical failure during Firebase initialization", e);
         }
     }
 }
