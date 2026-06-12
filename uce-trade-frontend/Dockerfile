@@ -7,7 +7,7 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN VITE_API_URL=http://localhost:8080/api npm run build
+RUN VITE_API_URL=http://uce-trade-ms1-alb-1397163559.us-east-1.elb.amazonaws.com/api npm run build
 
 # --- STAGE 2: RUN (Nginx) ---
 FROM nginx:alpine
