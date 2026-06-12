@@ -32,13 +32,13 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Run Unit Tests (MS1)
-      run: ./gradlew :ms1-identity-and-access:test
-
     - name: Inject Firebase Secret
       run: |
-        mkdir -p ./uce-trade-backend/ms1-identity-and-access/src/main/resources
-        echo '${{ secrets.FIREBASE_JSON_SECRET }}' > ./uce-trade-backend/ms1-identity-and-access/src/main/resources/firebase-service-account.json
+        mkdir -p ./ms1-identity-and-access/src/main/resources
+        echo '${{ secrets.FIREBASE_JSON_SECRET }}' > ./ms1-identity-and-access/src/main/resources/firebase-service-account.json
+
+    - name: Run Unit Tests (MS1)
+      run: ./gradlew :ms1-identity-and-access:test
 
     - name: Build JAR file (MS1)
       run: ./gradlew :ms1-identity-and-access:bootJar
