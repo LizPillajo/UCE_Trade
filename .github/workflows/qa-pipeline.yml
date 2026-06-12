@@ -3,8 +3,14 @@ name: CI/CD Pipeline - UCE Trade
 on:
   push:
     branches: [ "q/a", "main" ]
+    paths:
+      - 'uce-trade-backend/ms2-product-command/**'
+      - '.github/workflows/qa-pipeline.yml'
   pull_request:
     branches: [ "q/a", "main" ]
+    paths:
+      - 'uce-trade-backend/ms2-product-command/**'
+      - '.github/workflows/qa-pipeline.yml'
 
 jobs:
   build-and-test:

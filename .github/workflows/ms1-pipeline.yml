@@ -4,11 +4,13 @@ on:
   push:
     branches: [ "q/a", "main" ]
     paths:
-      - 'uce-trade-backend/ms1-identity-and-access/**' 
+      - 'uce-trade-backend/ms1-identity-and-access/**'
+      - '.github/workflows/ms1-pipeline.yml'
   pull_request:
     branches: [ "q/a", "main" ]
     paths:
       - 'uce-trade-backend/ms1-identity-and-access/**'
+      - '.github/workflows/ms1-pipeline.yml'
 
 jobs:
   build-test-and-push:
