@@ -14,7 +14,6 @@ public class FirebaseConfig {
     public void init() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                // Requiere colocar el archivo JSON de credenciales de Firebase en src/main/resources
                 InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-service-account.json");
                 if (serviceAccount != null) {
                     FirebaseOptions options = FirebaseOptions.builder()
