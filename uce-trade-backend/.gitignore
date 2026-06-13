@@ -1,0 +1,12 @@
+.gradle/
+build/
+.idea/
+*.iml
+*.class
+.DS_Store
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+application-secrets.properties

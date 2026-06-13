@@ -1,0 +1,170 @@
+# 1. The ALB requires at least 2 public subnets in different zones. Creating the second one:
+resource "aws_subnet" "public_subnet_1b" {
+  vpc_id                  = aws_vpc.main_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "uce-trade-public-1b"
+  }
+}
+
+# Connect the new public subnet to the existing Internet Gateway
+resource "aws_route_table_association" "public_1b_assoc" {
+  subnet_id      = aws_subnet.public_subnet_1b.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+# 2. Security Group for the Application Load Balancer (ALB)
+resource "aws_security_group" "alb_sg" {
+  name        = "uce-trade-alb-sg"
+  description = "Allow public HTTP traffic to the backend"
+  vpc_id      = aws_vpc.main_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "uce-trade-alb-sg"
+  }
+}
+
+# 3. The Application Load Balancer
+resource "aws_lb" "ms1_alb" {
+  name               = "uce-trade-ms1-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = [aws_subnet.public_subnet_1a.id, aws_subnet.public_subnet_1b.id]
+
+  tags = {
+    Name = "uce-trade-ms1-alb"
+  }
+}
+
+# Target Group pointing to port 8080 of the containers
+resource "aws_lb_target_group" "ms1_tg" {
+  name        = "uce-trade-ms1-tg"
+  port        = 8080
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main_vpc.id
+  target_type = "instance"
+
+  health_check {
+    path                = "/swagger-ui/index.html" 
+    port                = "8080"
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    matcher             = "200"
+  }
+
+}
+
+# ALB Listener on port 80
+resource "aws_lb_listener" "ms1_listener" {
+  load_balancer_arn = aws_lb.ms1_alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ms1_tg.arn
+  }
+}
+
+# 4. Launch Template with automated Docker script
+resource "aws_launch_template" "ms1_lt" {
+  name_prefix   = "uce-trade-ms1-template-"
+  image_id      = data.aws_ami.amazon_linux.id
+  instance_type = "t2.micro"
+  key_name      = "vockey"
+
+  network_interfaces {
+    associate_public_ip_address = false # Completely private and inaccessible from the internet
+    security_groups             = [aws_security_group.microservices_sg.id]
+  }
+
+  # Automation script: Installs Docker, downloads your image, and runs it connecting to RDS
+  user_data = base64encode(<<-EOF
+              #!/bin/bash
+              sudo dnf update -y
+              sudo dnf install -y docker
+              sudo systemctl start docker
+              sudo systemctl enable docker            
+              sudo docker run -d --restart always -p 8080:8080 \
+                -e SPRING_DATASOURCE_URL=jdbc:postgresql://${aws_db_instance.ms1_postgres.endpoint}/uce_trade_ms1 \
+                -e SPRING_DATASOURCE_USERNAME=${aws_db_instance.ms1_postgres.username} \
+                -e SPRING_DATASOURCE_PASSWORD=root1234 \
+                lizdaisy/ms1-identity-and-access:qa
+              EOF
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# 5. Auto Scaling Group configured for the QA environment (1 fixed instance)
+resource "aws_autoscaling_group" "ms1_asg" {
+  name_prefix         = "uce-trade-ms1-asg-"
+  desired_capacity    = 1 # Setting for the QA environment
+  max_size            = 1
+  min_size            = 1
+  target_group_arns   = [aws_lb_target_group.ms1_tg.arn]
+  vpc_zone_identifier = [aws_subnet.private_subnet_1a.id, aws_subnet.private_subnet_1b.id]
+
+  launch_template {
+    id      = aws_launch_template.ms1_lt.id
+    version = "$Latest"
+  }
+
+  # Instance refresh moved INSIDE the autoscaling group
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 0 # For a 1-instance QA environment, allow 0 during replacement
+    }
+    triggers = ["tag"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Final Public URL to connect from Postman or the React Frontend
+output "alb_dns_name" {
+  value       = aws_lb.ms1_alb.dns_name
+  description = "Public URL of the Load Balancer to access the Microservice"
+}
+
+resource "local_file" "frontend_env" {
+  content  = <<-EOT
+    VITE_STRIPE_PUBLIC_KEY=pk_test_51SnluY3hZrEwECaZMWcnDpHMns3R2kDnDsDfBoLGAHh919zKDpG9Ryo2qWyr49PS542DQJfll0dIM4l1sUoNGkuQ005H0lh6f0
+    VITE_SUPABASE_URL=https://rgkdqmybvrrpobaomxsg.supabase.co
+    VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJna2RxbXlidnJycG9iYW9teHNnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDM1NzYwNCwiZXhwIjoyMDk1OTMzNjA0fQ.I3PHTR4qxiPTkr4YWkpd7A9o27_f3dzBKLNohYDdYLE
+    VITE_FIREBASE_API_KEY=AIzaSyBvimUmT5AeHp2kGUo8hATZXq-J22lcH5I
+    VITE_FIREBASE_AUTH_DOMAIN=uce-trade-e015e.firebaseapp.com
+    VITE_FIREBASE_PROJECT_ID=uce-trade-e015e
+    VITE_FIREBASE_STORAGE_BUCKET=uce-trade-e015e.firebasestorage.app
+    VITE_FIREBASE_MESSAGING_SENDER_ID=495142170941
+    VITE_FIREBASE_APP_ID=1:495142170941:web:600d39dc5d0ea0584e9554
+    
+    VITE_API_URL=http://${aws_lb.ms1_alb.dns_name}/api
+  EOT
+  filename = "${path.module}/../../uce-trade-frontend/.env"
+}

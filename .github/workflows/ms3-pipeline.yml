@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "q/a" ]
     paths:
-      - 'ms3-catalog-query/**' 
+      - 'uce-trade-backend/ms3-catalog-query/**' 
 
 jobs:
   build-and-push:
@@ -15,14 +15,14 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.26'
+        go-version: '1.22' 
 
     - name: Run Unit Tests
-      working-directory: ./ms3-catalog-query
+      working-directory: ./uce-trade-backend/ms3-catalog-query
       run: go test -v ./...
 
     - name: Build Go App
-      working-directory: ./ms3-catalog-query
+      working-directory: ./uce-trade-backend/ms3-catalog-query
       run: go build -v ./...
 
     - name: Log in to Docker Hub
@@ -43,6 +43,6 @@ jobs:
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v4
       with:
-        context: ./ms3-catalog-query
+        context: ./uce-trade-backend/ms3-catalog-query
         push: true
         tags: lizdaisy/ms3-catalog-query:${{ env.TAG }}

@@ -1,19 +1,19 @@
-name: CI/CD Pipeline - UCE Trade
+name: MS1 Identity CI/CD
 
 on:
   push:
     branches: [ "q/a", "main" ]
     paths:
-      - 'uce-trade-backend/ms2-product-command/**'
-      - '.github/workflows/qa-pipeline.yml'
+      - 'uce-trade-backend/ms1-identity-and-access/**'
+      - '.github/workflows/ms1-pipeline.yml'
   pull_request:
     branches: [ "q/a", "main" ]
     paths:
-      - 'uce-trade-backend/ms2-product-command/**'
-      - '.github/workflows/qa-pipeline.yml'
+      - 'uce-trade-backend/ms1-identity-and-access/**'
+      - '.github/workflows/ms1-pipeline.yml'
 
 jobs:
-  build-and-test:
+  build-test-and-push:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,11 +32,16 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Run Unit Tests (Q/A)
-      run: ./gradlew :ms2-product-command:test
+    - name: Inject Firebase Secret
+      run: |
+        mkdir -p ./ms1-identity-and-access/src/main/resources
+        echo '${{ secrets.FIREBASE_JSON_SECRET }}' > ./ms1-identity-and-access/src/main/resources/firebase-service-account.json
 
-    - name: Build JAR file
-      run: ./gradlew :ms2-product-command:bootJar
+    - name: Run Unit Tests (MS1)
+      run: ./gradlew :ms1-identity-and-access:test
+
+    - name: Build JAR file (MS1)
+      run: ./gradlew :ms1-identity-and-access:bootJar
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -55,6 +60,6 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./uce-trade-backend/ms2-product-command
+        context: ./uce-trade-backend/ms1-identity-and-access
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/ms2-product-command:${{ env.IMAGE_TAG }}
+        tags: ${{ secrets.DOCKER_USERNAME }}/ms1-identity-and-access:${{ env.IMAGE_TAG }}
