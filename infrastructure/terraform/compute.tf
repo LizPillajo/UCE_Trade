@@ -41,16 +41,6 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
-# Allow the ALB to communicate with instances in the private subnet
-resource "aws_security_group_rule" "allow_alb_to_ms" {
-  type                     = "ingress"
-  from_port                = 8080
-  to_port                  = 8080
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.microservices_sg.id
-  source_security_group_id = aws_security_group.alb_sg.id
-}
-
 # 3. The Application Load Balancer
 resource "aws_lb" "ms1_alb" {
   name               = "uce-trade-ms1-alb"
