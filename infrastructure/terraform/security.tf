@@ -36,7 +36,7 @@ resource "aws_security_group" "microservices_sg" {
     from_port       = 8080
     to_port         = 8080
     protocol        = "tcp"
-    security_groups = [aws_security_group.bastion_sg.id] 
+    security_groups = [aws_security_group.bastion_sg.id, aws_security_group.alb_sg.id] 
   }
 
   # Internal SSH from the bastion host to access and review logs
