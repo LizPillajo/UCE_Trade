@@ -73,3 +73,29 @@ func (r *esRepository) SearchVentures(query string, category string) ([]domain.V
 
 	return ventures, nil
 }
+
+func (r *esRepository) IndexVenture(v domain.Venture) error {
+	// Convert a Go struct to JSON
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	// The document is sent to Elasticsearch using its ID
+	res, err := r.client.Index(
+		r.index,
+		bytes.NewReader(data),
+		r.client.Index.WithDocumentID(v.ID),
+		r.client.Index.WithRefresh("true"), // Resfresh to make it searchable immediately
+	)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("Error indexing document in ES: %s", res.Status())
+	}
+
+	return nil
+}

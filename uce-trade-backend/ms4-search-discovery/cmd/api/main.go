@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"uce-trade-ms4/internal/adapters/handlers/events"
 	"uce-trade-ms4/internal/adapters/handlers/http"
 	"uce-trade-ms4/internal/adapters/repositories/elasticsearch"
 	"uce-trade-ms4/internal/core/services"
@@ -12,7 +13,7 @@ import (
 )
 
 func main() {
-	// 1. Configure the Elasticsearch Client
+	// Configure the Elasticsearch Client
 	cfg := es8.Config{
 		Addresses: []string{"http://localhost:9200"}, // Docker ES
 	}
@@ -21,12 +22,16 @@ func main() {
 		log.Fatalf("Error creating the client: %s", err)
 	}
 
-	// 2. Dependency Injection (Hexagonal)
+	// Dependency Injection (Hexagonal)
 	repo := elasticsearch.NewESRepository(esClient, "ventures")
 	searchSvc := services.NewSearchService(repo)
 	searchHandler := http.NewSearchHandler(searchSvc)
 
-	// 3. Router Gin
+	//Launch Kafka in the background
+	kafkaConsumer := events.NewKafkaConsumer([]string{"localhost:9092"}, "venture-created-topic", searchSvc)
+	go kafkaConsumer.Start()
+
+	// Router Gin
 	router := gin.Default()
 	
 	v1 := router.Group("/api/v1/search")
@@ -34,6 +39,6 @@ func main() {
 		v1.GET("/ventures", searchHandler.Search)
 	}
 
-	fmt.Println("MS4 Search & Discovery levantado en el puerto 8083")
+	fmt.Println("MS4 Search & Discovery built at Port 8083")
 	router.Run(":8083")
 }

@@ -16,3 +16,7 @@ func NewSearchService(repo ports.SearchRepository) ports.SearchService {
 func (s *searchService) Search(query string, category string) ([]domain.Venture, error) {
 	return s.repo.SearchVentures(query, category)
 }
+
+func (s *searchService) IndexVenture(v domain.Venture) error {
+	return s.repo.IndexVenture(v)
+}
