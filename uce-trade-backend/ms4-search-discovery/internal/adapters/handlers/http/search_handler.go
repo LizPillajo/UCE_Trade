@@ -1,7 +1,9 @@
 package http
 
 import (
+	"log"
 	"net/http"
+	"uce-trade-ms4/internal/core/domain"
 	"uce-trade-ms4/internal/core/ports"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +23,7 @@ func (h *SearchHandler) Search(c *gin.Context) {
 
 	results, err := h.service.Search(query, category)
 	if err != nil {
+		log.Printf("Error searching in Elasticsearch: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
 		return
 	}

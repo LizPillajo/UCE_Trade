@@ -52,6 +52,9 @@ func (r *esRepository) SearchVentures(query string, category string) ([]domain.V
 	defer res.Body.Close()
 
 	if res.IsError() {
+		if res.StatusCode == 404 {
+			return []domain.Venture{}, nil
+		}
 		return nil, fmt.Errorf("error in response: %s", res.String())
 	}
 

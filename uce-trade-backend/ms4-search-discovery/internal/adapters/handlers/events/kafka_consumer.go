@@ -26,7 +26,7 @@ func NewKafkaConsumer(brokers []string, topic string, service ports.SearchServic
 }
 
 func (c *KafkaConsumer) Start() {
-	fmt.Println("🎧 MS4: Consumidor de Kafka escuchando eventos...")
+	fmt.Println("🎧 MS4: Kafka consumer listening for events...")
 	for {
 		// Waiting for a message to arrive
 		msg, err := c.reader.ReadMessage(context.Background())
