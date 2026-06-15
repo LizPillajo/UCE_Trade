@@ -28,6 +28,18 @@ services:
     ports:
       - "27017:27017"
       
+  ms4-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: uce_trade_ms4_db
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false 
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" 
+    ports:
+      - "9200:9200"
+    volumes:
+      - ms4_db_data:/usr/share/elasticsearch/data
+
   kafka:
     image: apache/kafka:latest
     container_name: uce_trade_kafka
@@ -45,3 +57,4 @@ services:
 volumes:
   ms1_db_data: 
   ms2_db_data:
+  ms4_db_data:
