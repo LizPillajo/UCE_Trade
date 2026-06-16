@@ -94,7 +94,7 @@ const RegisterPage = () => {
         faculty: ms1User.faculty
       });
       
-      const path = ms1User.role === 'ADMIN' ? '/admin/dashboard' : (ms1User.role === 'STUDENT' ? '/student/dashboard' : '/explore');
+      const path = ms1User.role === 'UCE_ADMIN' ? '/admin/dashboard' : (ms1User.role === 'UCE_STUDENT' ? '/student/dashboard' : '/explore');
       navigate(path);
   
     } catch (err) {

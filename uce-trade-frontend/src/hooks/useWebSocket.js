@@ -24,7 +24,7 @@ export const useWebSocket = () => {
       onConnect: () => {
         console.log('✅ SOCKET CONECTADO');
 
-        if (user.role === 'STUDENT') {
+        if (user.role === 'UCE_STUDENT') {
           client.subscribe(`/topic/sales/${user.email}`, (message) => {
             const notif = JSON.parse(message.body);
             toast.success(`💰 ${notif.title}: ${notif.body}`, { toastId: 'sale-notif' });
@@ -35,7 +35,7 @@ export const useWebSocket = () => {
         }
 
         // Suscripción Admin (General)
-        if (user.role === 'ADMIN') {
+        if (user.role === 'UCE_ADMIN') {
           client.subscribe('/topic/admin/notifications', (msg) => {
             const notif = JSON.parse(msg.body);
             toast.info(`🔔 ${notif.title}: ${notif.body}`, { toastId: 'admin-notif' });

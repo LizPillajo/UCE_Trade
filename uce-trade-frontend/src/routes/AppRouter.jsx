@@ -32,7 +32,7 @@ export const AppRouter = () => {
         <Route path="/profile/:id" element={<SellerProfilePage />} />
 
         {/* --- STUDENT AREA (Only role STUDENT) --- */}
-        <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['UCE_STUDENT']} />}>
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/student/my-ventures" element={<MyVenturesPage />} />
             <Route path="/student/create-venture" element={<CreateVenturePage />} />
@@ -40,7 +40,7 @@ export const AppRouter = () => {
         </Route>
 
         {/* --- ADMIN AREA (Only role ADMIN) --- */}
-        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['UCE_ADMIN']} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/ventures" element={<AdminVenturesPage />} />
             <Route path="/admin/users" element={<ManageUsersPage />} />
