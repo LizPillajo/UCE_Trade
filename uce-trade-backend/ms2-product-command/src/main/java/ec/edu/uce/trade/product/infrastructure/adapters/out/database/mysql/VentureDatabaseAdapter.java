@@ -24,6 +24,7 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
         entity.setPrice(venture.getPrice());
         entity.setStatus(venture.getStatus());
         entity.setCreatedAt(venture.getCreatedAt());
+        entity.setImageUrl(venture.getImageUrl());
 
         // 2. Save in MySQL
         VentureEntity savedEntity = repository.save(entity);
@@ -37,6 +38,7 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
         savedVenture.setPrice(savedEntity.getPrice());
         savedVenture.setStatus(savedEntity.getStatus());
         savedVenture.setCreatedAt(savedEntity.getCreatedAt());
+        savedVenture.setImageUrl(savedEntity.getImageUrl());
 
         return savedVenture;
     }
