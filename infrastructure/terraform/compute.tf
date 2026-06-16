@@ -152,19 +152,3 @@ output "alb_dns_name" {
   description = "Public URL of the Load Balancer to access the Microservice"
 }
 
-resource "local_file" "frontend_env" {
-  content  = <<-EOT
-    VITE_STRIPE_PUBLIC_KEY=pk_test_51SnluY3hZrEwECaZMWcnDpHMns3R2kDnDsDfBoLGAHh919zKDpG9Ryo2qWyr49PS542DQJfll0dIM4l1sUoNGkuQ005H0lh6f0
-    VITE_SUPABASE_URL=https://rgkdqmybvrrpobaomxsg.supabase.co
-    VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJna2RxbXlidnJycG9iYW9teHNnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDM1NzYwNCwiZXhwIjoyMDk1OTMzNjA0fQ.I3PHTR4qxiPTkr4YWkpd7A9o27_f3dzBKLNohYDdYLE
-    VITE_FIREBASE_API_KEY=AIzaSyBvimUmT5AeHp2kGUo8hATZXq-J22lcH5I
-    VITE_FIREBASE_AUTH_DOMAIN=uce-trade-e015e.firebaseapp.com
-    VITE_FIREBASE_PROJECT_ID=uce-trade-e015e
-    VITE_FIREBASE_STORAGE_BUCKET=uce-trade-e015e.firebasestorage.app
-    VITE_FIREBASE_MESSAGING_SENDER_ID=495142170941
-    VITE_FIREBASE_APP_ID=1:495142170941:web:600d39dc5d0ea0584e9554
-    
-    VITE_API_URL=http://${aws_lb.ms1_alb.dns_name}/api
-  EOT
-  filename = "${path.module}/../../uce-trade-frontend/.env"
-}

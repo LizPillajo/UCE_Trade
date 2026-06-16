@@ -2,47 +2,72 @@ name: MS3 Catalog Query CI/CD
 
 on:
   push:
-    branches: [ "main", "q/a" ]
+    branches: [ "q/a", "main" ]
     paths:
-      - 'uce-trade-backend/ms3-catalog-query/**' 
+      - 'uce-trade-backend/ms3-catalog-query/**'
+      - '.github/workflows/ms3-pipeline.yml'
+  pull_request:
+    branches: [ "q/a", "main" ]
+    paths:
+      - 'uce-trade-backend/ms3-catalog-query/**'
+      - '.github/workflows/ms3-pipeline.yml'
 
 jobs:
-  build-and-push:
+  # Job 1: Unit Tests (PRs and Pushes)
+  test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./uce-trade-backend/ms3-catalog-query
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    - name: Set up Go
+    - name: Set up Go 1.26
       uses: actions/setup-go@v4
       with:
-        go-version: '1.22' 
+        go-version: '1.26'
 
-    - name: Run Unit Tests
-      working-directory: ./uce-trade-backend/ms3-catalog-query
+    - name: Run Unit Tests (MS3)
       run: go test -v ./...
 
-    - name: Build Go App
-      working-directory: ./uce-trade-backend/ms3-catalog-query
+  # Job 2: Build y Push (Merges to q/a or main)
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push' 
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./uce-trade-backend/ms3-catalog-query
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Go 1.26  
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.26'
+
+    - name: Build Go App (MS3)
       run: go build -v ./...
 
     - name: Log in to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Set Docker Tag
-      id: vars
+    - name: Determine Docker Tag
       run: |
-        if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-          echo "TAG=prod" >> $GITHUB_ENV
+        if [ "${{ github.ref_name }}" == "main" ]; then
+          echo "IMAGE_TAG=prod" >> $GITHUB_ENV
         else
-          echo "TAG=qa" >> $GITHUB_ENV
+          echo "IMAGE_TAG=qa" >> $GITHUB_ENV
         fi
 
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v4
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
       with:
         context: ./uce-trade-backend/ms3-catalog-query
         push: true
-        tags: lizdaisy/ms3-catalog-query:${{ env.TAG }}
+        tags: ${{ secrets.DOCKER_USERNAME }}/ms3-catalog-query:${{ env.IMAGE_TAG }}
