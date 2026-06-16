@@ -31,6 +31,12 @@ public class AuthService {
         }
 
         String email = decodedToken.getEmail();
+
+        if (email != null && email.endsWith("@admin.edu.ec")) {
+            logger.warn("Security Alert: Attempted registration with administrative domain: {}", email);
+            throw new RuntimeException("Access denied: Administrative accounts cannot be registered through this method.");
+        }
+
         String role = (email != null && email.endsWith("@uce.edu.ec")) ? "UCE_STUDENT" : "UCE_CLIENT";
 
         User newUser = new User();
