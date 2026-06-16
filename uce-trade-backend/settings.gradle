@@ -1,4 +1,3 @@
 rootProject.name = 'uce-trade-backend'
 include 'ms1-identity-and-access'
 include 'ms2-product-command'
-include 'ms3-catalog-query'
