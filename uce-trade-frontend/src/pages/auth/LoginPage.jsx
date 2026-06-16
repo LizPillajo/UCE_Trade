@@ -60,9 +60,9 @@ const LoginPage = () => {
       });
 
       const redirectPath =
-        ms1User.role === "ADMIN"
+        ms1User.role === "UCE_ADMIN"
           ? "/admin/dashboard"
-          : ms1User.role === "STUDENT"
+          : ms1User.role === "UCE_STUDENT"
             ? "/student/dashboard"
             : "/explore";
       navigate(redirectPath);

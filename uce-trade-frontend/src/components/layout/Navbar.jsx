@@ -38,8 +38,8 @@ const Navbar = () => {
   });
   
   let links = [{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }];
-  if (user?.role === 'STUDENT') links.push({ name: 'Dashboard', path: '/student/dashboard' });
-  if (user?.role === 'ADMIN') links.push({ name: 'Dashboard', path: '/admin/dashboard' });
+  if (user?.role === 'UCE_STUDENT') links.push({ name: 'Dashboard', path: '/student/dashboard' });
+  if (user?.role === 'UCE_ADMIN') links.push({ name: 'Dashboard', path: '/admin/dashboard' });
 
   const handleLogout = () => {
     setAnchorEl(null);
