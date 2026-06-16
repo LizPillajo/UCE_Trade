@@ -79,14 +79,16 @@ const MyVenturesPage = () => {
             <Typography variant="h5" fontWeight="800" color="#0d2149">My ventures</Typography>
             <Typography variant="body2" color="text.secondary">Manage your published services</Typography>
           </Box>
-          <Button 
-            startIcon={<AddIcon />} 
-            variant="contained" 
-            onClick={() => navigate("/student/create-venture")} 
-            sx={{ bgcolor: "#0d2149", borderRadius: "20px" }}
-          >
-            New Product
-          </Button>
+          {user?.role === 'STUDENT' && (
+              <Button 
+                startIcon={<AddIcon />} 
+                variant="contained" 
+                onClick={() => navigate("/student/create-venture")} 
+                sx={{ bgcolor: "#0d2149", borderRadius: "20px" }}
+              >
+                New Product
+              </Button>
+          )}
         </Box>
 
         <MyVenturesTable ventures={ventures} />

@@ -37,13 +37,13 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        // Habilitar el mock estático para Firebase
+        // Enable static mocking for Firebase
         mockedFirebaseAuth = mockStatic(FirebaseAuth.class);
     }
 
     @AfterEach
     void tearDown() {
-        // Cerrar el mock estático para evitar contaminación entre hilos de ejecución
+        // Enclose the static mock to prevent cross-thread contamination
         mockedFirebaseAuth.close();
     }
 
@@ -79,7 +79,7 @@ class AuthServiceTest {
         // Arrange
         String token = "new-token";
         String uid = "user-789";
-        String email = "liz@uce.edu.ec"; // Dominio institucional institucional
+        String email = "liz@uce.edu.ec"; 
         
         mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(firebaseAuth);
         when(firebaseAuth.verifyIdToken(token)).thenReturn(firebaseToken);
@@ -96,7 +96,7 @@ class AuthServiceTest {
         assertNotNull(result);
         assertEquals(uid, result.getUid());
         assertEquals(email, result.getEmail());
-        assertEquals("UCE_STUDENT", result.getRole()); // Mapeado por terminar en @uce.edu.ec
+        assertEquals("UCE_STUDENT", result.getRole()); 
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -136,6 +136,29 @@ class AuthServiceTest {
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> authService.updateProfile(uid, updatedData));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAdminDomainUsed() throws Exception {
+        // Arrange
+        String token = "admin-hacker-token";
+        String uid = "hacker-123";
+        String email = "hacker@admin.edu.ec"; 
+
+        mockedFirebaseAuth.when(FirebaseAuth::getInstance).thenReturn(firebaseAuth);
+        when(firebaseAuth.verifyIdToken(token)).thenReturn(firebaseToken);
+        when(firebaseToken.getUid()).thenReturn(uid);
+        when(firebaseToken.getEmail()).thenReturn(email);
+
+        // We assume that the user does not exist in the database
+        when(userRepository.findById(uid)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> authService.authenticate(token));
+        
+        assertTrue(exception.getMessage().contains("Access denied"));
+        
+        // We verify that it has NEVER been saved in the database
         verify(userRepository, never()).save(any(User.class));
     }
 }
