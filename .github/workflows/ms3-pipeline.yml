@@ -23,10 +23,10 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up Go 1.25
+    - name: Set up Go 1.26
       uses: actions/setup-go@v4
       with:
-        go-version: '1.25'
+        go-version: '1.26'
 
     - name: Run Unit Tests (MS3)
       run: go test -v ./...
@@ -43,10 +43,10 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up Go 1.25
+    - name: Set up Go 1.26  
       uses: actions/setup-go@v4
       with:
-        go-version: '1.25'
+        go-version: '1.26'
 
     - name: Build Go App (MS3)
       run: go build -v ./...
