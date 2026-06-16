@@ -47,10 +47,10 @@ const UserMenu = ({ user, anchorEl, setAnchorEl, onLogout }) => {
         </Box>
         <Divider />
         
-        {user.role === 'STUDENT' && (
+        {user.role === 'UCE_STUDENT' && (
             <MenuItem onClick={() => { navigate('/profile'); handleClose(); }}>My Profile</MenuItem>
         )}
-        {user.role === 'ADMIN' && (
+        {user.role === 'UCE_ADMIN' && (
             <MenuItem onClick={() => { navigate('/admin/dashboard'); handleClose(); }}>Dashboard</MenuItem>
         )}
         
