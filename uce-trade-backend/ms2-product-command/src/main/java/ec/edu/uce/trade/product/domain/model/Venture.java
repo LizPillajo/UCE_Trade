@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class Venture {
     private UUID id;
-    private UUID studentId;
+    private String studentId; 
     private String title;
     private String description;
     private BigDecimal price;
@@ -20,8 +20,8 @@ public class Venture {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public UUID getStudentId() { return studentId; }
-    public void setStudentId(UUID studentId) { this.studentId = studentId; }
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

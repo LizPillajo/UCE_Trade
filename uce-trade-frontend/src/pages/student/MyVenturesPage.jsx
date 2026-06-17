@@ -79,7 +79,7 @@ const MyVenturesPage = () => {
             <Typography variant="h5" fontWeight="800" color="#0d2149">My ventures</Typography>
             <Typography variant="body2" color="text.secondary">Manage your published services</Typography>
           </Box>
-          {user?.role === 'STUDENT' && (
+          {user?.role === 'UCE_STUDENT' && (
               <Button 
                 startIcon={<AddIcon />} 
                 variant="contained" 
