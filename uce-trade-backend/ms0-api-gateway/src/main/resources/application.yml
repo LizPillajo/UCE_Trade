@@ -1,0 +1,51 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: ms0-api-gateway
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin RETAIN_FIRST
+        - DedupeResponseHeader=Access-Control-Allow-Credentials RETAIN_FIRST
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            redis-rate-limiter.requestedTokens: 1
+            key-resolver: "#{@ipKeyResolver}"
+      routes:
+        - id: ms1-identity
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/users/**
+
+        - id: ms3-catalog-featured
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/ventures/featured
+            - Method=GET
+          filters:
+            - RewritePath=/api/ventures/featured, /api/v1/catalog/ventures
+
+        - id: ms4-search-discovery
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/ventures, /api/ventures/suggestions
+            - Method=GET
+          filters:
+            - RewritePath=/api/ventures.*, /api/v1/search/ventures
+
+        - id: ms2-product-command
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/ventures/**
+          filters:
+            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}

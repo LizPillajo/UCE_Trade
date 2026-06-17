@@ -151,4 +151,3 @@ output "alb_dns_name" {
   value       = aws_lb.ms1_alb.dns_name
   description = "Public URL of the Load Balancer to access the Microservice"
 }
-

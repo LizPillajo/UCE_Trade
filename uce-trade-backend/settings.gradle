@@ -1,3 +1,4 @@
 rootProject.name = 'uce-trade-backend'
+include 'ms0-api-gateway'
 include 'ms1-identity-and-access'
 include 'ms2-product-command'

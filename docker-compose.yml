@@ -3,9 +3,9 @@ services:
     image: postgres:15
     container_name: uce_trade_ms1_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${POSTGRES_DB:-uce_trade_ms1}
     ports:
       - "5433:5432"
     volumes:
@@ -15,8 +15,8 @@ services:
     image: mysql:8.0
     container_name: uce_trade_ms2_db
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-uce_trade_ms2}
     ports:
       - "3306:3306"
     volumes:
@@ -55,6 +55,12 @@ services:
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+
+  redis:
+    image: redis:7-alpine
+    container_name: uce_trade_redis
+    ports:
+      - "6379:6379"
 
 volumes:
   ms1_db_data: 
