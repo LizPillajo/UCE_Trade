@@ -2,7 +2,6 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore} from '../../store/authStore';
 import { CircularProgress, Box } from '@mui/material';
 
-// allowedRoles: Array with the allowed roles for this route ['ADMIN'], ['STUDENT'], etc.
 const ProtectedRoute = ({ allowedRoles }) => {
   const { user, isAuthenticated } = useAuthStore();
 

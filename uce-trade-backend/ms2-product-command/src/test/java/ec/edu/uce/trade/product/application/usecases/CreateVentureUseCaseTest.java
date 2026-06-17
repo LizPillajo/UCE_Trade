@@ -42,7 +42,7 @@ class CreateVentureUseCaseTest {
     void shouldCreateVentureAndUploadImageSuccessfully() {
         // 1. Fake data
         Venture newVenture = new Venture();
-        newVenture.setStudentId(UUID.randomUUID());
+        newVenture.setStudentId("firebase-uid-test-123"); 
         newVenture.setTitle("Emprendimiento de Prueba");
         newVenture.setPrice(new BigDecimal("15.50"));
 

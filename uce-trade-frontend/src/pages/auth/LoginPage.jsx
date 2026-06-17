@@ -89,7 +89,7 @@ const LoginPage = () => {
           faculty: ms1User.faculty
       });
       
-      const redirectPath = ms1User.role === 'ADMIN' ? "/admin/dashboard" : (ms1User.role === 'STUDENT' ? "/student/dashboard" : "/explore");
+      const redirectPath = ms1User.role === 'UCE_ADMIN' ? "/admin/dashboard" : (ms1User.role === 'UCE_STUDENT' ? "/student/dashboard" : "/explore");
       navigate(redirectPath);
     } catch (err) {
       console.error(err);

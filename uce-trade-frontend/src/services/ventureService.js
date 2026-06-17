@@ -17,7 +17,8 @@ export const fetchServices = async (page = 1, search = '', category = 'All', sor
   params.append('page', pageParam);
   params.append('size', 12);
 
-  if (search) params.append('search', search);
+  // CAMBIO AQUÍ: Elasticsearch (MS4) espera 'q', no 'search'
+  if (search) params.append('q', search); 
   if (category && category !== 'All') params.append('category', category);
   if (sort) params.append('sort', sort);
 
@@ -32,7 +33,8 @@ export const fetchServiceById = async (id) => {
 
 export const fetchSuggestions = async (query) => {
   if (!query) return [];
-  const response = await api.get(`/ventures/suggestions?query=${query}`);
+  // CAMBIO AQUÍ: Elasticsearch (MS4) espera 'q', no 'query'
+  const response = await api.get(`/ventures/suggestions?q=${query}`);
   return response.data; 
 };
 
