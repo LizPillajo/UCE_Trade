@@ -1,4 +1,4 @@
-# Public routing table
+# Public Route Table
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main_vpc.id
 
@@ -12,13 +12,13 @@ resource "aws_route_table" "public_rt" {
   }
 }
 
-# Add the public subnet to the routing table
+# Associate public subnet 1a
 resource "aws_route_table_association" "public_1a_assoc" {
   subnet_id      = aws_subnet.public_subnet_1a.id
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Create a static IP (Elastic IP) for the NAT Gateway
+# Elastic IP for NAT Gateway
 resource "aws_eip" "nat_eip" {
   domain = "vpc"
 
@@ -27,7 +27,7 @@ resource "aws_eip" "nat_eip" {
   }
 }
 
-# Create the NAT gateway and place it in the PUBLIC subnet
+# NAT Gateway (for private subnets to access internet)
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = aws_subnet.public_subnet_1a.id
@@ -37,7 +37,7 @@ resource "aws_nat_gateway" "nat" {
   }
 }
 
-# Create the Private Routing Table
+# Private Route Table
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.main_vpc.id
 
@@ -51,12 +51,13 @@ resource "aws_route_table" "private_rt" {
   }
 }
 
-# Connect the private subnets to this new table
+# Associate private subnet 1a
 resource "aws_route_table_association" "private_1a_assoc" {
   subnet_id      = aws_subnet.private_subnet_1a.id
   route_table_id = aws_route_table.private_rt.id
 }
 
+# Associate private subnet 1b
 resource "aws_route_table_association" "private_1b_assoc" {
   subnet_id      = aws_subnet.private_subnet_1b.id
   route_table_id = aws_route_table.private_rt.id

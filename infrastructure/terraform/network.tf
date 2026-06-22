@@ -1,4 +1,4 @@
-# Principal VPC
+# Main VPC
 resource "aws_vpc" "main_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
@@ -9,7 +9,7 @@ resource "aws_vpc" "main_vpc" {
   }
 }
 
-# Internet Gateway 
+# Internet Gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main_vpc.id
 
@@ -18,7 +18,7 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# Public Subnet  (Load Balancer and EC2 Bastion)
+# Public Subnet 1a (Load Balancer and Bastion)
 resource "aws_subnet" "public_subnet_1a" {
   vpc_id                  = aws_vpc.main_vpc.id
   cidr_block              = "10.0.1.0/24"
@@ -30,7 +30,7 @@ resource "aws_subnet" "public_subnet_1a" {
   }
 }
 
-# Private Subnet (Microservices and Data Bases)
+# Private Subnet 1a (Microservices and Databases)
 resource "aws_subnet" "private_subnet_1a" {
   vpc_id            = aws_vpc.main_vpc.id
   cidr_block        = "10.0.10.0/24"
