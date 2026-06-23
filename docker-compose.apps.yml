@@ -1,0 +1,42 @@
+services:
+  ms0-api-gateway:
+    build:
+      context: ./uce-trade-backend/ms0-api-gateway
+    container_name: uce_trade_ms0
+    ports:
+      - "8000:8000"
+
+  ms1-identity-and-access:
+    build:
+      context: ./uce-trade-backend/ms1-identity-and-access
+    container_name: uce_trade_ms1
+    ports:
+      - "8080:8080"
+
+  ms2-product-command:
+    build:
+      context: ./uce-trade-backend/ms2-product-command
+    container_name: uce_trade_ms2
+    ports:
+      - "8081:8081"
+
+  ms3-catalog-query:
+    build:
+      context: ./uce-trade-backend/ms3-catalog-query
+    container_name: uce_trade_ms3
+    ports:
+      - "8082:8082"
+
+  ms4-search-discovery:
+    build:
+      context: ./uce-trade-backend/ms4-search-discovery
+    container_name: uce_trade_ms4
+    ports:
+      - "8083:8083"
+
+  uce-trade-frontend:
+    build:
+      context: ./uce-trade-frontend
+    container_name: uce_trade_frontend
+    ports:
+      - "3000:5173"
