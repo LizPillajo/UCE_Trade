@@ -29,10 +29,10 @@ resource "aws_security_group" "microservices_sg" {
   description = "Allow traffic only from Bastion and Load Balancers"
   vpc_id      = aws_vpc.main_vpc.id
 
-  # Allow all microservice ports from ALB and Bastion
+  # Allow all microservice ports from ALB and Bastion (Ahora hasta el 8084 para el MS5)
   ingress {
     from_port       = 8000
-    to_port         = 8083
+    to_port         = 8084
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion_sg.id, aws_security_group.alb_sg.id]
   }

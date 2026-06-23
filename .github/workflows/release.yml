@@ -67,9 +67,10 @@ jobs:
           - MS2 Product Command (Java/Spring Boot)  
           - MS3 Catalog Query (Go)
           - MS4 Search Discovery (Go)
+          - MS5 Interactions & Reviews (Node.js/Express)
           
           ### 🔧 Infrastructure:
-          - Terraform (VPC, Subnets, ALB, Auto Scaling, RDS)
+          - Terraform (VPC, Subnets, ALB, Auto Scaling, RDS, Cassandra EC2)
           - Docker images with tags: `qa` and `prod`
           
           ### ✨ Changes included:
