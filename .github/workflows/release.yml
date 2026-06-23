@@ -3,7 +3,6 @@ name: Create Release
 on:
   push:
     branches: [ "main" ]
-    # Optional: only if backend changes
     paths:
       - 'uce-trade-backend/**'
       - 'infrastructure/**'
@@ -12,27 +11,23 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required to create releases
+      contents: write
       pull-requests: write
     
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Get all tags/history
+        fetch-depth: 0
 
     - name: Get Current Version
       id: get_version
       run: |
-        # Get the latest release tag
         LATEST_TAG=$(git tag -l "v*" --sort=-version:refname | head -n 1)
         
         if [ -z "$LATEST_TAG" ]; then
-          # If no tags exist, start from v1.0.0
           NEW_VERSION="v1.0.0"
         else
-          # Automatically increment patch version
-          # Example: v1.0.0 -> v1.0.1
           BASE_VERSION=${LATEST_TAG#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
           NEW_PATCH=$((PATCH + 1))
@@ -45,15 +40,13 @@ jobs:
     - name: Generate Release Notes
       id: release_notes
       run: |
-        # Generate release notes based on commits since last tag
         LAST_TAG=$(git tag -l "v*" --sort=-version:refname | head -n 1)
         
         if [ -z "$LAST_TAG" ]; then
-          # First release: show all commits
-          NOTES=$(git log --pretty=format:"- %s" --no-pager)
+          # Use | cat to avoid pager issues
+          NOTES=$(git log --pretty=format:"- %s" | cat)
         else
-          # Show commits since last tag
-          NOTES=$(git log --pretty=format:"- %s" $LAST_TAG..HEAD --no-pager)
+          NOTES=$(git log --pretty=format:"- %s" $LAST_TAG..HEAD | cat)
         fi
         
         # Escape for JSON
@@ -69,11 +62,11 @@ jobs:
           ## 🚀 Release ${{ steps.get_version.outputs.NEW_VERSION }}
           
           ### 📦 Included Microservices:
+          - MS0 API Gateway (Java/Spring Cloud Gateway)
           - MS1 Identity & Access (Java/Spring Boot)
           - MS2 Product Command (Java/Spring Boot)  
           - MS3 Catalog Query (Go)
           - MS4 Search Discovery (Go)
-          - MS0 API Gateway (Java/Spring Cloud Gateway)
           
           ### 🔧 Infrastructure:
           - Terraform (VPC, Subnets, ALB, Auto Scaling, RDS)
