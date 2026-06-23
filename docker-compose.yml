@@ -41,6 +41,16 @@ services:
       - "9200:9200"
     volumes:
       - ms4_db_data:/usr/share/elasticsearch/data
+  
+  ms5-cassandra:
+    image: cassandra:latest
+    container_name: uce_trade_ms5_db
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=UCECluster
+    volumes:
+      - ms5_db_data:/var/lib/cassandra
 
   kafka:
     image: apache/kafka:latest
@@ -67,3 +77,4 @@ volumes:
   ms2_db_data:
   ms3_db_data:
   ms4_db_data:
+  ms5_db_data:

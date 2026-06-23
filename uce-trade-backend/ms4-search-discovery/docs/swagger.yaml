@@ -1,0 +1,60 @@
+definitions:
+  domain.Venture:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      imageUrl:
+        type: string
+      price:
+        type: number
+      status:
+        type: string
+      studentId:
+        type: string
+      title:
+        type: string
+    type: object
+host: localhost:8083
+info:
+  contact: {}
+  description: Microservice of search and discovery for UCE Trade using Elasticsearch.
+  title: MS4 Search & Discovery API
+  version: "1.0"
+paths:
+  /api/v1/search/ventures:
+    get:
+      consumes:
+      - application/json
+      description: Busca emprendimientos en Elasticsearch por término y/o categoría
+      parameters:
+      - description: Término de búsqueda
+        in: query
+        name: q
+        type: string
+      - description: Filtro de categoría
+        in: query
+        name: category
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Venture'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Buscar emprendimientos
+      tags:
+      - search
+swagger: "2.0"
