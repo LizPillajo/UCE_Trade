@@ -1,5 +1,6 @@
 // src/adapters/in/http/ReviewController.js
 const express = require('express');
+const logger = require('../../../config/logger');
 
 function createReviewController(reviewUseCases) {
   const router = express.Router();
@@ -37,10 +38,11 @@ function createReviewController(reviewUseCases) {
       };
 
       const newReview = await reviewUseCases.createReview(reviewData);
+      logger.info(`✅ New review created for the venture: ${req.params.ventureId} by user: ${reviewData.userId}`);
       res.status(201).json(newReview);
       
     } catch (error) {
-      console.error(error);
+      logger.error(`❌ Error to create review: ${error.message}`, { stack: error.stack });
       res.status(400).json({ error: error.message });
     }
   });

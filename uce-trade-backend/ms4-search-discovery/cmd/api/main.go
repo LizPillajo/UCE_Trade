@@ -10,8 +10,16 @@ import (
 
 	es8 "github.com/elastic/go-elasticsearch/v8"
 	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "uce-trade-ms4/docs" 
 )
 
+// @title MS4 Search & Discovery API
+// @version 1.0
+// @description Microservice of search and discovery for UCE Trade using Elasticsearch.
+// @host localhost:8083
 func main() {
 	// Configure the Elasticsearch Client
 	cfg := es8.Config{
@@ -27,13 +35,16 @@ func main() {
 	searchSvc := services.NewSearchService(repo)
 	searchHandler := http.NewSearchHandler(searchSvc)
 
-	//Launch Kafka in the background
+	// Launch Kafka in the background
 	kafkaConsumer := events.NewKafkaConsumer([]string{"localhost:9092"}, "venture-created-topic", searchSvc)
 	go kafkaConsumer.Start()
 
 	// Router Gin
 	router := gin.Default()
 	
+	// Swagger Endpoint
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	v1 := router.Group("/api/v1/search")
 	{
 		v1.GET("/ventures", searchHandler.Search)

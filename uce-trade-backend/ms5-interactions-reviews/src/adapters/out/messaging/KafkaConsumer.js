@@ -1,5 +1,6 @@
 // src/adapters/out/messaging/KafkaConsumer.js
 const { Kafka } = require('kafkajs');
+const logger = require('../../../config/logger');
 
 const kafka = new Kafka({
   clientId: 'ms5-reviews',
@@ -20,13 +21,13 @@ const initKafkaConsumer = async () => {
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         const ventureData = JSON.parse(message.value.toString());
-        console.log(`🎧 [Kafka MS5] Event received. New venture detected: "${ventureData.title}". Section of reviews enabled.`);
+        logger.info(`🎧 [Kafka MS5] Event received. New venture detected: "${ventureData.title}". Section of reviews enabled.`);
       },
     });
     
-    console.log('✅ Kafka consumer connected successfully to MS5.');
+    logger.info('✅ Kafka consumer connected successfully to MS5.');
   } catch (error) {
-    console.error(`❌ Kafka isn't ready yet (${error.message}). Retrying in 5 seconds...`);
+    logger.error(`❌ Kafka isn't ready yet (${error.message}). Retrying in 5 seconds...`, { stack: error.stack });
     setTimeout(initKafkaConsumer, 5000);
   }
 };

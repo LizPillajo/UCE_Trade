@@ -17,6 +17,16 @@ func NewSearchHandler(service ports.SearchService) *SearchHandler {
 	return &SearchHandler{service: service}
 }
 
+// @Summary Buscar emprendimientos
+// @Description Busca emprendimientos en Elasticsearch por término y/o categoría
+// @Tags search
+// @Accept json
+// @Produce json
+// @Param q query string false "Término de búsqueda"
+// @Param category query string false "Filtro de categoría"
+// @Success 200 {array} domain.Venture
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/search/ventures [get]
 func (h *SearchHandler) Search(c *gin.Context) {
 	query := c.Query("q")
 	category := c.Query("category")
