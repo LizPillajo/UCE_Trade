@@ -1,3 +1,4 @@
+// src/services/axiosInstance.js
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore'; 
 import { toast } from 'react-toastify';
@@ -15,6 +16,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // 1. Expired Session (401)
     if (error.response?.status === 401) {
       const isAuthEndpoint = error.config?.url?.includes('/v1/auth/login');
       
@@ -30,6 +32,24 @@ api.interceptors.response.use(
         }, 1500);
       }
     }
+
+    // 2. Rate Limiting
+    if (error.response?.status === 429) {
+      toast.warning("⏳ Please wait a moment! You have made too many requests in a short period.", {
+        position: "top-center",
+        autoClose: 4000,
+        hideProgressBar: true,
+        style: {
+          borderRadius: '16px',
+          fontWeight: 'bold',
+          color: '#0d2149', 
+          backgroundColor: '#fff8e1', 
+          border: '1px solid #efb034', 
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+        }
+      });
+    }
+
     return Promise.reject(error);
   }
 );
