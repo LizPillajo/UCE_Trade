@@ -380,6 +380,63 @@ resource "aws_autoscaling_group" "ms4_asg" {
   }
 }
 
+# 14. Launch Template for MS5 Interactions & Reviews
+resource "aws_launch_template" "ms5_lt" {
+  name_prefix   = "uce-trade-ms5-template-"
+  image_id      = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = [aws_security_group.microservices_sg.id]
+  }
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    sudo dnf update -y
+    sudo dnf install -y docker
+    sudo systemctl start docker
+    sudo systemctl enable docker
+
+    sudo docker run -d --restart always -p 8084:8084 \
+      -e CASSANDRA_HOST=${aws_instance.cassandra_db.private_ip} \
+      -e KAFKA_BROKER=${aws_msk_cluster.kafka_cluster.bootstrap_brokers} \
+      ${var.docker_username}/ms5-interactions-reviews:qa
+  EOF
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# 15. Auto Scaling Group for MS5
+resource "aws_autoscaling_group" "ms5_asg" {
+  name_prefix         = "uce-trade-ms5-asg-"
+  desired_capacity    = 1
+  max_size            = 1
+  min_size            = 1
+  vpc_zone_identifier = [aws_subnet.private_subnet_1a.id, aws_subnet.private_subnet_1b.id]
+
+  launch_template {
+    id      = aws_launch_template.ms5_lt.id
+    version = "$Latest"
+  }
+
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 0
+    }
+    triggers = ["tag"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 # Final Public URL
 output "alb_dns_name" {
   value       = aws_lb.main_alb.dns_name
