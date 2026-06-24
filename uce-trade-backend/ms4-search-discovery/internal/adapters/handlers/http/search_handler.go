@@ -50,13 +50,22 @@ func (h *SearchHandler) Search(c *gin.Context) {
 }
 
 func (h *SearchHandler) GetMyVentures(c *gin.Context) {
+	var token string
 	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" || len(authHeader) < 8 {
+	if authHeader != "" && len(authHeader) > 7 {
+		token = authHeader[7:]
+	} else {
+		cookie, err := c.Cookie("access_token")
+		if err == nil && cookie != "" {
+			token = cookie
+		}
+	}
+
+	if token == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing or invalid token"})
 		return
 	}
 
-	token := authHeader[7:] // Remove "Bearer "
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid JWT format"})
