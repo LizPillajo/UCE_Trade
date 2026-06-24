@@ -21,19 +21,39 @@ func NewESRepository(client *elasticsearch.Client, index string) ports.SearchRep
 }
 
 func (r *esRepository) SearchVentures(query string, category string) ([]domain.Venture, error) {
-	// Basic Multi-Match Query for Elasticsearch
 	var buf bytes.Buffer
-	searchQuery := map[string]interface{}{
-		"query": map[string]interface{}{
+	
+	mustClauses := []map[string]interface{}{}
+	
+	if query != "" {
+		mustClauses = append(mustClauses, map[string]interface{}{
 			"multi_match": map[string]interface{}{
 				"query":  query,
 				"fields": []string{"title^2", "description", "category"},
 			},
-		},
+		})
+	} else {
+		mustClauses = append(mustClauses, map[string]interface{}{
+			"match_all": map[string]interface{}{},
+		})
 	}
 
-	if query == "" {
-		searchQuery["query"] = map[string]interface{}{"match_all": map[string]interface{}{}}
+	filterClauses := []map[string]interface{}{}
+	if category != "" && category != "All" {
+		filterClauses = append(filterClauses, map[string]interface{}{
+			"term": map[string]interface{}{
+				"category.keyword": category,
+			},
+		})
+	}
+
+	searchQuery := map[string]interface{}{
+		"query": map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": mustClauses,
+				"filter": filterClauses,
+			},
+		},
 	}
 
 	if err := json.NewEncoder(&buf).Encode(searchQuery); err != nil {
