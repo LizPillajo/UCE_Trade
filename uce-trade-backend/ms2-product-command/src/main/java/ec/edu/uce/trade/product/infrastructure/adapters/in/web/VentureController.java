@@ -24,15 +24,22 @@ public class VentureController {
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<?> createVenture(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @CookieValue(value = "access_token", required = false) String cookieToken,
             @ModelAttribute Venture venture, 
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
         
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        String token = null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.replace("Bearer ", "");
+        } else if (cookieToken != null && !cookieToken.isEmpty()) {
+            token = cookieToken;
+        }
+
+        if (token == null) {
             log.warn("Security Alert: Missing or invalid authentication token."); // <-- LOG
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("The authentication token is missing or invalid.");
         }
 
-        String token = authHeader.replace("Bearer ", "");
         try {
             String[] chunks = token.split("\\.");
             Base64.Decoder decoder = Base64.getUrlDecoder();
