@@ -89,6 +89,27 @@ resource "aws_security_group" "cassandra_sg" {
   }
 
   ingress {
+    from_port       = 9092
+    to_port         = 9092
+    protocol        = "tcp"
+    security_groups = [var.microservices_sg_id]
+  }
+
+  ingress {
+    from_port       = 27017
+    to_port         = 27017
+    protocol        = "tcp"
+    security_groups = [var.microservices_sg_id]
+  }
+
+  ingress {
+    from_port       = 9200
+    to_port         = 9200
+    protocol        = "tcp"
+    security_groups = [var.microservices_sg_id]
+  }
+
+  ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
