@@ -57,7 +57,7 @@ const LoginPage = () => {
         role: ms1User.role,
         email: ms1User.email,
         faculty: ms1User.faculty,
-      });
+      }, token);
 
       const redirectPath =
         ms1User.role === "UCE_ADMIN"
@@ -87,7 +87,7 @@ const LoginPage = () => {
           email: ms1User.email, 
           avatar: result.user.photoURL,
           faculty: ms1User.faculty
-      });
+      }, token);
       
       const redirectPath = ms1User.role === 'UCE_ADMIN' ? "/admin/dashboard" : (ms1User.role === 'UCE_STUDENT' ? "/student/dashboard" : "/explore");
       navigate(redirectPath);
