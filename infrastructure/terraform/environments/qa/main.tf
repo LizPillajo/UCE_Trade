@@ -78,6 +78,10 @@ module "compute" {
   kafka_brokers          = module.databases.kafka_brokers
   elasticsearch_endpoint = module.databases.elasticsearch_endpoint
   docdb_endpoint         = module.databases.mongodb_endpoint
+
+  supabase_url           = var.supabase_url
+  supabase_bucket        = var.supabase_bucket
+  supabase_key           = var.supabase_key
 }
 
 output "alb_dns_name" {
