@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"strings"
 	
 	"uce-trade-ms3/internal/adapters/handlers/events"
 	httpHandler "uce-trade-ms3/internal/adapters/handlers/http"
@@ -19,8 +21,12 @@ import (
 )
 
 func main() {
-	// 1. INFRASTRUCTURE: Connecting to MongoDB
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	// 1. ADAPTERS: MongoDB Configuration
+	mongoURI := os.Getenv("MONGO_URI")
+	if mongoURI == "" {
+		mongoURI = "mongodb://localhost:27017"
+	}
+	clientOptions := options.Client().ApplyURI(mongoURI)
 	mongoClient, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatalf("Critical Error connecting to MongoDB: %v", err)
@@ -32,7 +38,12 @@ func main() {
 	catalogHandler := httpHandler.NewCatalogHandler(catalogSvc)
 
 	// 3. INPUT ADAPTER: Start Kafka in the background
-	kafkaConsumer := events.NewKafkaConsumer([]string{"localhost:9092"}, "venture-created-topic", catalogSvc)
+	kafkaBrokersEnv := os.Getenv("KAFKA_BROKERS")
+	if kafkaBrokersEnv == "" {
+		kafkaBrokersEnv = "localhost:9092"
+	}
+	kafkaBrokers := strings.Split(kafkaBrokersEnv, ",")
+	kafkaConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-created-topic", catalogSvc)
 	go kafkaConsumer.Start()
 
 	// 4. INPUT ADAPTER: Router Gin

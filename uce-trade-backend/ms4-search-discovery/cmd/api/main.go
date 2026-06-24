@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"uce-trade-ms4/internal/adapters/handlers/events"
 	"uce-trade-ms4/internal/adapters/handlers/http"
 	"uce-trade-ms4/internal/adapters/repositories/elasticsearch"
@@ -22,8 +24,12 @@ import (
 // @host localhost:8083
 func main() {
 	// Configure the Elasticsearch Client
+	esURL := os.Getenv("ELASTICSEARCH_URL")
+	if esURL == "" {
+		esURL = "http://localhost:9200"
+	}
 	cfg := es8.Config{
-		Addresses: []string{"http://localhost:9200"}, // Docker ES
+		Addresses: []string{esURL},
 	}
 	esClient, err := es8.NewClient(cfg)
 	if err != nil {
@@ -36,7 +42,12 @@ func main() {
 	searchHandler := http.NewSearchHandler(searchSvc)
 
 	// Launch Kafka in the background
-	kafkaConsumer := events.NewKafkaConsumer([]string{"localhost:9092"}, "venture-created-topic", searchSvc)
+	kafkaBrokersEnv := os.Getenv("KAFKA_BROKERS")
+	if kafkaBrokersEnv == "" {
+		kafkaBrokersEnv = "localhost:9092"
+	}
+	kafkaBrokers := strings.Split(kafkaBrokersEnv, ",")
+	kafkaConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-created-topic", searchSvc)
 	go kafkaConsumer.Start()
 
 	// Router Gin
