@@ -59,6 +59,8 @@ func main() {
 	v1 := router.Group("/api/v1/search")
 	{
 		v1.GET("/ventures", searchHandler.Search)
+		v1.GET("/ventures/my-ventures", searchHandler.GetMyVentures)
+		v1.GET("/ventures/:id", searchHandler.GetVentureById)
 	}
 
 	fmt.Println("MS4 Search & Discovery built at Port 8083")

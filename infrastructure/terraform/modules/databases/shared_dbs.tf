@@ -50,16 +50,15 @@ resource "aws_instance" "shared_dbs" {
 
     # 3. Zookeeper & Kafka
     sudo docker run -d --name zookeeper --restart always -p 2181:2181 \
-      -e ALLOW_ANONYMOUS_LOGIN=yes \
-      bitnami/zookeeper:latest
+      wurstmeister/zookeeper:latest
 
     sudo docker run -d --name kafka --restart always -p 9092:9092 \
       --link zookeeper:zookeeper \
       -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
-      -e ALLOW_PLAINTEXT_LISTENER=yes \
       -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 \
+      -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
       -e KAFKA_HEAP_OPTS="-Xmx256M -Xms256M" \
-      bitnami/kafka:latest
+      wurstmeister/kafka:latest
 
     # 4. Cassandra
     sudo docker run -d --name cassandra-db --restart always -p 9042:9042 \

@@ -164,6 +164,9 @@ resource "aws_launch_template" "ms2_lt" {
       -e SPRING_DATASOURCE_USERNAME=${var.rds_ms2_username} \
       -e SPRING_DATASOURCE_PASSWORD=${var.rds_ms2_password} \
       -e SPRING_KAFKA_BOOTSTRAP_SERVERS=${var.kafka_brokers} \
+      -e SUPABASE_URL=${var.supabase_url} \
+      -e SUPABASE_BUCKET=${var.supabase_bucket} \
+      -e SUPABASE_KEY=${var.supabase_key} \
       ${var.docker_username}/ms2-product-command:${var.docker_tag}
   EOF
   )
@@ -264,7 +267,7 @@ resource "aws_launch_template" "ms4_lt" {
     sudo systemctl enable docker
 
     sudo docker run -d --restart always -p 8083:8083 \
-      -e ES_HOSTS=http://${var.elasticsearch_endpoint}:9200 \
+      -e ELASTICSEARCH_URL=http://${var.elasticsearch_endpoint}:9200 \
       -e KAFKA_BROKERS=${var.kafka_brokers} \
       ${var.docker_username}/ms4-search-discovery:${var.docker_tag}
   EOF
