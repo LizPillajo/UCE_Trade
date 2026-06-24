@@ -8,7 +8,7 @@ import (
 	"uce-trade-ms4/internal/core/domain"
 	"uce-trade-ms4/internal/core/ports"
 
-	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v7"
 )
 
 type esRepository struct {

@@ -40,7 +40,7 @@ resource "aws_launch_template" "gateway_lt" {
     MS5_IP=$${MS5_IP:-localhost}
 
     sudo docker run -d --restart always -p 8000:8000 \
-      -e SPRING_REDIS_HOST=${var.redis_address} \
+      -e REDIS_HOST=${var.redis_address} \
       -e MS1_URI=http://$MS1_IP:8080 \
       -e MS2_URI=http://$MS2_IP:8081 \
       -e MS3_URI=http://$MS3_IP:8082 \

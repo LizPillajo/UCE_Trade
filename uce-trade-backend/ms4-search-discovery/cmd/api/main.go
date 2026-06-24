@@ -10,7 +10,7 @@ import (
 	"uce-trade-ms4/internal/adapters/repositories/elasticsearch"
 	"uce-trade-ms4/internal/core/services"
 
-	es8 "github.com/elastic/go-elasticsearch/v8"
+	es8 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/gin-gonic/gin"
 
 	swaggerFiles "github.com/swaggo/files"
