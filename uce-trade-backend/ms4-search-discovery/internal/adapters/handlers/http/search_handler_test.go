@@ -25,6 +25,16 @@ func (m *mockSearchService) IndexVenture(v domain.Venture) error {
 	return nil
 }
 
+func (m *mockSearchService) GetMyVentures(email string) ([]domain.Venture, error) {
+	return []domain.Venture{
+		{ID: "2", Title: "Mis Tutorías", Category: "Tutorials", Price: 15.0, StudentId: email},
+	}, nil
+}
+
+func (m *mockSearchService) GetVentureById(id string) (*domain.Venture, error) {
+	return &domain.Venture{ID: id, Title: "Venture Detalle", Category: "Category", Price: 10.0}, nil
+}
+
 // 2. The Unitary Test 
 func TestSearchHandler_Search_Success(t *testing.T) {
 	// Set up Gin in test mode so it doesn't clutter the console

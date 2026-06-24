@@ -108,7 +108,7 @@ func (r *esRepository) GetMyVentures(email string) ([]domain.Venture, error) {
 	searchQuery := map[string]interface{}{
 		"query": map[string]interface{}{
 			"match": map[string]interface{}{
-				"creator_email": email,
+				"studentId": email,
 			},
 		},
 	}
