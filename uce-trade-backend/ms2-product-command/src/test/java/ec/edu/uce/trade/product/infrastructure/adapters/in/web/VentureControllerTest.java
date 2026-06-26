@@ -67,7 +67,7 @@ class VentureControllerTest {
         venture.setTitle("Test Venture");
         MultipartFile file = mock(MultipartFile.class);
         
-        // Simulamos que el caso de uso funciona
+        // Simulate function of the use case
         when(createVentureUseCase.execute(any(), any())).thenReturn(venture);
 
         // Act

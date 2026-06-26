@@ -34,7 +34,7 @@ describe('ReviewUseCases', () => {
       ventureId: '123-abc',
       userId: 'user-456',
       rating: 5,
-      comment: '¡Excelente servicio!'
+      comment: '¡Exelent service!'
     };
 
     const result = await useCases.createReview(validData);
