@@ -9,9 +9,10 @@ export const useAuthStore = create(
       isAuthenticated: false,
 
       // Acción de Login
-      login: (userData) => {
+      login: (userData, token) => {
         set({ 
           user: userData, 
+          token: token,
           isAuthenticated: true 
         });
       },

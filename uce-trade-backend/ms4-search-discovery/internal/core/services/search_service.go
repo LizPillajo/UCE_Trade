@@ -20,3 +20,11 @@ func (s *searchService) Search(query string, category string) ([]domain.Venture,
 func (s *searchService) IndexVenture(v domain.Venture) error {
 	return s.repo.IndexVenture(v)
 }
+
+func (s *searchService) GetMyVentures(email string) ([]domain.Venture, error) {
+	return s.repo.GetMyVentures(email)
+}
+
+func (s *searchService) GetVentureById(id string) (*domain.Venture, error) {
+	return s.repo.GetVentureById(id)
+}

@@ -36,7 +36,7 @@ class VentureControllerTest {
         Venture venture = new Venture();
         MultipartFile file = mock(MultipartFile.class);
 
-        ResponseEntity<?> response = ventureController.createVenture(null, venture, file);
+        ResponseEntity<?> response = ventureController.createVenture(null, null, venture, file);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
@@ -50,7 +50,7 @@ class VentureControllerTest {
         MultipartFile file = mock(MultipartFile.class);
 
         // Act
-        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, venture, file);
+        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, null, venture, file);
 
         // Assert
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
@@ -67,11 +67,11 @@ class VentureControllerTest {
         venture.setTitle("Test Venture");
         MultipartFile file = mock(MultipartFile.class);
         
-        // Simulamos que el caso de uso funciona
+        // Simulate function of the use case
         when(createVentureUseCase.execute(any(), any())).thenReturn(venture);
 
         // Act
-        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, venture, file);
+        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, null, venture, file);
 
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());

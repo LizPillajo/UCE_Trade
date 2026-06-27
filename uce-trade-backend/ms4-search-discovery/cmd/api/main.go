@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"uce-trade-ms4/internal/adapters/handlers/events"
 	"uce-trade-ms4/internal/adapters/handlers/http"
 	"uce-trade-ms4/internal/adapters/repositories/elasticsearch"
 	"uce-trade-ms4/internal/core/services"
 
-	es8 "github.com/elastic/go-elasticsearch/v8"
+	es8 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/gin-gonic/gin"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -22,8 +24,12 @@ import (
 // @host localhost:8083
 func main() {
 	// Configure the Elasticsearch Client
+	esURL := os.Getenv("ELASTICSEARCH_URL")
+	if esURL == "" {
+		esURL = "http://localhost:9200"
+	}
 	cfg := es8.Config{
-		Addresses: []string{"http://localhost:9200"}, // Docker ES
+		Addresses: []string{esURL},
 	}
 	esClient, err := es8.NewClient(cfg)
 	if err != nil {
@@ -36,7 +42,12 @@ func main() {
 	searchHandler := http.NewSearchHandler(searchSvc)
 
 	// Launch Kafka in the background
-	kafkaConsumer := events.NewKafkaConsumer([]string{"localhost:9092"}, "venture-created-topic", searchSvc)
+	kafkaBrokersEnv := os.Getenv("KAFKA_BROKERS")
+	if kafkaBrokersEnv == "" {
+		kafkaBrokersEnv = "localhost:9092"
+	}
+	kafkaBrokers := strings.Split(kafkaBrokersEnv, ",")
+	kafkaConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-created-topic", searchSvc)
 	go kafkaConsumer.Start()
 
 	// Router Gin
@@ -48,6 +59,8 @@ func main() {
 	v1 := router.Group("/api/v1/search")
 	{
 		v1.GET("/ventures", searchHandler.Search)
+		v1.GET("/ventures/my-ventures", searchHandler.GetMyVentures)
+		v1.GET("/ventures/:id", searchHandler.GetVentureById)
 	}
 
 	fmt.Println("MS4 Search & Discovery built at Port 8083")
