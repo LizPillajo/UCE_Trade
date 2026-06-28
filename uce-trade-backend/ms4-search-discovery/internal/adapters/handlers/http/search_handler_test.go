@@ -1,4 +1,3 @@
-// uce-trade-backend/ms4-search-discovery/internal/adapters/handlers/http/search_handler_test.go
 package http
 
 import (
