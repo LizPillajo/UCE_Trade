@@ -37,37 +37,39 @@ func (m *mockSearchService) GetVentureById(id string) (*domain.Venture, error) {
 
 // 2. The Unitary Test 
 func TestSearchHandler_Search_Success(t *testing.T) {
-	// Set up Gin in test mode so it doesn't clutter the console
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 
-	// Inject the mock instead of the actual service
 	mockSvc := &mockSearchService{}
 	handler := NewSearchHandler(mockSvc)
 
 	router.GET("/api/v1/search/ventures", handler.Search)
 
-	// Create a fake HTTP request simulating what the React Frontend would do
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/search/ventures?q=Go", nil)
-	resp := httptest.NewRecorder() // Record the response
+	resp := httptest.NewRecorder()
 
-	// Execute the request on the router
 	router.ServeHTTP(resp, req)
 
-	// Verifications (Asserts)
 	if resp.Code != http.StatusOK {
 		t.Errorf("Expected HTTP status 200 OK, but got %d", resp.Code)
 	}
 
-	// Parsing the JSON response
-	var response []domain.Venture
+	// Parse the new paginated JSON response
+	var response map[string]interface{}
 	err := json.Unmarshal(resp.Body.Bytes(), &response)
 	if err != nil {
-			t.Fatalf("Failed to unmarshal JSON response: %v", err)
-		}
+		t.Fatalf("Failed to unmarshal JSON response: %v", err)
+	}
 
-	// Verify that the response contains the fake data
-	if len(response) == 0 || response[0].Title != "Tutoría de Go" {
-		t.Errorf("The response does not contain the expected simulated data. We got: %v", response)
+	// Extract the "content" array
+	content, ok := response["content"].([]interface{})
+	if !ok || len(content) == 0 {
+		t.Fatalf("Response does not contain a valid 'content' array. Got: %v", response)
+	}
+
+	// Verify the first item's title
+	firstItem := content[0].(map[string]interface{})
+	if firstItem["title"] != "Tutoría de Go" {
+		t.Errorf("The response does not contain the expected simulated data. We got: %v", firstItem["title"])
 	}
 }
