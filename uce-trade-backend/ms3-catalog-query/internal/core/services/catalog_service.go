@@ -4,17 +4,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 	"uce-trade-ms3/internal/core/domain"
 	"uce-trade-ms3/internal/core/ports"
 )
 
 type catalogService struct {
-	repo ports.CatalogRepository
+	repo       ports.CatalogRepository
+	ms1BaseURL string 
 }
 
 func NewCatalogService(repo ports.CatalogRepository) ports.CatalogService {
-	return &catalogService{repo: repo}
+	ms1URL := os.Getenv("MS1_BASE_URL")
+	if ms1URL == "" {
+		ms1URL = "http://localhost:8080" 
+	}
+
+	return &catalogService{
+		repo:       repo,
+		ms1BaseURL: ms1URL,
+	}
 }
 
 // Helper function to fetch owner details from MS1 (Identity)
@@ -22,8 +32,8 @@ func (s *catalogService) fetchOwner(studentId string) *domain.Owner {
 	if studentId == "" {
 		return nil
 	}
-	
-	url := fmt.Sprintf("http://localhost:8080/api/v1/users/%s", studentId)
+
+	url := fmt.Sprintf("%s/api/v1/users/%s", s.ms1BaseURL, studentId)
 
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Get(url)
