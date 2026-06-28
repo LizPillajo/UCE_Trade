@@ -20,6 +20,7 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
         entity.setId(venture.getId());
         entity.setStudentId(venture.getStudentId());
         entity.setTitle(venture.getTitle());
+        entity.setCategory(venture.getCategory());
         entity.setDescription(venture.getDescription());
         entity.setPrice(venture.getPrice());
         entity.setStatus(venture.getStatus());
@@ -34,6 +35,7 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
         savedVenture.setId(savedEntity.getId());
         savedVenture.setStudentId(savedEntity.getStudentId());
         savedVenture.setTitle(savedEntity.getTitle());
+        savedVenture.setCategory(savedEntity.getCategory());
         savedVenture.setDescription(savedEntity.getDescription());
         savedVenture.setPrice(savedEntity.getPrice());
         savedVenture.setStatus(savedEntity.getStatus());
