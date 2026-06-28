@@ -8,7 +8,7 @@ import (
 	"uce-trade-ms3/internal/core/domain"
 )
 
-// 1. Repository mock para aislar la prueba de MongoDB
+// 1. Repository mock 
 type mockCatalogRepository struct {
 	mockData []domain.VentureReadModel
 }
@@ -63,11 +63,11 @@ func TestCatalogService_GetAllVentures(t *testing.T) {
 
 	// The URL of the mock server is injected into our service
 	repo := &mockCatalogRepository{mockData: mockVentures}
-	
+
 	// The service is created using the mock URL
 	svc := &catalogService{
-		repo:      repo,
-		ms1BaseURL: mockServer.URL, 
+		repo:       repo,
+		ms1BaseURL: mockServer.URL,
 	}
 
 	// Act: Call the method you want to test
@@ -82,28 +82,27 @@ func TestCatalogService_GetAllVentures(t *testing.T) {
 		t.Fatalf("2 startups were expected, but found: %d", len(ventures))
 	}
 
-	// Verificamos que el Owner se haya poblado correctamente
 	if ventures[0].Owner == nil {
-		t.Error("2 startups were expected, but found: %d", len(ventures))
+		t.Errorf("Owner is nil for first venture")
 	} else {
 		if ventures[0].Owner.FullName != "Liz Pillajo" {
-			t.Errorf("Incorrect owner name. ‘Liz Pillajo’ was expected, but the following was found: %s", ventures[0].Owner.FullName)
+			t.Errorf("Incorrect owner name. 'Liz Pillajo' was expected, but found: %s", ventures[0].Owner.FullName)
 		}
 		if ventures[0].Owner.Faculty != "Engineering and Applied Sciences" {
-			t.Errorf("Incorrect owner faculty. ‘Engineering and Applied Sciences’ was expected, but the following was found: %s", ventures[0].Owner.Faculty)
+			t.Errorf("Incorrect owner faculty. 'Engineering and Applied Sciences' was expected, but found: %s", ventures[0].Owner.Faculty)
 		}
 	}
 
 	if ventures[1].Owner == nil {
-		t.Error("2 startups were expected, but found: %d", len(ventures))
+		t.Errorf("Owner is nil for second venture")
 	} else {
 		if ventures[1].Owner.FullName != "Juan Pérez" {
-			t.Errorf("Incorrect owner name. ‘Juan Pérez’ was expected, but the following was found: %s", ventures[1].Owner.FullName)
+			t.Errorf("Incorrect owner name. 'Juan Pérez' was expected, but found: %s", ventures[1].Owner.FullName)
 		}
 	}
 }
 
-// 3. Test para SyncVenture 
+// 3. Test para SyncVenture
 func TestCatalogService_SyncVenture(t *testing.T) {
 	// Arrange
 	repo := &mockCatalogRepository{
