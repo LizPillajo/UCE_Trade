@@ -38,7 +38,7 @@ spring:
         - id: ms4-search-discovery
           uri: ${MS4_URI:http://localhost:8083}
           predicates:
-            - Path=/api/ventures, /api/ventures/suggestions, /api/ventures/my-ventures, /api/ventures/{id}
+            - Path=/api/ventures/**
             - Method=GET
           filters:
             - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/search/ventures$\{segment}
@@ -47,6 +47,7 @@ spring:
           uri: ${MS2_URI:http://localhost:8081}
           predicates:
             - Path=/api/ventures/**
+            - Method=POST, PUT, DELETE
           filters:
             - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
         
