@@ -22,16 +22,16 @@ const ReviewList = ({ reviews }) => {
                 <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="flex-start">
                     
                     <UserInfoItem 
-                        name={review.userName || review.user?.fullName || "Anonymous"}
-                        avatar={review.userAvatar || review.user?.avatarUrl || ""}
-                        subtitle={review.user?.faculty || "Verified User"}
+                        name={review.user_name || review.userName || "Anonymous"}
+                        avatar={review.user_avatar || review.userAvatar || ""}
+                        subtitle="Verified User"
                         isVerified={true} 
                     />
 
                     <Box textAlign="right">
                         <Rating value={review.rating} readOnly size="small" />
                         <Typography variant="caption" color="text.secondary" display="block">
-                            {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
+                            {review.created_at || review.createdAt ? new Date(review.created_at || review.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                         </Typography>
                     </Box>
                 </Stack>

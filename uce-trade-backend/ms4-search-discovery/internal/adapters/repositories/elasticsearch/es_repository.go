@@ -202,11 +202,12 @@ func (r *esRepository) GetVentureById(id string) (*domain.Venture, error) {
 func (r *esRepository) GetFeaturedVentures() ([]domain.Venture, error) {
     var buf bytes.Buffer
 
+    // Use a simpler query that always works
     searchQuery := map[string]interface{}{
         "size": 4,
         "sort": []map[string]interface{}{
             {
-                "createdAt": map[string]string{
+                "_id": map[string]string{
                     "order": "desc",
                 },
             },
@@ -224,6 +225,7 @@ func (r *esRepository) GetFeaturedVentures() ([]domain.Venture, error) {
         r.client.Search.WithContext(context.Background()),
         r.client.Search.WithIndex(r.index),
         r.client.Search.WithBody(&buf),
+        r.client.Search.WithTrackTotalHits(true),
     )
     if err != nil {
         return nil, err
