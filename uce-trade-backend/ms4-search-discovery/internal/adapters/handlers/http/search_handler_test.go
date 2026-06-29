@@ -1,4 +1,3 @@
-// uce-trade-backend/ms4-search-discovery/internal/adapters/handlers/http/search_handler_test.go
 package http
 
 import (
@@ -14,50 +13,148 @@ import (
 // 1. Create a service mock to isolate the test and avoid relying on Elasticsearch
 type mockSearchService struct{}
 
-func (m *mockSearchService) Search(query string, category string) ([]domain.Venture, error) {
+func (m *mockSearchService) Search(query string, category string, page int, size int, sort string) ([]domain.Venture, int, error) {
 	// Simulate that the search always returns this result
 	return []domain.Venture{
 		{ID: "1", Title: "Tutoría de Go", Category: "Tutorials", Price: 10.0},
-	}, nil
+	}, 1, nil
 }
 
 func (m *mockSearchService) IndexVenture(v domain.Venture) error {
 	return nil
 }
 
-// 2. The Unitary Test 
+func (m *mockSearchService) GetMyVentures(email string) ([]domain.Venture, error) {
+	return []domain.Venture{
+		{ID: "2", Title: "Mis Tutorías", Category: "Tutorials", Price: 15.0, StudentId: email},
+	}, nil
+}
+
+func (m *mockSearchService) GetVentureById(id string) (*domain.Venture, error) {
+	return &domain.Venture{ID: id, Title: "Venture Detalle", Category: "Category", Price: 10.0}, nil
+}
+
+func (m *mockSearchService) GetFeaturedVentures() ([]domain.Venture, error) {
+	return []domain.Venture{
+		{ID: "3", Title: "Featured Venture 1", Category: "Tutorials", Price: 10.0},
+		{ID: "4", Title: "Featured Venture 2", Category: "Food", Price: 8.0},
+	}, nil
+}
+
+// 2. Test for Search endpoint
 func TestSearchHandler_Search_Success(t *testing.T) {
-	// Set up Gin in test mode so it doesn't clutter the console
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 
-	// Inject the mock instead of the actual service
 	mockSvc := &mockSearchService{}
 	handler := NewSearchHandler(mockSvc)
 
 	router.GET("/api/v1/search/ventures", handler.Search)
 
-	// Create a fake HTTP request simulating what the React Frontend would do
 	req, _ := http.NewRequest(http.MethodGet, "/api/v1/search/ventures?q=Go", nil)
-	resp := httptest.NewRecorder() // Record the response
+	resp := httptest.NewRecorder()
 
-	// Execute the request on the router
 	router.ServeHTTP(resp, req)
 
-	// Verifications (Asserts)
 	if resp.Code != http.StatusOK {
 		t.Errorf("Expected HTTP status 200 OK, but got %d", resp.Code)
 	}
 
-	// Parsing the JSON response
-	var response []domain.Venture
+	// Parse the new paginated JSON response
+	var response map[string]interface{}
 	err := json.Unmarshal(resp.Body.Bytes(), &response)
 	if err != nil {
-			t.Fatalf("Failed to unmarshal JSON response: %v", err)
-		}
+		t.Fatalf("Failed to unmarshal JSON response: %v", err)
+	}
 
-	// Verify that the response contains the fake data
-	if len(response) == 0 || response[0].Title != "Tutoría de Go" {
-		t.Errorf("The response does not contain the expected simulated data. We got: %v", response)
+	// Extract the "content" array
+	content, ok := response["content"].([]interface{})
+	if !ok || len(content) == 0 {
+		t.Fatalf("Response does not contain a valid 'content' array. Got: %v", response)
+	}
+
+	// Verify the first item's title
+	firstItem := content[0].(map[string]interface{})
+	if firstItem["title"] != "Tutoría de Go" {
+		t.Errorf("The response does not contain the expected simulated data. We got: %v", firstItem["title"])
+	}
+}
+
+// 3. Test for GetFeaturedVentures endpoint - Success case
+func TestSearchHandler_GetFeaturedVentures_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+
+	mockSvc := &mockSearchService{}
+	handler := NewSearchHandler(mockSvc)
+
+	router.GET("/api/v1/search/ventures/featured", handler.GetFeaturedVentures)
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/v1/search/ventures/featured", nil)
+	resp := httptest.NewRecorder()
+
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Errorf("Expected HTTP status 200 OK, but got %d", resp.Code)
+	}
+
+	// Parse the JSON response
+	var ventures []domain.Venture
+	err := json.Unmarshal(resp.Body.Bytes(), &ventures)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON response: %v", err)
+	}
+
+	// Verify we got the expected number of ventures
+	expectedCount := 2
+	if len(ventures) != expectedCount {
+		t.Errorf("Expected %d ventures, but got %d", expectedCount, len(ventures))
+	}
+
+	// Verify the first venture's title
+	if len(ventures) > 0 && ventures[0].Title != "Featured Venture 1" {
+		t.Errorf("Expected first venture title 'Featured Venture 1', but got '%s'", ventures[0].Title)
+	}
+
+	// Verify the second venture's title
+	if len(ventures) > 1 && ventures[1].Title != "Featured Venture 2" {
+		t.Errorf("Expected second venture title 'Featured Venture 2', but got '%s'", ventures[1].Title)
+	}
+}
+
+// 4. Test for GetFeaturedVentures endpoint - Empty response case
+func TestSearchHandler_GetFeaturedVentures_Empty(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+
+	// Create a custom struct that embeds mockSearchService and overrides GetFeaturedVentures
+	type emptyMockService struct {
+		mockSearchService
+	}
+	
+	emptyMock := &emptyMockService{}
+	
+	handler := NewSearchHandler(emptyMock)
+
+	router.GET("/api/v1/search/ventures/featured", handler.GetFeaturedVentures)
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/v1/search/ventures/featured", nil)
+	resp := httptest.NewRecorder()
+
+	router.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusOK {
+		t.Errorf("Expected HTTP status 200 OK, but got %d", resp.Code)
+	}
+
+	var ventures []domain.Venture
+	err := json.Unmarshal(resp.Body.Bytes(), &ventures)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON response: %v", err)
+	}
+
+	if resp.Code != http.StatusOK {
+		t.Errorf("Expected HTTP status 200 OK, but got %d", resp.Code)
 	}
 }

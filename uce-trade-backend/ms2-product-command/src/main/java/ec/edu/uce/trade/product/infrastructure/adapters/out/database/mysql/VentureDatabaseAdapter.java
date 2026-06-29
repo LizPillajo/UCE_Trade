@@ -4,6 +4,9 @@ import ec.edu.uce.trade.product.domain.model.Venture;
 import ec.edu.uce.trade.product.domain.ports.out.VentureRepositoryPort;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Component
 public class VentureDatabaseAdapter implements VentureRepositoryPort {
 
@@ -20,6 +23,7 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
         entity.setId(venture.getId());
         entity.setStudentId(venture.getStudentId());
         entity.setTitle(venture.getTitle());
+        entity.setCategory(venture.getCategory());
         entity.setDescription(venture.getDescription());
         entity.setPrice(venture.getPrice());
         entity.setStatus(venture.getStatus());
@@ -30,16 +34,30 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
         VentureEntity savedEntity = repository.save(entity);
 
         // 3. Return as a domain object
-        Venture savedVenture = new Venture();
-        savedVenture.setId(savedEntity.getId());
-        savedVenture.setStudentId(savedEntity.getStudentId());
-        savedVenture.setTitle(savedEntity.getTitle());
-        savedVenture.setDescription(savedEntity.getDescription());
-        savedVenture.setPrice(savedEntity.getPrice());
-        savedVenture.setStatus(savedEntity.getStatus());
-        savedVenture.setCreatedAt(savedEntity.getCreatedAt());
-        savedVenture.setImageUrl(savedEntity.getImageUrl());
+        return mapToDomain(savedEntity);
+    }
 
-        return savedVenture;
+    @Override
+    public Optional<Venture> findById(UUID id) {
+        return repository.findById(id).map(this::mapToDomain);
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        repository.deleteById(id);
+    }
+
+    private Venture mapToDomain(VentureEntity entity) {
+        Venture venture = new Venture();
+        venture.setId(entity.getId());
+        venture.setStudentId(entity.getStudentId());
+        venture.setTitle(entity.getTitle());
+        venture.setCategory(entity.getCategory());
+        venture.setDescription(entity.getDescription());
+        venture.setPrice(entity.getPrice());
+        venture.setStatus(entity.getStatus());
+        venture.setCreatedAt(entity.getCreatedAt());
+        venture.setImageUrl(entity.getImageUrl());
+        return venture;
     }
 }

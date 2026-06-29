@@ -9,8 +9,9 @@ import org.springframework.stereotype.Component;
 public class KafkaVentureEventAdapter implements VentureEventPort {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    // Topic where we will post the message
-    private static final String TOPIC = "venture-created-topic"; 
+    private static final String CREATED_TOPIC = "venture-created-topic";
+    private static final String UPDATED_TOPIC = "venture-updated-topic";
+    private static final String DELETED_TOPIC = "venture-deleted-topic";
 
     public KafkaVentureEventAdapter(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
@@ -18,8 +19,19 @@ public class KafkaVentureEventAdapter implements VentureEventPort {
 
     @Override
     public void publishVentureCreatedEvent(Venture venture) {
-        // The student ID and the startup project are sent
-        kafkaTemplate.send(TOPIC, venture.getStudentId().toString(), venture);
-        System.out.println("Event sent to Kafka: Startup created -> " + venture.getTitle());
+        kafkaTemplate.send(CREATED_TOPIC, venture.getStudentId(), venture);
+        System.out.println("Event sent to Kafka: Venture created -> " + venture.getTitle());
+    }
+
+    @Override
+    public void publishVentureUpdatedEvent(Venture venture) {
+        kafkaTemplate.send(UPDATED_TOPIC, venture.getStudentId(), venture);
+        System.out.println("Event sent to Kafka: Venture updated -> " + venture.getTitle());
+    }
+
+    @Override
+    public void publishVentureDeletedEvent(String ventureId) {
+        kafkaTemplate.send(DELETED_TOPIC, ventureId, ventureId);
+        System.out.println("Event sent to Kafka: Venture deleted -> " + ventureId);
     }
 }

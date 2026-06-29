@@ -1,7 +1,7 @@
 import { Box, Typography, Rating, Paper, Stack } from '@mui/material';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import EmptyState from '../common/EmptyState';
-import UserInfoItem from '../common/UserInfoItem'; // <--- IMPORTADO
+import UserInfoItem from '../common/UserInfoItem';
 
 const ReviewList = ({ reviews }) => {
   if (!reviews || reviews.length === 0) {
@@ -21,18 +21,17 @@ const ReviewList = ({ reviews }) => {
             <Paper key={review.id} elevation={0} sx={{ p: 3, borderRadius: '16px', border: '1px solid #eaecf0' }}>
                 <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="flex-start">
                     
-                    {/* REUTILIZACIÓN AQUÍ */}
                     <UserInfoItem 
-                        name={review.user?.fullName}
-                        avatar={review.user?.avatarUrl}
-                        subtitle={review.user?.faculty || "Verified User"}
+                        name={review.user_name || review.userName || "Anonymous"}
+                        avatar={review.user_avatar || review.userAvatar || ""}
+                        subtitle="Verified User"
                         isVerified={true} 
                     />
 
                     <Box textAlign="right">
                         <Rating value={review.rating} readOnly size="small" />
                         <Typography variant="caption" color="text.secondary" display="block">
-                            {new Date(review.date).toLocaleDateString()}
+                            {review.created_at || review.createdAt ? new Date(review.created_at || review.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                         </Typography>
                     </Box>
                 </Stack>

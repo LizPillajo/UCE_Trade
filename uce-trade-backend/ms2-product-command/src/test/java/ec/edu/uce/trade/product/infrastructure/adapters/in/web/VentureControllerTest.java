@@ -1,6 +1,8 @@
 package ec.edu.uce.trade.product.infrastructure.adapters.in.web;
 
 import ec.edu.uce.trade.product.application.usecases.CreateVentureUseCase;
+import ec.edu.uce.trade.product.application.usecases.DeleteVentureUseCase;
+import ec.edu.uce.trade.product.application.usecases.UpdateVentureUseCase;
 import ec.edu.uce.trade.product.domain.model.Venture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,12 @@ class VentureControllerTest {
     @Mock
     private CreateVentureUseCase createVentureUseCase;
 
+    @Mock
+    private UpdateVentureUseCase updateVentureUseCase;
+
+    @Mock
+    private DeleteVentureUseCase deleteVentureUseCase;
+
     @InjectMocks
     private VentureController ventureController;
 
@@ -36,7 +44,7 @@ class VentureControllerTest {
         Venture venture = new Venture();
         MultipartFile file = mock(MultipartFile.class);
 
-        ResponseEntity<?> response = ventureController.createVenture(null, venture, file);
+        ResponseEntity<?> response = ventureController.createVenture(null, null, venture, file);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
@@ -44,34 +52,34 @@ class VentureControllerTest {
     @Test
     void shouldRejectNonStudentToken() {
         // Arrange: Fake payload masquerading as an external client
-        String payload = "{\"email\":\"external.client@gmail.com\"}";
+        String payload = "{\"email\":\"external.client@gmail.com\", \"user_id\":\"user-123\"}";
         String token = "header." + Base64.getUrlEncoder().encodeToString(payload.getBytes()) + ".signature";
         Venture venture = new Venture();
         MultipartFile file = mock(MultipartFile.class);
 
         // Act
-        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, venture, file);
+        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, null, venture, file);
 
-        // Assert
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertEquals("Access denied. Only UCE students can post business ventures.", response.getBody());
+        // Assert - The extractStudentId method returns null for non-UCE emails,
+        // which triggers a 401 UNAUTHORIZED response
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
     void shouldAllowStudentToken() {
         // Arrange: Fake payload posing as a UCE student
-        String payload = "{\"email\":\"estudiante@uce.edu.ec\"}";
+        String payload = "{\"email\":\"estudiante@uce.edu.ec\", \"user_id\":\"student-123\"}";
         String token = "header." + Base64.getUrlEncoder().encodeToString(payload.getBytes()) + ".signature";
-        
+
         Venture venture = new Venture();
         venture.setTitle("Test Venture");
         MultipartFile file = mock(MultipartFile.class);
-        
-        // Simulamos que el caso de uso funciona
+
+        // Simulate that the use case works
         when(createVentureUseCase.execute(any(), any())).thenReturn(venture);
 
         // Act
-        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, venture, file);
+        ResponseEntity<?> response = ventureController.createVenture("Bearer " + token, null, venture, file);
 
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());

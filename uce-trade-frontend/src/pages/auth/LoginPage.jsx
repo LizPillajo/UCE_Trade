@@ -57,7 +57,11 @@ const LoginPage = () => {
         role: ms1User.role,
         email: ms1User.email,
         faculty: ms1User.faculty,
-      });
+        phoneNumber: ms1User.phoneNumber,
+        githubUser: ms1User.githubUser,
+        description: ms1User.description,
+        avatarUrl: ms1User.avatarUrl,
+      }, token);
 
       const redirectPath =
         ms1User.role === "UCE_ADMIN"
@@ -85,9 +89,12 @@ const LoginPage = () => {
           name: ms1User.fullName || result.user.displayName, 
           role: ms1User.role, 
           email: ms1User.email, 
-          avatar: result.user.photoURL,
-          faculty: ms1User.faculty
-      });
+          avatar: ms1User.avatarUrl || result.user.photoURL,
+          faculty: ms1User.faculty,
+          phoneNumber: ms1User.phoneNumber,
+          githubUser: ms1User.githubUser,
+          description: ms1User.description,
+      }, token);
       
       const redirectPath = ms1User.role === 'UCE_ADMIN' ? "/admin/dashboard" : (ms1User.role === 'UCE_STUDENT' ? "/student/dashboard" : "/explore");
       navigate(redirectPath);

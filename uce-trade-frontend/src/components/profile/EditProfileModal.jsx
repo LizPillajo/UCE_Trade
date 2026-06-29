@@ -10,7 +10,7 @@ import { updateUserProfile } from '../../services/api';
 import { useAuthStore} from '../../store/authStore';
 import { supabase } from '../../services/supabaseClient'; 
 import ImageUploadBox from '../common/ImageUploadBox';
-import ProfileFormFields from './ProfileFormFields'; // <--- NUEVO
+import ProfileFormFields from './ProfileFormFields';
 import Button from '../ui/Button';
 import BaseModal from '../ui/BaseModal'; 
 
@@ -67,7 +67,10 @@ const EditProfileModal = ({ open, handleClose, user }) => {
   };
 
   const mutation = useMutation({
-    mutationFn: updateUserProfile,
+    mutationFn: (data) => {
+      // FIX: Pass the user.uid correctly
+      return updateUserProfile(user.uid, data);
+    },
     onSuccess: (updatedUser) => {
       updateUser({
         name: updatedUser.fullName,
@@ -80,7 +83,10 @@ const EditProfileModal = ({ open, handleClose, user }) => {
       toast.success("Profile updated successfully!");
       handleClose();
     },
-    onError: () => toast.error("Failed to update profile.")
+    onError: (error) => {
+      console.error("Profile update error:", error);
+      toast.error("Failed to update profile.");
+    }
   });
 
   const onSubmit = (data) => {
@@ -105,7 +111,7 @@ const EditProfileModal = ({ open, handleClose, user }) => {
        <Box component="form" id="profile-form" onSubmit={handleSubmit(onSubmit)} pt={1}>
             <Grid container spacing={2}>
             
-            {/* Foto (Se mantiene lógica de UI aquí) */}
+            {/* Foto */}
             <Grid size={{ xs: 12 }}>
                 <Typography variant="caption" color="text.secondary" mb={1} display="block">Profile Picture</Typography>
                 <ImageUploadBox 
@@ -116,7 +122,6 @@ const EditProfileModal = ({ open, handleClose, user }) => {
                 />
             </Grid>
 
-            {/* Campos refactorizados */}
             <ProfileFormFields register={register} errors={errors} />
 
             </Grid>

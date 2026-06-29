@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type mongoRepository struct {
@@ -19,12 +20,16 @@ func NewMongoRepository(client *mongo.Client, dbName, collectionName string) por
 }
 
 func (r *mongoRepository) FindAll() ([]domain.VentureReadModel, error) {
-	var ventures []domain.VentureReadModel
+	var ventures []domain.VentureReadModel	
 	
-	cursor, err := r.collection.Find(context.TODO(), bson.D{{}})
+	// Sort by _id descending (MongoDB ObjectId contains timestamp)
+	opts := options.Find().SetSort(bson.D{{Key: "_id", Value: -1}})
+	
+	cursor, err := r.collection.Find(context.TODO(), bson.D{{}}, opts)
 	if err != nil {
 		return nil, err
 	}
+	defer cursor.Close(context.TODO())
 	
 	if err = cursor.All(context.TODO(), &ventures); err != nil {
 		return nil, err

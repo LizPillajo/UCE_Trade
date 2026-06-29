@@ -3,7 +3,7 @@ package ec.edu.uce.trade.identity.application.services;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import ec.edu.uce.trade.identity.domain.model.User;
-import ec.edu.uce.trade.identity.domain.ports.UserRepositoryPort; 
+import ec.edu.uce.trade.identity.domain.ports.UserRepositoryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,18 +44,28 @@ public class AuthService {
         newUser.setEmail(email);
         newUser.setRole(role);
         newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setPhoneNumber("");
+        newUser.setGithubUser("");
+        newUser.setDescription("");
+        newUser.setAvatarUrl("");
         
         logger.info("Adding a new user to the database. Assigned role: {}", role);
         return userRepository.save(newUser);
     }
     
-    // How to Edit Your Profile
+    // How to Edit Your Profile - Updated with all fields
     public User updateProfile(String uid, User updatedData) {
         User existing = userRepository.findById(uid)
             .orElseThrow(() -> new RuntimeException("User not found"));
             
+        // Update all fields
         existing.setFullName(updatedData.getFullName());
         existing.setFaculty(updatedData.getFaculty());
+        existing.setPhoneNumber(updatedData.getPhoneNumber());
+        existing.setGithubUser(updatedData.getGithubUser());
+        existing.setDescription(updatedData.getDescription());
+        existing.setAvatarUrl(updatedData.getAvatarUrl());
+        
         return userRepository.save(existing);
     }
     

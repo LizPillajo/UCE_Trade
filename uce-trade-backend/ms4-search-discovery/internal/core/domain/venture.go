@@ -1,5 +1,13 @@
 package domain
 
+type Owner struct {
+	ID          string `json:"id"`
+	FullName    string `json:"fullName"`
+	Faculty     string `json:"faculty"`
+	PhoneNumber string `json:"phoneNumber"`
+	Email       string `json:"email"`
+}
+
 type Venture struct {
 	ID          string  `json:"id"`
 	StudentId   string  `json:"studentId"`
@@ -9,4 +17,5 @@ type Venture struct {
 	Price       float64 `json:"price"`
 	ImageUrl    string  `json:"imageUrl"`
 	Status      string  `json:"status"`
+	Owner       *Owner  `json:"owner,omitempty"`
 }

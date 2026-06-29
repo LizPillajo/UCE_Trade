@@ -9,4 +9,14 @@ type VentureReadModel struct {
 	Price       float64 `json:"price" bson:"price"`
 	ImageUrl    string  `json:"imageUrl" bson:"image_url"`
 	Status      string  `json:"status" bson:"status"`
+	Owner       *Owner  `json:"owner,omitempty" bson:"-"`
+}
+
+// Owner represents the user details from MS1
+type Owner struct {
+	ID          string `json:"uid"` 
+	FullName    string `json:"fullName"`
+	Faculty     string `json:"faculty"`
+	PhoneNumber string `json:"phoneNumber"`
+	Email       string `json:"email"`
 }

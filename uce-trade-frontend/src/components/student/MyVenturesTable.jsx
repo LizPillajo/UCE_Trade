@@ -19,6 +19,7 @@ const MyVenturesTable = ({ ventures }) => {
   const [editVenture, setEditVenture] = useState(null);
 
   const handleUpdate = (data) => {
+    if (!editVenture) return;
     updateVenture({ id: editVenture.id, data });
     setEditVenture(null);
   };
@@ -40,13 +41,13 @@ const MyVenturesTable = ({ ventures }) => {
                     <UserInfoItem 
                         name={row.title}
                         avatar={row.imageUrl}
-                        subtitle={`Created: ${row.createdDate || 'Recently'}`}
+                        subtitle={`Created: ${row.createdAt || row.createdDate || 'Recently'}`}
                         sx={{ '& .MuiAvatar-root': { borderRadius: '8px' } }}
                     />
                 </TableCell>
                 <TableCell><Badge status={row.category} /></TableCell> 
                 <TableCell sx={{ fontWeight: "bold" }}>${row.price}</TableCell>
-                <TableCell><Badge status="Active" /></TableCell>
+                <TableCell><Badge status={row.status || 'Active'} /></TableCell>
                 <TableCell>
                     <Box display="flex" alignItems="center" gap={0.5}>
                         <StarIcon fontSize="small" sx={{ color: "#f59e0b" }} />
@@ -65,7 +66,6 @@ const MyVenturesTable = ({ ventures }) => {
           ))}
       </DataTable>
 
-      {/* Modales se mantienen igual */}
       <ConfirmationModal 
         open={!!deleteId}
         title="Delete Venture?"

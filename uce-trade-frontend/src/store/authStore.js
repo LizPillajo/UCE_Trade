@@ -8,15 +8,24 @@ export const useAuthStore = create(
       token: null,
       isAuthenticated: false,
 
-      // Acción de Login
-      login: (userData) => {
+      login: (userData, token) => {
         set({ 
-          user: userData, 
+          user: {
+            uid: userData.uid,
+            name: userData.fullName || userData.name,
+            role: userData.role,
+            email: userData.email,
+            faculty: userData.faculty,
+            avatar: userData.avatarUrl || userData.avatar || '',
+            phoneNumber: userData.phoneNumber || '',
+            githubUser: userData.githubUser || '',
+            description: userData.description || '',
+          },
+          token: token,
           isAuthenticated: true 
         });
       },
 
-      // Acción de Logout
       logout: () => {
         set({ 
           user: null, 
@@ -26,7 +35,6 @@ export const useAuthStore = create(
         localStorage.removeItem('auth-storage'); 
       },
 
-      // Actualizar datos del usuario en vivo 
       updateUser: (newData) => {
         set((state) => ({
           user: { ...state.user, ...newData }
@@ -34,7 +42,7 @@ export const useAuthStore = create(
       }
     }),
     {
-      name: 'auth-storage', // Nombre de la key en localStorage
+      name: 'auth-storage',
     }
   )
 );

@@ -27,32 +27,34 @@ spring:
           predicates:
             - Path=/api/v1/auth/**, /api/v1/users/**
 
-        - id: ms3-catalog-featured
-          uri: ${MS3_URI:http://localhost:8082}
+        - id: ms4-search-discovery-featured
+          uri: ${MS4_URI:http://localhost:8083}
           predicates:
             - Path=/api/ventures/featured
             - Method=GET
           filters:
-            - RewritePath=/api/ventures/featured, /api/v1/catalog/ventures
+            - RewritePath=/api/ventures/featured, /api/v1/search/ventures/featured
 
-        - id: ms4-search-discovery
-          uri: ${MS4_URI:http://localhost:8083}
-          predicates:
-            - Path=/api/ventures, /api/ventures/suggestions
-            - Method=GET
-          filters:
-            - RewritePath=/api/ventures.*, /api/v1/search/ventures
-
-        - id: ms2-product-command
-          uri: ${MS2_URI:http://localhost:8081}
-          predicates:
-            - Path=/api/ventures/**
-          filters:
-            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
-        
         - id: ms5-interactions-reviews
           uri: ${MS5_URI:http://localhost:8084}
           predicates:
             - Path=/api/ventures/{ventureId}/reviews
+            - Method=GET, POST
           filters:
             - RewritePath=/api/ventures/(?<ventureId>.*)/reviews, /api/v1/ventures/$\{ventureId}/reviews
+
+        - id: ms4-search-discovery
+          uri: ${MS4_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/ventures/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/search/ventures$\{segment}
+            
+        - id: ms2-product-command
+          uri: ${MS2_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/ventures/**
+            - Method=POST, PUT, DELETE
+          filters:
+            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
