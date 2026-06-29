@@ -20,7 +20,7 @@ func NewESRepository(client *elasticsearch.Client, index string) ports.SearchRep
 	return &esRepository{client: client, index: index}
 }
 
-func (r *esRepository) SearchVentures(query string, category string) ([]domain.Venture, error) {
+func (r *esRepository) SearchVentures(query string, category string, page int, size int, sort string) ([]domain.Venture, int, error) {
 	var buf bytes.Buffer
 	
 	mustClauses := []map[string]interface{}{}
@@ -47,7 +47,19 @@ func (r *esRepository) SearchVentures(query string, category string) ([]domain.V
 		})
 	}
 
+	sortClauses := []map[string]interface{}{}
+	if sort == "recent" {
+		sortClauses = append(sortClauses, map[string]interface{}{
+			"_id": map[string]string{
+				"order": "desc",
+			},
+		})
+	}
+
 	searchQuery := map[string]interface{}{
+		"from": page * size,
+		"size": size,
+		"sort": sortClauses,
 		"query": map[string]interface{}{
 			"bool": map[string]interface{}{
 				"must": mustClauses,
@@ -57,7 +69,7 @@ func (r *esRepository) SearchVentures(query string, category string) ([]domain.V
 	}
 
 	if err := json.NewEncoder(&buf).Encode(searchQuery); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	res, err := r.client.Search(
@@ -73,15 +85,24 @@ func (r *esRepository) SearchVentures(query string, category string) ([]domain.V
 
 	if res.IsError() {
 		if res.StatusCode == 404 {
-			return []domain.Venture{}, nil
+			return []domain.Venture{}, 0, nil
 		}
-		return nil, fmt.Errorf("error in response: %s", res.String())
+		return nil, 0, fmt.Errorf("error in response: %s", res.String())
 	}
 
 	// Parse the response from ES
 	var rMap map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&rMap); err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	total := 0
+	if hitsMap, ok := rMap["hits"].(map[string]interface{}); ok {
+		if totalObj, ok := hitsMap["total"].(map[string]interface{}); ok {
+			if v, ok := totalObj["value"].(float64); ok {
+				total = int(v)
+			}
+		}
 	}
 
 	var ventures []domain.Venture
@@ -94,7 +115,7 @@ func (r *esRepository) SearchVentures(query string, category string) ([]domain.V
 		ventures = append(ventures, venture)
 	}
 
-	return ventures, nil
+	return ventures, total, nil
 }
 
 func (r *esRepository) IndexVenture(v domain.Venture) error {

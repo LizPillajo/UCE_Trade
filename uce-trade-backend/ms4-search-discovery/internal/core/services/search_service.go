@@ -55,14 +55,14 @@ func (s *searchService) populateOwners(ventures []domain.Venture) []domain.Ventu
 	return ventures
 }
 
-func (s *searchService) Search(query string, category string) ([]domain.Venture, error) {
-	ventures, err := s.repo.SearchVentures(query, category)
+func (s *searchService) Search(query string, category string, page int, size int, sort string) ([]domain.Venture, int, error) {
+	ventures, total, err := s.repo.SearchVentures(query, category, page, size, sort)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	
 	// Inject owner data before returning
-	return s.populateOwners(ventures), nil
+	return s.populateOwners(ventures), total, nil
 }
 
 func (s *searchService) IndexVenture(v domain.Venture) error {
