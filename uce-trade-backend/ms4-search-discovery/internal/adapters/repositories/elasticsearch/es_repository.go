@@ -79,7 +79,7 @@ func (r *esRepository) SearchVentures(query string, category string, page int, s
 		r.client.Search.WithTrackTotalHits(true),
 	)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer res.Body.Close()
 
