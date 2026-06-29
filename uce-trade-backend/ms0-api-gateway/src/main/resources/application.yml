@@ -27,13 +27,13 @@ spring:
           predicates:
             - Path=/api/v1/auth/**, /api/v1/users/**
 
-        - id: ms3-catalog-featured
-          uri: ${MS3_URI:http://localhost:8082}
+        - id: ms4-search-discovery-featured
+          uri: ${MS4_URI:http://localhost:8083}
           predicates:
             - Path=/api/ventures/featured
             - Method=GET
           filters:
-            - RewritePath=/api/ventures/featured, /api/v1/catalog/ventures
+            - RewritePath=/api/ventures/featured, /api/v1/search/ventures/featured
 
         - id: ms4-search-discovery
           uri: ${MS4_URI:http://localhost:8083}

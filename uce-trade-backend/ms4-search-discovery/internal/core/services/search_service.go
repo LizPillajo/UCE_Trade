@@ -92,3 +92,12 @@ func (s *searchService) GetVentureById(id string) (*domain.Venture, error) {
 	
 	return venture, nil
 }
+
+func (s *searchService) GetFeaturedVentures() ([]domain.Venture, error) {
+    ventures, err := s.repo.GetFeaturedVentures()
+    if err != nil {
+        return nil, err
+    }
+    
+    return s.populateOwners(ventures), nil
+}

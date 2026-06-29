@@ -137,3 +137,26 @@ func (h *SearchHandler) GetVentureById(c *gin.Context) {
 
 	c.JSON(http.StatusOK, venture)
 }
+
+// @Summary Get featured ventures
+// @Description Get top 4 ventures sorted by rating and sales
+// @Tags search
+// @Accept json
+// @Produce json
+// @Success 200 {array} domain.Venture
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/search/ventures/featured [get]
+func (h *SearchHandler) GetFeaturedVentures(c *gin.Context) {
+    ventures, err := h.service.GetFeaturedVentures()
+    if err != nil {
+        log.Printf("Error getting featured ventures: %v", err)
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch featured data"})
+        return
+    }
+    
+    if ventures == nil {
+        ventures = []domain.Venture{}
+    }
+    
+    c.JSON(http.StatusOK, ventures)
+}
