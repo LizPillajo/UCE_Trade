@@ -47,6 +47,7 @@ spring:
           uri: ${MS5_URI:http://localhost:8084}
           predicates:
             - Path=/api/ventures/{ventureId}/reviews
+            - Method=GET, POST
           filters:
             - RewritePath=/api/ventures/(?<ventureId>.*)/reviews, /api/v1/ventures/$\{ventureId}/reviews
             
@@ -57,4 +58,3 @@ spring:
             - Method=POST, PUT, DELETE
           filters:
             - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
-        

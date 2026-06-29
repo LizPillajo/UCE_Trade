@@ -21,7 +21,8 @@ func NewMongoRepository(client *mongo.Client, dbName, collectionName string) por
 
 func (r *mongoRepository) FindAll() ([]domain.VentureReadModel, error) {
 	var ventures []domain.VentureReadModel	
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: -1}})
+	
+	opts := options.Find().SetSort(bson.D{{Key: "createdAt", Value: -1}})
 	
 	cursor, err := r.collection.Find(context.TODO(), bson.D{{}}, opts)
 	if err != nil {

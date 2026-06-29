@@ -201,20 +201,10 @@ func (r *esRepository) GetVentureById(id string) (*domain.Venture, error) {
 
 func (r *esRepository) GetFeaturedVentures() ([]domain.Venture, error) {
     var buf bytes.Buffer
-    
+
     searchQuery := map[string]interface{}{
         "size": 4,
         "sort": []map[string]interface{}{
-            {
-                "rating": map[string]string{
-                    "order": "desc",
-                },
-            },
-            {
-                "sales": map[string]string{
-                    "order": "desc",
-                },
-            },
             {
                 "createdAt": map[string]string{
                     "order": "desc",
