@@ -198,3 +198,73 @@ func (r *esRepository) GetVentureById(id string) (*domain.Venture, error) {
 
 	return &venture, nil
 }
+
+func (r *esRepository) GetFeaturedVentures() ([]domain.Venture, error) {
+    var buf bytes.Buffer
+    
+    searchQuery := map[string]interface{}{
+        "size": 4,
+        "sort": []map[string]interface{}{
+            {
+                "rating": map[string]string{
+                    "order": "desc",
+                },
+            },
+            {
+                "sales": map[string]string{
+                    "order": "desc",
+                },
+            },
+            {
+                "createdAt": map[string]string{
+                    "order": "desc",
+                },
+            },
+        },
+        "query": map[string]interface{}{
+            "match_all": map[string]interface{}{},
+        },
+    }
+    
+    if err := json.NewEncoder(&buf).Encode(searchQuery); err != nil {
+        return nil, err
+    }
+    
+    res, err := r.client.Search(
+        r.client.Search.WithContext(context.Background()),
+        r.client.Search.WithIndex(r.index),
+        r.client.Search.WithBody(&buf),
+    )
+    if err != nil {
+        return nil, err
+    }
+    defer res.Body.Close()
+    
+    if res.IsError() {
+        if res.StatusCode == 404 {
+            return []domain.Venture{}, nil
+        }
+        return nil, fmt.Errorf("error in response: %s", res.String())
+    }
+    
+    var rMap map[string]interface{}
+    if err := json.NewDecoder(res.Body).Decode(&rMap); err != nil {
+        return nil, err
+    }
+    
+    var ventures []domain.Venture
+    hits, ok := rMap["hits"].(map[string]interface{})["hits"].([]interface{})
+    if !ok {
+        return []domain.Venture{}, nil
+    }
+    
+    for _, hit := range hits {
+        source := hit.(map[string]interface{})["_source"]
+        sourceBytes, _ := json.Marshal(source)
+        var venture domain.Venture
+        json.Unmarshal(sourceBytes, &venture)
+        ventures = append(ventures, venture)
+    }
+    
+    return ventures, nil
+}
