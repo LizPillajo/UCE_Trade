@@ -35,14 +35,6 @@ spring:
           filters:
             - RewritePath=/api/ventures/featured, /api/v1/search/ventures/featured
 
-        - id: ms4-search-discovery
-          uri: ${MS4_URI:http://localhost:8083}
-          predicates:
-            - Path=/api/ventures/**
-            - Method=GET
-          filters:
-            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/search/ventures$\{segment}
-
         - id: ms5-interactions-reviews
           uri: ${MS5_URI:http://localhost:8084}
           predicates:
@@ -50,6 +42,14 @@ spring:
             - Method=GET, POST
           filters:
             - RewritePath=/api/ventures/(?<ventureId>.*)/reviews, /api/v1/ventures/$\{ventureId}/reviews
+
+        - id: ms4-search-discovery
+          uri: ${MS4_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/ventures/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/search/ventures$\{segment}
             
         - id: ms2-product-command
           uri: ${MS2_URI:http://localhost:8081}

@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -33,8 +34,21 @@ func NewSearchHandler(service ports.SearchService) *SearchHandler {
 func (h *SearchHandler) Search(c *gin.Context) {
 	query := c.Query("q")
 	category := c.Query("category")
+	pageStr := c.Query("page")
+	sizeStr := c.Query("size")
+	sort := c.Query("sort")
 
-	results, err := h.service.Search(query, category)
+	page := 0
+	if pageStr != "" {
+		fmt.Sscanf(pageStr, "%d", &page)
+	}
+
+	size := 10
+	if sizeStr != "" {
+		fmt.Sscanf(sizeStr, "%d", &size)
+	}
+
+	results, total, err := h.service.Search(query, category, page, size, sort)
 	if err != nil {
 		log.Printf("Error searching in Elasticsearch: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data"})
@@ -46,11 +60,16 @@ func (h *SearchHandler) Search(c *gin.Context) {
 		results = []domain.Venture{}
 	}
 
+	totalPages := total / size
+	if total%size > 0 {
+		totalPages++
+	}
+
 	// Pagination wrapper expected by React frontend (ExplorePage.jsx)
 	response := gin.H{
 		"content":       results,
-		"totalElements": len(results),
-		"totalPages":    1,
+		"totalElements": total,
+		"totalPages":    totalPages,
 	}
 
 	c.JSON(http.StatusOK, response)

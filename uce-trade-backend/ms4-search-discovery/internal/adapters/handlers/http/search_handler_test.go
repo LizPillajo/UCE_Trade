@@ -13,11 +13,11 @@ import (
 // 1. Create a service mock to isolate the test and avoid relying on Elasticsearch
 type mockSearchService struct{}
 
-func (m *mockSearchService) Search(query string, category string) ([]domain.Venture, error) {
+func (m *mockSearchService) Search(query string, category string, page int, size int, sort string) ([]domain.Venture, int, error) {
 	// Simulate that the search always returns this result
 	return []domain.Venture{
 		{ID: "1", Title: "Tutoría de Go", Category: "Tutorials", Price: 10.0},
-	}, nil
+	}, 1, nil
 }
 
 func (m *mockSearchService) IndexVenture(v domain.Venture) error {

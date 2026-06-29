@@ -60,8 +60,8 @@ func main() {
 	{
 		v1.GET("/ventures", searchHandler.Search)
 		v1.GET("/ventures/my-ventures", searchHandler.GetMyVentures)
-		v1.GET("/ventures/:id", searchHandler.GetVentureById)
 		v1.GET("/ventures/featured", searchHandler.GetFeaturedVentures) 
+		v1.GET("/ventures/:id", searchHandler.GetVentureById)
 	}
 
 	fmt.Println("MS4 Search & Discovery built at Port 8083")
