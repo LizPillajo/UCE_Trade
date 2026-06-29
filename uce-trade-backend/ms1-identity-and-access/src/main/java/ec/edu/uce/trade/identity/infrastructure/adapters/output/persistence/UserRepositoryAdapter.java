@@ -23,6 +23,10 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
         entity.setFaculty(user.getFaculty());
         entity.setRole(user.getRole());
         entity.setCreatedAt(user.getCreatedAt());
+        entity.setPhoneNumber(user.getPhoneNumber());
+        entity.setGithubUser(user.getGithubUser());
+        entity.setDescription(user.getDescription());
+        entity.setAvatarUrl(user.getAvatarUrl());
         
         UserEntity saved = repository.save(entity);
         return mapToDomain(saved);
@@ -41,6 +45,11 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
         user.setFaculty(entity.getFaculty());
         user.setRole(entity.getRole());
         user.setCreatedAt(entity.getCreatedAt());
+        user.setPhoneNumber(entity.getPhoneNumber());
+        user.setGithubUser(entity.getGithubUser());
+        user.setDescription(entity.getDescription());
+        user.setAvatarUrl(entity.getAvatarUrl());
+        
         return user;
     }
 }

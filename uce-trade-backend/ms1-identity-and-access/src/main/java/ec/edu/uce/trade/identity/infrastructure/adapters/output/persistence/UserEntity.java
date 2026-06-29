@@ -15,4 +15,9 @@ public class UserEntity {
     private String faculty;
     private String role;
     private LocalDateTime createdAt;
+    private String phoneNumber;
+    private String githubUser;
+    @Column(length = 500)
+    private String description;
+    private String avatarUrl;
 }
