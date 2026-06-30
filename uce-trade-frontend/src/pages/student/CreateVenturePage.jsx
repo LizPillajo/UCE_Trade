@@ -90,7 +90,7 @@ const CreateVenturePage = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pt: 12, pb: 8 }}>
+    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
       <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
         
         <Box mb={5} textAlign="center">
