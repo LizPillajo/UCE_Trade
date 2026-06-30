@@ -70,7 +70,14 @@ const CreateVenturePage = () => {
       });
       
       toast.success("Service published successfully! 🚀");
-      queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+      
+      // Delay to allow Kafka -> MS3 eventual consistency before refetching
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+        queryClient.invalidateQueries({ queryKey: ['catalog'] });
+        queryClient.invalidateQueries({ queryKey: ['featuredVentures'] });
+      }, 1500);
+
       navigate('/student/my-ventures');
 
     } catch (error) {
