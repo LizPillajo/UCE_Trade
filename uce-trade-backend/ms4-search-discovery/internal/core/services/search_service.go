@@ -3,7 +3,6 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"net/http"
 	"time"
 	"uce-trade-ms4/internal/core/domain"
@@ -24,11 +23,7 @@ func (s *searchService) fetchOwner(studentId string) *domain.Owner {
 		return nil
 	}
 
-	ms1Uri := os.Getenv("MS1_URI")
-	if ms1Uri == "" {
-		ms1Uri = "http://localhost:8080"
-	}
-	url := fmt.Sprintf("%s/api/v1/users/%s", ms1Uri, studentId)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users/%s", studentId)
 	
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Get(url)
