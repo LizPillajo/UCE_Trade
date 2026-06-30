@@ -5,7 +5,7 @@ const ReviewForm = ({ user, rating, setRating, comment, setComment, onSubmit, is
   return (
     <Paper elevation={0} sx={{ p: 3, mb: 4, border: '1px solid #e5e7eb', borderRadius: '16px', bgcolor: '#f9fafb' }}>
       <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-        <Avatar sx={{ bgcolor: '#efb034' }}>{user.name.charAt(0)}</Avatar>
+        <Avatar sx={{ bgcolor: '#efb034' }}>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</Avatar>
         <Box>
             <Typography variant="subtitle2" fontWeight="bold">{user.name}</Typography>
             <Typography variant="caption" color="text.secondary">Share your experience</Typography>
