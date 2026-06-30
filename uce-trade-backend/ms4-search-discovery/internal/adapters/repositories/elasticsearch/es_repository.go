@@ -47,19 +47,9 @@ func (r *esRepository) SearchVentures(query string, category string, page int, s
 		})
 	}
 
-	sortClauses := []map[string]interface{}{}
-	if sort == "recent" {
-		sortClauses = append(sortClauses, map[string]interface{}{
-			"_id": map[string]string{
-				"order": "desc",
-			},
-		})
-	}
-
 	searchQuery := map[string]interface{}{
 		"from": page * size,
 		"size": size,
-		"sort": sortClauses,
 		"query": map[string]interface{}{
 			"bool": map[string]interface{}{
 				"must": mustClauses,
@@ -130,7 +120,7 @@ func (r *esRepository) IndexVenture(v domain.Venture) error {
 		r.index,
 		bytes.NewReader(data),
 		r.client.Index.WithDocumentID(v.ID),
-		r.client.Index.WithRefresh("true"), // Resfresh to make it searchable immediately
+		r.client.Index.WithRefresh("true"), // Refresh to make it searchable immediately
 	)
 	if err != nil {
 		return err
@@ -223,16 +213,9 @@ func (r *esRepository) GetVentureById(id string) (*domain.Venture, error) {
 func (r *esRepository) GetFeaturedVentures() ([]domain.Venture, error) {
     var buf bytes.Buffer
 
-    // Use a simpler query that always works
+    // Use a simpler query that always works without _id sorting
     searchQuery := map[string]interface{}{
         "size": 4,
-        "sort": []map[string]interface{}{
-            {
-                "_id": map[string]string{
-                    "order": "desc",
-                },
-            },
-        },
         "query": map[string]interface{}{
             "match_all": map[string]interface{}{},
         },
