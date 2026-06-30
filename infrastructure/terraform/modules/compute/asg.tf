@@ -22,22 +22,29 @@ resource "aws_launch_template" "gateway_lt" {
     sudo dnf install -y docker
     sudo systemctl start docker
     sudo systemctl enable docker
-    # Esperar unos segundos para asegurar que los otros MS tengan IPs asignadas
-    sleep 30
-    
-    # Obtener IPs dinámicamente usando AWS CLI (usando tags del ASG y estado running)
-    MS1_IP=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=${var.project}-${var.environment}-ms1-asg*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | head -n 1)
-    MS2_IP=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=${var.project}-${var.environment}-ms2-asg*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | head -n 1)
-    MS3_IP=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=${var.project}-${var.environment}-ms3-asg*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | head -n 1)
-    MS4_IP=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=${var.project}-${var.environment}-ms4-asg*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | head -n 1)
-    MS5_IP=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=${var.project}-${var.environment}-ms5-asg*" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | head -n 1)
 
-    # Fallbacks a localhost por si el comando falla
-    MS1_IP=$${MS1_IP:-localhost}
-    MS2_IP=$${MS2_IP:-localhost}
-    MS3_IP=$${MS3_IP:-localhost}
-    MS4_IP=$${MS4_IP:-localhost}
-    MS5_IP=$${MS5_IP:-localhost}
+    # Función para esperar y obtener IPs de forma segura
+    get_ip() {
+      local asg_pattern=$1
+      local ip=""
+      local retries=0
+      # Intenta hasta 30 veces (aprox 5 minutos)
+      while [ -z "$ip" ] && [ $retries -lt 30 ]; do
+        ip=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=$asg_pattern" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | tr '\t' '\n' | head -n 1)
+        if [ -z "$ip" ]; then
+          sleep 10
+          retries=$((retries+1))
+        fi
+      done
+      echo "$${ip:-localhost}"
+    }
+
+    echo "Buscando IPs de los microservicios..."
+    MS1_IP=$(get_ip "${var.project}-${var.environment}-ms1-asg*")
+    MS2_IP=$(get_ip "${var.project}-${var.environment}-ms2-asg*")
+    MS3_IP=$(get_ip "${var.project}-${var.environment}-ms3-asg*")
+    MS4_IP=$(get_ip "${var.project}-${var.environment}-ms4-asg*")
+    MS5_IP=$(get_ip "${var.project}-${var.environment}-ms5-asg*")
 
     sudo docker run -d --restart always -p 8000:8000 \
       -e REDIS_HOST=${var.redis_address} \
