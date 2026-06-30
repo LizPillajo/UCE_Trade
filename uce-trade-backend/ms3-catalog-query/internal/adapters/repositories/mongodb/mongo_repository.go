@@ -43,6 +43,8 @@ func (r *mongoRepository) FindAll() ([]domain.VentureReadModel, error) {
 }
 
 func (r *mongoRepository) InsertVenture(venture domain.VentureReadModel) error {
-	_, err := r.collection.InsertOne(context.TODO(), venture)
+	filter := bson.M{"id": venture.ID}
+	opts := options.Replace().SetUpsert(true)
+	_, err := r.collection.ReplaceOne(context.TODO(), filter, venture, opts)
 	return err
 }
