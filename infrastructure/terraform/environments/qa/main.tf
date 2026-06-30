@@ -1,5 +1,3 @@
-# infrastructure/terraform/environments/qa/main.tf
-
 terraform {
   required_providers {
     aws = {
@@ -28,8 +26,30 @@ provider "aws" {
   }
 }
 
-# ✅ TODAS LAS VARIABLES ESTÁN EN variables.tf
-# NO DECLARES VARIABLES AQUÍ
+variable "docker_username" {
+  default = "lizdaisy"
+}
+
+variable "key_name" {
+  default = "vockey"
+}
+
+# ✅ FIX: Variables de entorno para Supabase (leer desde secrets)
+variable "supabase_url" {
+  description = "Supabase API URL"
+  type        = string
+}
+
+variable "supabase_bucket" {
+  description = "Supabase Storage Bucket Name"
+  type        = string
+}
+
+variable "supabase_key" {
+  description = "Supabase Service Role Key"
+  type        = string
+  sensitive   = true
+}
 
 module "networking" {
   source      = "../../modules/networking"
