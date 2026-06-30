@@ -46,6 +46,9 @@ func main() {
 	kafkaConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-created-topic", catalogSvc)
 	go kafkaConsumer.Start()
 
+	kafkaUpdateConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-updated-topic", catalogSvc)
+	go kafkaUpdateConsumer.Start()
+
 	// 4. INPUT ADAPTER: Router Gin
 	router := gin.Default()
 	

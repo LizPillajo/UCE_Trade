@@ -50,6 +50,9 @@ func main() {
 	kafkaConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-created-topic", searchSvc)
 	go kafkaConsumer.Start()
 
+	kafkaUpdateConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-updated-topic", searchSvc)
+	go kafkaUpdateConsumer.Start()
+
 	// Router Gin
 	router := gin.Default()
 	
