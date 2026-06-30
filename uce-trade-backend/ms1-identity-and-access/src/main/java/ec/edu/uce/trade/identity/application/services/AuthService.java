@@ -24,6 +24,14 @@ public class AuthService {
         FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
         String uid = decodedToken.getUid();
         
+        // ✅ FIX: Validate UID is not null or empty
+        if (uid == null || uid.trim().isEmpty()) {
+            logger.error("Authentication failed: Firebase token contains null or empty UID");
+            throw new RuntimeException("Invalid authentication token: UID is missing");
+        }
+        
+        logger.info("Authentication successful for UID: {}", uid);
+        
         Optional<User> existingUser = userRepository.findById(uid);
         if (existingUser.isPresent()) {
             logger.info("Existing user found in PostgreSQL: {}", existingUser.get().getEmail());
@@ -31,14 +39,18 @@ public class AuthService {
         }
 
         String email = decodedToken.getEmail();
+        logger.info("New user detected with email: {}", email);
 
+        // ⚠️ Security: Block admin domain registrations
         if (email != null && email.endsWith("@admin.edu.ec")) {
             logger.warn("Security Alert: Attempted registration with administrative domain: {}", email);
             throw new RuntimeException("Access denied: Administrative accounts cannot be registered through this method.");
         }
 
+        // 👤 Assign role based on email domain
         String role = (email != null && email.endsWith("@uce.edu.ec")) ? "UCE_STUDENT" : "UCE_CLIENT";
 
+        // 🆕 Create new user
         User newUser = new User();
         newUser.setUid(uid);
         newUser.setEmail(email);
@@ -48,17 +60,19 @@ public class AuthService {
         newUser.setGithubUser("");
         newUser.setDescription("");
         newUser.setAvatarUrl("");
+        newUser.setFullName("");
+        newUser.setFaculty("");
         
-        logger.info("Adding a new user to the database. Assigned role: {}", role);
+        logger.info("Creating new user with role: {}", role);
         return userRepository.save(newUser);
     }
     
-    // How to Edit Your Profile - Updated with all fields
     public User updateProfile(String uid, User updatedData) {
+        logger.info("Updating profile for UID: {}", uid);
+        
         User existing = userRepository.findById(uid)
             .orElseThrow(() -> new RuntimeException("User not found"));
             
-        // Update all fields
         existing.setFullName(updatedData.getFullName());
         existing.setFaculty(updatedData.getFaculty());
         existing.setPhoneNumber(updatedData.getPhoneNumber());
@@ -66,11 +80,12 @@ public class AuthService {
         existing.setDescription(updatedData.getDescription());
         existing.setAvatarUrl(updatedData.getAvatarUrl());
         
+        logger.info("Profile updated successfully for: {}", existing.getEmail());
         return userRepository.save(existing);
     }
     
-    // How to View Your Profile
     public User getUserProfile(String uid) {
+        logger.info("Fetching profile for UID: {}", uid);
         return userRepository.findById(uid)
             .orElseThrow(() -> new RuntimeException("User not found"));
     }

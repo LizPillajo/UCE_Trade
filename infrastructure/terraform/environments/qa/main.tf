@@ -16,9 +16,6 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
-  # Cuenta 1: QA
-  # access_key = var.aws_access_key
-  # secret_key = var.aws_secret_key
 
   default_tags {
     tags = {
@@ -29,8 +26,30 @@ provider "aws" {
   }
 }
 
-variable "docker_username" { default = "lizdaisy" }
-variable "key_name" { default = "vockey" }
+variable "docker_username" {
+  default = "lizdaisy"
+}
+
+variable "key_name" {
+  default = "vockey"
+}
+
+# ✅ FIX: Variables de entorno para Supabase (leer desde secrets)
+variable "supabase_url" {
+  description = "Supabase API URL"
+  type        = string
+}
+
+variable "supabase_bucket" {
+  description = "Supabase Storage Bucket Name"
+  type        = string
+}
+
+variable "supabase_key" {
+  description = "Supabase Service Role Key"
+  type        = string
+  sensitive   = true
+}
 
 module "networking" {
   source      = "../../modules/networking"
@@ -55,6 +74,7 @@ module "databases" {
 module "compute" {
   source           = "../../modules/compute"
   environment      = "qa"
+  project          = "UCE_Trade"
   vpc_id           = module.networking.vpc_id
   public_subnets   = [module.networking.public_subnet_1a_id, module.networking.public_subnet_1b_id]
   private_subnets  = [module.networking.private_subnet_1a_id, module.networking.private_subnet_1b_id]
@@ -79,9 +99,9 @@ module "compute" {
   elasticsearch_endpoint = module.databases.elasticsearch_endpoint
   docdb_endpoint         = module.databases.mongodb_endpoint
 
-  supabase_url           = var.supabase_url
-  supabase_bucket        = var.supabase_bucket
-  supabase_key           = var.supabase_key
+  supabase_url    = var.supabase_url
+  supabase_bucket = var.supabase_bucket
+  supabase_key    = var.supabase_key
 }
 
 output "alb_dns_name" {
