@@ -11,9 +11,9 @@ const OwnerCard = ({ owner, onNavigate }) => (
     </Box>
     
     <UserInfoItem 
-        name={owner.fullName} 
-        avatar={owner.avatarUrl || owner.avatar}
-        subtitle={owner.faculty}
+        name={owner?.fullName || owner?.name || "Unknown User"} 
+        avatar={owner?.avatarUrl || owner?.avatar}
+        subtitle={owner?.faculty || "No specified"}
         size={55}
         isVerified={true} 
     />
