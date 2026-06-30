@@ -19,12 +19,8 @@ resource "aws_instance" "shared_dbs" {
     sudo systemctl start docker
     sudo systemctl enable docker
 
-    # Fetch LOCAL_IP using IMDSv2
-    TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-    LOCAL_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-ipv4)
-    if [ -z "$LOCAL_IP" ]; then
-      LOCAL_IP=$(hostname -I | awk '{print $1}')
-    fi
+    LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+
     # Esperar y montar volumen EBS de Cassandra
     sleep 30
     DEVICE=$(lsblk -dp | grep -v "xvda" | grep -v "nvme0n1" | head -n 1 | awk '{print $1}')
