@@ -273,9 +273,29 @@ resource "aws_launch_template" "ms4_lt" {
     sudo systemctl start docker
     sudo systemctl enable docker
 
+    # Función para esperar y obtener IPs de forma segura
+    get_ip() {
+      local asg_pattern=$1
+      local ip=""
+      local retries=0
+      # Intenta hasta 30 veces (aprox 5 minutos)
+      while [ -z "$ip" ] && [ $retries -lt 30 ]; do
+        ip=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=$asg_pattern" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | tr '\t' '\n' | head -n 1)
+        if [ -z "$ip" ]; then
+          sleep 10
+          retries=$((retries+1))
+        fi
+      done
+      echo "$${ip:-localhost}"
+    }
+
+    echo "Buscando IP de MS1..."
+    MS1_IP=$(get_ip "${var.project}-${var.environment}-ms1-asg*")
+
     sudo docker run -d --restart always -p 8083:8083 \
       -e ELASTICSEARCH_URL=http://${var.elasticsearch_endpoint}:9200 \
       -e KAFKA_BROKERS=${var.kafka_brokers} \
+      -e MS1_URI=http://$MS1_IP:8080 \
       ${var.docker_username}/ms4-search-discovery:${var.docker_tag}
   EOF
   )
