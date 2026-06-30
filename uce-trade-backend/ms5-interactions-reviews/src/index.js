@@ -1,4 +1,3 @@
-// src/index.js
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -25,32 +24,8 @@ const swaggerOptions = {
       description: 'Microservice to manage reviews of services in UCE Trade',
     },
     servers: [{ url: `http://localhost:${process.env.PORT || 8084}` }],
-    paths: {
-      '/api/v1/ventures/{ventureId}/reviews': {
-        get: {
-          summary: 'Get all reviews for a venture',
-          tags: ['Reviews'],
-          parameters: [{ in: 'path', name: 'ventureId', required: true, schema: { type: 'string' } }],
-          responses: { 200: { description: 'List of reviews' } }
-        },
-        post: {
-          summary: 'Create a new review (Requires token)',
-          tags: ['Reviews'],
-          parameters: [{ in: 'path', name: 'ventureId', required: true, schema: { type: 'string' } }],
-          requestBody: {
-            required: true,
-            content: {
-              'application/json': {
-                schema: { type: 'object', properties: { rating: { type: 'integer' }, comment: { type: 'string' } } }
-              }
-            }
-          },
-          responses: { 201: { description: 'Review created' } }
-        }
-      }
-    }
   },
-  apis: [], 
+  apis: [],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
@@ -69,9 +44,12 @@ const PORT = process.env.PORT || 8084;
 // --- Initialization ---
 initDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 MS5 Interactions & Reviews running at the port ${PORT}`);
-    console.log(`📚 Swagger en http://localhost:${PORT}/swagger-ui`);
+    console.log(`🚀 MS5 Interactions & Reviews running at port ${PORT}`);
+    console.log(`📚 Swagger at http://localhost:${PORT}/swagger-ui`);
   });
   
-  initKafkaConsumer();
+  // ✅ FIX: Don't block startup if Kafka fails
+  initKafkaConsumer().catch(err => {
+    console.warn('⚠️ Kafka initialization failed (will retry):', err.message);
+  });
 });

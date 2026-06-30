@@ -7,7 +7,12 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN VITE_API_URL=http://uce-trade-ms1-alb-1397163559.us-east-1.elb.amazonaws.com/api npm run build
+# ✅ FIX: Correct QA ALB endpoint
+# The QA ALB from your error: uce-trade-qa-alb-1533665450.us-east-1.elb.amazonaws.com
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL:-http://uce-trade-qa-alb-1533665450.us-east-1.elb.amazonaws.com/api}
+
+RUN VITE_API_URL=${VITE_API_URL} npm run build
 
 # --- STAGE 2: RUN (Nginx) ---
 FROM nginx:alpine
