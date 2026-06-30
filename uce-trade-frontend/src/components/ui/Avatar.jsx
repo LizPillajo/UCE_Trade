@@ -20,7 +20,7 @@ const Avatar = ({ src, alt, size = 40, fallback = 'U', sx, ...props }) => {
       {...props}
     >
       {/* If there is no image, show the initial */}
-      {!src && (typeof fallback === 'string' && fallback.trim().length > 0 ? fallback.charAt(0).toUpperCase() : 'U')}
+      {!src && fallback.charAt(0).toUpperCase()}
     </MuiAvatar>
   );
 };

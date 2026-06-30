@@ -1,17 +1,3 @@
-# infrastructure/terraform/environments/qa/variables.tf
-
-variable "docker_username" {
-  description = "Docker Hub username"
-  type        = string
-  default     = "lizdaisy"
-}
-
-variable "key_name" {
-  description = "EC2 Key Pair name"
-  type        = string
-  default     = "vockey"
-}
-
 variable "supabase_url" {
   description = "Supabase API URL"
   type        = string
