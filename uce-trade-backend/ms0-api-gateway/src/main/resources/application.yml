@@ -55,6 +55,6 @@ spring:
           uri: ${MS2_URI:http://localhost:8081}
           predicates:
             - Path=/api/ventures/**
-            - Method=POST, PUT, DELETE
+            - Method=POST,PUT,DELETE
           filters:
             - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
