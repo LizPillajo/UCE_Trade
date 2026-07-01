@@ -65,3 +65,8 @@ spring:
             - Method=POST,PUT,DELETE
           filters:
             - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
+
+        - id: ms6-payments
+          uri: ${MS6_URI:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/payments/**

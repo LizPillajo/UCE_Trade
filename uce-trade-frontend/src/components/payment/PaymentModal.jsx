@@ -14,7 +14,7 @@ const PaymentModal = ({ open, handleClose, ventureId, price }) => {
   useEffect(() => {
     if (open && ventureId) {
       setClientSecret('');
-      api.post('/payments/create-intent', { ventureId })
+      api.post('/v1/payments/create-intent', { ventureId })
         .then(res => setClientSecret(res.data.clientSecret))
         .catch(err => console.error("Error iniciando pago:", err));
     }
