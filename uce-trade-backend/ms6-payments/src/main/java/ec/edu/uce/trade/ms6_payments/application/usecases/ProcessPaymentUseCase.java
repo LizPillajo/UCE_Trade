@@ -25,11 +25,12 @@ public class ProcessPaymentUseCase {
         this.eventPort = eventPort;
     }
 
-    public String createIntent(UUID ventureId, String studentId) {
+    public String createIntent(UUID ventureId, String ventureName, String studentId) {
         log.info("Starting payment intent creation for ventureId: {} by studentId: {}", ventureId, studentId);
         BigDecimal amount = new BigDecimal("15.50"); 
         
-        String clientSecret = stripePort.createPaymentIntent(amount, "USD");
+        String description = "Pay for service: " + (ventureName != null ? ventureName : "Unknown Venture");
+        String clientSecret = stripePort.createPaymentIntent(amount, "USD", description);
         log.info("Successfully generated client secret for ventureId: {}", ventureId);
         
         return clientSecret;

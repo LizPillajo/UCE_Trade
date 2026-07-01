@@ -126,6 +126,7 @@ const VentureDetailPage = () => {
         open={openPayment} 
         handleClose={() => setOpenPayment(false)} 
         ventureId={id} 
+        ventureName={venture.title}
         price={venture.price} 
       />
 

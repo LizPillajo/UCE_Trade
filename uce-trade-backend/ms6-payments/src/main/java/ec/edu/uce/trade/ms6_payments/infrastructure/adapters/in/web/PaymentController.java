@@ -40,8 +40,9 @@ public class PaymentController {
         }
 
         String ventureId = request.get("ventureId");
+        String ventureName = request.get("ventureName");
         try {
-            String clientSecret = processPaymentUseCase.createIntent(UUID.fromString(ventureId), studentId);
+            String clientSecret = processPaymentUseCase.createIntent(UUID.fromString(ventureId), ventureName, studentId);
             return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
         } catch (Exception e) {
             log.error("Error creating payment intent: {}", e.getMessage());
