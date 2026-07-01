@@ -43,12 +43,13 @@ class ProcessPaymentUseCaseTest {
         UUID ventureId = UUID.randomUUID();
         String ventureName = "Awesome Project";
         String studentId = "student-123";
+        BigDecimal amount = new BigDecimal("25.00");
         String expectedClientSecret = "pi_123_secret_456";
 
-        when(stripePort.createPaymentIntent(eq(new BigDecimal("15.50")), eq("USD"), eq("Pay for service: Awesome Project")))
+        when(stripePort.createPaymentIntent(eq(amount), eq("USD"), eq("Pay for service: Awesome Project")))
                 .thenReturn(expectedClientSecret);
 
-        String actualClientSecret = processPaymentUseCase.createIntent(ventureId, ventureName, studentId);
+        String actualClientSecret = processPaymentUseCase.createIntent(ventureId, ventureName, studentId, amount);
 
         assertEquals(expectedClientSecret, actualClientSecret);
         verify(stripePort, times(1)).createPaymentIntent(any(), any(), any());
@@ -58,18 +59,19 @@ class ProcessPaymentUseCaseTest {
     void testConfirmPayment() {
         UUID ventureId = UUID.randomUUID();
         String studentId = "student-123";
+        BigDecimal amount = new BigDecimal("25.00");
 
         Payment mockSavedPayment = new Payment();
         mockSavedPayment.setId(UUID.randomUUID());
         mockSavedPayment.setVentureId(ventureId);
         mockSavedPayment.setStudentId(studentId);
-        mockSavedPayment.setAmount(new BigDecimal("15.50"));
+        mockSavedPayment.setAmount(amount);
         mockSavedPayment.setStatus("SUCCEEDED");
 
         when(repositoryPort.save(any(Payment.class))).thenReturn(mockSavedPayment);
         doNothing().when(eventPort).publishPaymentSuccess(any(Payment.class));
 
-        Payment actualPayment = processPaymentUseCase.confirmPayment(ventureId, studentId);
+        Payment actualPayment = processPaymentUseCase.confirmPayment(ventureId, studentId, amount);
 
         assertNotNull(actualPayment);
         assertEquals("SUCCEEDED", actualPayment.getStatus());

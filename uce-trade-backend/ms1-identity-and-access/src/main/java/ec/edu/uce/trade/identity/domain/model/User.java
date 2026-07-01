@@ -11,8 +11,6 @@ public class User {
     private String faculty;
     private String role;      // "UCE_STUDENT", "UCE_ADMIN", "UCE_CLIENT"
     private LocalDateTime createdAt;
-    
-    // New fields for profile
     private String phoneNumber;
     private String githubUser;
     private String description;

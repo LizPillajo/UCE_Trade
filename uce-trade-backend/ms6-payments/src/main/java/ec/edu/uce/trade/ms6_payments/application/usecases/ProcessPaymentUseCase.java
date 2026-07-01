@@ -25,9 +25,8 @@ public class ProcessPaymentUseCase {
         this.eventPort = eventPort;
     }
 
-    public String createIntent(UUID ventureId, String ventureName, String studentId) {
+    public String createIntent(UUID ventureId, String ventureName, String studentId, BigDecimal amount) {
         log.info("Starting payment intent creation for ventureId: {} by studentId: {}", ventureId, studentId);
-        BigDecimal amount = new BigDecimal("15.50"); 
         
         String description = "Pay for service: " + (ventureName != null ? ventureName : "Unknown Venture");
         String clientSecret = stripePort.createPaymentIntent(amount, "USD", description);
@@ -36,14 +35,14 @@ public class ProcessPaymentUseCase {
         return clientSecret;
     }
 
-    public Payment confirmPayment(UUID ventureId, String studentId) {
+    public Payment confirmPayment(UUID ventureId, String studentId, BigDecimal amount) {
         log.info("Confirming payment for ventureId: {} by studentId: {}", ventureId, studentId);
         
         Payment payment = new Payment();
         payment.setId(UUID.randomUUID());
         payment.setVentureId(ventureId);
         payment.setStudentId(studentId);
-        payment.setAmount(new BigDecimal("15.50"));
+        payment.setAmount(amount);
         payment.setStatus("SUCCEEDED");
         payment.setCreatedAt(LocalDateTime.now());
 

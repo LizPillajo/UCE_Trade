@@ -25,7 +25,7 @@ export const downloadInvoice = async (ventureId) => {
   link.click();
 };
 
-export const confirmPayment = async (ventureId) => {
-  const response = await api.post(`/v1/payments/confirm/${ventureId}`);
+export const confirmPayment = async (ventureId, amount) => {
+  const response = await api.post(`/v1/payments/confirm/${ventureId}`, { amount });
   return response.data;
 };

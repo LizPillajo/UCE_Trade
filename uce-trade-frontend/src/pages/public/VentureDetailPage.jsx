@@ -53,7 +53,7 @@ const VentureDetailPage = () => {
     if (query.get('redirect_status') === 'succeeded' && !processedRef.current) {
       processedRef.current = true;
       setPaymentStatus('succeeded');
-      confirmPayment(id).then(() => setShowSuccessModal(true));
+      confirmPayment(id, venture?.price).then(() => setShowSuccessModal(true));
     }
   }, [location, id]);
 
