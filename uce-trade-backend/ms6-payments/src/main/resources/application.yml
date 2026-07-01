@@ -5,7 +5,7 @@ spring:
   application:
     name: ms6-payments
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3306/uce_trade_ms6}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3307/uce_trade_ms6}
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:root}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -20,4 +20,4 @@ spring:
     port: ${RABBITMQ_PORT:5672}
 
 stripe:
-  secret-key: ${STRIPE_SECRET_KEY:sk_test_tu_clave_aqui}
+  secret-key: ${STRIPE_SECRET_KEY:}
