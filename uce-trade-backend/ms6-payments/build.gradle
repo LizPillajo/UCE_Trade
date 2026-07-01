@@ -6,5 +6,6 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
     implementation 'com.stripe:stripe-java:24.22.0' // Stripe SDK
     
-    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client' // MariaDB
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client' // MariaDB    
+    testImplementation 'com.h2database:h2'
 }
