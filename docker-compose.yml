@@ -51,6 +51,24 @@ services:
       - CASSANDRA_CLUSTER_NAME=UCECluster
     volumes:
       - ms5_db_data:/var/lib/cassandra
+  
+  ms6-mariadb:
+    image: mariadb:10.11
+    container_name: uce_trade_ms6_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MARIADB_DATABASE:-uce_trade_ms6}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ms6_db_data:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: uce_trade_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
   kafka:
     image: apache/kafka:latest
@@ -78,3 +96,4 @@ volumes:
   ms3_db_data:
   ms4_db_data:
   ms5_db_data:
+  ms6_db_data:

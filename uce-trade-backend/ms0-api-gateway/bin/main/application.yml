@@ -1,0 +1,72 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: ms0-api-gateway
+  data:
+    redis:
+      # ✅ FIX: Read from environment variable with fallback
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin RETAIN_FIRST
+        - DedupeResponseHeader=Access-Control-Allow-Credentials RETAIN_FIRST
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            redis-rate-limiter.requestedTokens: 1
+            key-resolver: "#{@ipKeyResolver}"
+      routes:
+        - id: ms1-identity
+          uri: ${MS1_URI:http://localhost:8080}
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/users/**
+
+        - id: ms4-search-discovery-featured
+          uri: ${MS4_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/ventures/featured
+            - Method=GET
+          filters:
+            - RewritePath=/api/ventures/featured, /api/v1/search/ventures/featured
+
+        - id: ms5-interactions-reviews
+          uri: ${MS5_URI:http://localhost:8084}
+          predicates:
+            - Path=/api/ventures/{ventureId}/reviews
+            - Method=GET, POST
+          filters:
+            - RewritePath=/api/ventures/(?<ventureId>.*)/reviews, /api/v1/ventures/$\{ventureId}/reviews
+
+        - id: ms4-search-discovery
+          uri: ${MS4_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/ventures/**
+            - Method=GET
+          filters:
+            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/search/ventures$\{segment}
+            
+        - id: ms2-product-command
+          uri: ${MS2_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/ventures/**
+            - Method=POST,PUT,DELETE
+          filters:
+            - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
+        
+        - id: ms6-payments
+          uri: ${MS6_URI:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/payments/**
