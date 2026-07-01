@@ -13,12 +13,13 @@ import java.math.BigDecimal;
 public class StripePaymentAdapter implements StripePort {
 
     @Override
-    public String createPaymentIntent(BigDecimal amount, String currency) {
+    public String createPaymentIntent(BigDecimal amount, String currency, String description) {
         try {
             log.debug("Communicating with Stripe API to create PaymentIntent for amount: {}", amount);
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                     .setAmount(amount.multiply(new BigDecimal("100")).longValue()) 
                     .setCurrency(currency.toLowerCase())
+                    .setDescription(description)
                     .setAutomaticPaymentMethods(
                             PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
                                     .setEnabled(true)

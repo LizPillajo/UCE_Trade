@@ -8,13 +8,13 @@ import BaseModal from '../ui/BaseModal';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const PaymentModal = ({ open, handleClose, ventureId, price }) => {
+const PaymentModal = ({ open, handleClose, ventureId, ventureName, price }) => {
   const [clientSecret, setClientSecret] = useState('');
 
   useEffect(() => {
     if (open && ventureId) {
       setClientSecret('');
-      api.post('/v1/payments/create-intent', { ventureId })
+      api.post('/v1/payments/create-intent', { ventureId, ventureName })
         .then(res => setClientSecret(res.data.clientSecret))
         .catch(err => console.error("Error iniciando pago:", err));
     }
