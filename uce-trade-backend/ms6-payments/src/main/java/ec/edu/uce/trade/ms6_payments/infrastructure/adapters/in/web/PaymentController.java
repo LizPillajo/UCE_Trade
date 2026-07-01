@@ -1,7 +1,7 @@
 package ec.edu.uce.trade.ms6_payments.infrastructure.adapters.in.web;
 
-import ec.edu.uce.trade.payments.application.usecases.ProcessPaymentUseCase;
-import ec.edu.uce.trade.payments.domain.model.Payment;
+import ec.edu.uce.trade.ms6_payments.application.usecases.ProcessPaymentUseCase;
+import ec.edu.uce.trade.ms6_payments.domain.model.Payment;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
