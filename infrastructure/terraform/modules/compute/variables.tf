@@ -141,3 +141,20 @@ variable "supabase_key" {
   sensitive   = true
 }
 
+variable "mariadb_endpoint" {
+  description = "Endpoint for MariaDB"
+  type        = string
+  default     = ""
+}
+
+variable "rabbitmq_endpoint" {
+  description = "Endpoint for RabbitMQ"
+  type        = string
+  default     = ""
+}
+
+variable "stripe_secret_key" {
+  description = "Stripe Secret Key"
+  type        = string
+  sensitive   = true
+}

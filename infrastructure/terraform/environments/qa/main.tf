@@ -51,6 +51,12 @@ variable "supabase_key" {
   sensitive   = true
 }
 
+variable "stripe_secret_key" {
+  description = "Stripe Secret Key"
+  type        = string
+  sensitive   = true
+}
+
 module "networking" {
   source      = "../../modules/networking"
   environment = "qa"
@@ -102,6 +108,10 @@ module "compute" {
   supabase_url    = var.supabase_url
   supabase_bucket = var.supabase_bucket
   supabase_key    = var.supabase_key
+
+  mariadb_endpoint  = module.databases.mariadb_endpoint
+  rabbitmq_endpoint = module.databases.rabbitmq_endpoint
+  stripe_secret_key = var.stripe_secret_key
 }
 
 output "alb_dns_name" {

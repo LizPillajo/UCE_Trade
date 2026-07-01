@@ -67,6 +67,16 @@ resource "aws_instance" "shared_dbs" {
       -e CASSANDRA_CLUSTER_NAME=UCECluster \
       -e MAX_HEAP_SIZE="512M" -e HEAP_NEWSIZE="100M" \
       cassandra:latest
+
+    # 5. MariaDB (MS6)
+    sudo docker run -d --name mariadb-ms6 --restart always -p 3306:3306 \
+      -e MARIADB_ROOT_PASSWORD=root \
+      -e MARIADB_DATABASE=uce_trade_ms6 \
+      mariadb:10.11
+
+    # 6. RabbitMQ (MS6)
+    sudo docker run -d --name rabbitmq --restart always -p 5672:5672 -p 15672:15672 \
+      rabbitmq:3-management
   EOF
   )
 

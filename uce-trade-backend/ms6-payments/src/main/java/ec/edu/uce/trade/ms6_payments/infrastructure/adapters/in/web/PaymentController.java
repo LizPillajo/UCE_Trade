@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
@@ -41,8 +42,13 @@ public class PaymentController {
 
         String ventureId = request.get("ventureId");
         String ventureName = request.get("ventureName");
+        
+        // Use the passed amount or default to a fallback if null (for safety)
+        String amountStr = request.get("amount");
+        BigDecimal amount = (amountStr != null && !amountStr.isEmpty()) ? new BigDecimal(amountStr) : new BigDecimal("0.00");
+
         try {
-            String clientSecret = processPaymentUseCase.createIntent(UUID.fromString(ventureId), ventureName, studentId);
+            String clientSecret = processPaymentUseCase.createIntent(UUID.fromString(ventureId), ventureName, studentId, amount);
             return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
         } catch (Exception e) {
             log.error("Error creating payment intent: {}", e.getMessage());
@@ -55,15 +61,19 @@ public class PaymentController {
     public ResponseEntity<?> confirmPayment(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @CookieValue(value = "access_token", required = false) String cookieToken,
-            @PathVariable UUID ventureId) {
+            @PathVariable UUID ventureId,
+            @RequestBody(required = false) Map<String, String> request) {
 
         String studentId = extractStudentId(authHeader, cookieToken);
         if (studentId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token.");
         }
 
+        String amountStr = (request != null && request.get("amount") != null) ? request.get("amount") : "0.00";
+        BigDecimal amount = new BigDecimal(amountStr);
+
         try {
-            Payment confirmedPayment = processPaymentUseCase.confirmPayment(ventureId, studentId);
+            Payment confirmedPayment = processPaymentUseCase.confirmPayment(ventureId, studentId, amount);
             return ResponseEntity.ok(confirmedPayment);
         } catch (Exception e) {
             log.error("Error confirming payment: {}", e.getMessage());

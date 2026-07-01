@@ -45,6 +45,7 @@ resource "aws_launch_template" "gateway_lt" {
     MS3_IP=$(get_ip "${var.project}-${var.environment}-ms3-asg*")
     MS4_IP=$(get_ip "${var.project}-${var.environment}-ms4-asg*")
     MS5_IP=$(get_ip "${var.project}-${var.environment}-ms5-asg*")
+    MS6_IP=$(get_ip "${var.project}-${var.environment}-ms6-asg*")
 
     sudo docker run -d --restart always -p 8000:8000 \
       -e REDIS_HOST=${var.redis_address} \
@@ -53,6 +54,7 @@ resource "aws_launch_template" "gateway_lt" {
       -e MS3_URI=http://$MS3_IP:8082 \
       -e MS4_URI=http://$MS4_IP:8083 \
       -e MS5_URI=http://$MS5_IP:8084 \
+      -e MS6_URI=http://$MS6_IP:8085 \
       ${var.docker_username}/ms0-api-gateway:${var.docker_tag}
   EOF
   )
@@ -361,6 +363,60 @@ resource "aws_autoscaling_group" "ms5_asg" {
 
   launch_template {
     id      = aws_launch_template.ms5_lt.id
+    version = "$Latest"
+  }
+
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 0
+    }
+  }
+}
+
+# MS6: Payments
+resource "aws_launch_template" "ms6_lt" {
+  name_prefix   = "${var.project}-${var.environment}-ms6-lt-"
+  image_id      = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = [aws_security_group.microservices_sg.id]
+  }
+
+  iam_instance_profile {
+    name = "LabInstanceProfile"
+  }
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    sudo dnf update -y
+    sudo dnf install -y docker
+    sudo systemctl start docker
+    sudo systemctl enable docker
+
+    sudo docker run -d --restart always -p 8085:8085 \
+      -e SPRING_DATASOURCE_URL=jdbc:mariadb://${var.mariadb_endpoint}:3306/uce_trade_ms6 \
+      -e SPRING_DATASOURCE_USERNAME=root \
+      -e SPRING_DATASOURCE_PASSWORD=root \
+      -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
+      -e STRIPE_SECRET_KEY=${var.stripe_secret_key} \
+      ${var.docker_username}/ms6-payments:${var.docker_tag}
+  EOF
+  )
+}
+
+resource "aws_autoscaling_group" "ms6_asg" {
+  name_prefix         = "${var.project}-${var.environment}-ms6-asg-"
+  desired_capacity    = var.desired_capacity
+  max_size            = var.max_size
+  min_size            = var.min_size
+  vpc_zone_identifier = var.private_subnets
+
+  launch_template {
+    id      = aws_launch_template.ms6_lt.id
     version = "$Latest"
   }
 
