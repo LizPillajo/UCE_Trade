@@ -62,4 +62,5 @@ func main() {
 
 	log.Println("🚀 MS3 Catalog Query running on port 8082")
 	router.Run(":8082")
+	
 }
