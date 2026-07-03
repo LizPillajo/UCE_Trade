@@ -61,5 +61,4 @@ function createReviewController(reviewUseCases) {
 
   return router;
 }
-
 module.exports = createReviewController;
