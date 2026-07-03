@@ -55,9 +55,10 @@ resource "aws_instance" "shared_dbs" {
 
     sudo docker run -d --name kafka --restart always -p 9092:9092 \
       --link zookeeper:zookeeper \
-      -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+      -e KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181 \
+      -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092 \
       -e ALLOW_PLAINTEXT_LISTENER=yes \
-      -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 \
+      -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 \
       -e KAFKA_HEAP_OPTS="-Xmx256M -Xms256M" \
       bitnami/kafka:latest
 

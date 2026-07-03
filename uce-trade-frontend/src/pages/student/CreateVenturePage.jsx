@@ -71,20 +71,18 @@ const CreateVenturePage = () => {
       
       toast.success("Service published successfully! 🚀");
       
-      // Delay to allow Kafka -> MS3 eventual consistency before refetching
+      // Delay to allow Kafka -> MS3 eventual consistency before refetching and navigating
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['myVentures'] });
         queryClient.invalidateQueries({ queryKey: ['catalog'] });
         queryClient.invalidateQueries({ queryKey: ['featuredVentures'] });
+        navigate('/student/my-ventures');
       }, 1500);
-
-      navigate('/student/my-ventures');
 
     } catch (error) {
       console.error(error);
       setGeneralError('Server error o token inválido. Por favor intenta de nuevo.');
       toast.error("Failed to publish service.");
-    } finally {
       setSubmitting(false);
     }
   };
