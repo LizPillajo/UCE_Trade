@@ -33,14 +33,7 @@ const VentureDetailPage = () => {
   const handleDownloadInvoice = async () => {
       try {
           setDownloading(true);
-          const blob = await downloadInvoice(id); 
-          const url = window.URL.createObjectURL(new Blob([blob]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `invoice_${venture?.title}.pdf`);
-          document.body.appendChild(link);
-          link.click();
-          link.parentNode.removeChild(link);
+          await downloadInvoice(id); 
       } catch (error) {
           toast.error("Error generating invoice.");
       } finally {

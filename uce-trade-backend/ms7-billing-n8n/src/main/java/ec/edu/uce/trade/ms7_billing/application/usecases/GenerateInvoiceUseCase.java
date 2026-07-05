@@ -44,10 +44,13 @@ public class GenerateInvoiceUseCase {
         invoice.setCreatedAt(LocalDateTime.now());
         
         Invoice savedInvoice = invoiceRepositoryPort.save(invoice);
-        log.info("Saved invoice with ID: {}", savedInvoice.getId());
+        log.info("Successfully saved invoice to database with ID: {}", savedInvoice.getId());
+        log.debug("Saved Invoice details: {}", savedInvoice);
 
         // 3. Send email via n8n (MS7-04)
+        log.info("Triggering n8n webhook for invoice email dispatch...");
         n8nWebhookPort.sendInvoiceEmail(savedInvoice);
+        log.info("n8n webhook triggered successfully for Invoice ID: {}", savedInvoice.getId());
     }
 
 }

@@ -18,10 +18,13 @@ public class RabbitMQBillingConsumer {
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
     public void receivePaymentSuccess(PaymentEvent event) {
         log.info("Received PaymentSuccess event for Venture ID: {} Amount: {}", event.getVentureId(), event.getAmount());
+        log.debug("Full event payload: {}", event);
         try {
+            log.info("Starting invoice generation process for event...");
             generateInvoiceUseCase.processPaymentSuccess(event.getVentureId(), event.getStudentId(), event.getAmount());
+            log.info("Successfully completed billing process for Venture ID: {}", event.getVentureId());
         } catch (Exception e) {
-            log.error("Error processing billing for event: {}", event, e);
+            log.error("CRITICAL: Error processing billing for event: {}. Cause: {}", event, e.getMessage(), e);
         }
     }
 }
