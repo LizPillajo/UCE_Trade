@@ -5,6 +5,9 @@ import ec.edu.uce.trade.identity.domain.ports.UserRepositoryPort;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Repository
 public class UserRepositoryAdapter implements UserRepositoryPort {
 
@@ -16,6 +19,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     @Override
     public User save(User user) {
+        log.debug("Saving user to database: {}", user.getUid());
         UserEntity entity = new UserEntity();
         entity.setUid(user.getUid());
         entity.setEmail(user.getEmail());
@@ -34,6 +38,7 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     @Override
     public Optional<User> findById(String uid) {
+        log.debug("Finding user by ID: {}", uid);
         return repository.findById(uid).map(this::mapToDomain);
     }
 

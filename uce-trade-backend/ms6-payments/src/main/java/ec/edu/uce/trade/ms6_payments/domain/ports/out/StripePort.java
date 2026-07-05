@@ -3,5 +3,5 @@ package ec.edu.uce.trade.ms6_payments.domain.ports.out;
 import java.math.BigDecimal;
 
 public interface StripePort {
-    String createPaymentIntent(BigDecimal amount, String currency, String description);
+    String createPaymentIntent(BigDecimal amount, String currency, String description, java.util.Map<String, String> metadata);
 }

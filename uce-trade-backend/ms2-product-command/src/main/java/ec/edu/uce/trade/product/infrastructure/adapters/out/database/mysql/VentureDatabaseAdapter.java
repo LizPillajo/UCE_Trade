@@ -2,11 +2,13 @@ package ec.edu.uce.trade.product.infrastructure.adapters.out.database.mysql;
 
 import ec.edu.uce.trade.product.domain.model.Venture;
 import ec.edu.uce.trade.product.domain.ports.out.VentureRepositoryPort;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class VentureDatabaseAdapter implements VentureRepositoryPort {
 
@@ -18,6 +20,7 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
 
     @Override
     public Venture save(Venture venture) {
+        log.debug("Saving venture to database: {}", venture.getId());
         // 1. Convert the domain object to a database entity
         VentureEntity entity = new VentureEntity();
         entity.setId(venture.getId());
@@ -39,11 +42,13 @@ public class VentureDatabaseAdapter implements VentureRepositoryPort {
 
     @Override
     public Optional<Venture> findById(UUID id) {
+        log.debug("Finding venture by ID: {}", id);
         return repository.findById(id).map(this::mapToDomain);
     }
 
     @Override
     public void deleteById(UUID id) {
+        log.debug("Deleting venture by ID: {}", id);
         repository.deleteById(id);
     }
 

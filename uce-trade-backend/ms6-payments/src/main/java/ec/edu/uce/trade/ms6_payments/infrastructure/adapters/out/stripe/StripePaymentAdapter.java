@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class StripePaymentAdapter implements StripePort {
 
     @Override
-    public String createPaymentIntent(BigDecimal amount, String currency, String description) {
+    public String createPaymentIntent(BigDecimal amount, String currency, String description, java.util.Map<String, String> metadata) {
         try {
             log.debug("Communicating with Stripe API to create PaymentIntent for amount: {}", amount);
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
@@ -25,6 +25,7 @@ public class StripePaymentAdapter implements StripePort {
                                     .setEnabled(true)
                                     .build()
                     )
+                    .putAllMetadata(metadata != null ? metadata : java.util.Collections.emptyMap())
                     .build();
 
             PaymentIntent intent = PaymentIntent.create(params);

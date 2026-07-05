@@ -1,6 +1,6 @@
 // src/adapters/out/messaging/KafkaConsumer.js
 const { Kafka } = require('kafkajs');
-const logger = require('../../../config/logger');
+const logger = require('../../../utils/logger');
 
 const kafka = new Kafka({
   clientId: 'ms5-reviews',

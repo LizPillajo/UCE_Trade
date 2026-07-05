@@ -4,15 +4,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import ec.edu.uce.trade.identity.domain.model.User;
 import ec.edu.uce.trade.identity.domain.ports.UserRepositoryPort;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class AuthService {
-    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final UserRepositoryPort userRepository;
 
     public AuthService(UserRepositoryPort userRepository) {
@@ -20,30 +19,30 @@ public class AuthService {
     }
 
     public User authenticate(String idToken) throws Exception {
-        logger.info("Starting Firebase token validation...");
+        log.info("Starting Firebase token validation...");
         FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
         String uid = decodedToken.getUid();
         
         // ✅ FIX: Validate UID is not null or empty
         if (uid == null || uid.trim().isEmpty()) {
-            logger.error("Authentication failed: Firebase token contains null or empty UID");
+            log.error("Authentication failed: Firebase token contains null or empty UID");
             throw new RuntimeException("Invalid authentication token: UID is missing");
         }
         
-        logger.info("Authentication successful for UID: {}", uid);
+        log.info("Authentication successful for UID: {}", uid);
         
         Optional<User> existingUser = userRepository.findById(uid);
         if (existingUser.isPresent()) {
-            logger.info("Existing user found in PostgreSQL: {}", existingUser.get().getEmail());
+            log.info("Existing user found in PostgreSQL: {}", existingUser.get().getEmail());
             return existingUser.get();
         }
 
         String email = decodedToken.getEmail();
-        logger.info("New user detected with email: {}", email);
+        log.info("New user detected with email: {}", email);
 
         // ⚠️ Security: Block admin domain registrations
         if (email != null && email.endsWith("@admin.edu.ec")) {
-            logger.warn("Security Alert: Attempted registration with administrative domain: {}", email);
+            log.warn("Security Alert: Attempted registration with administrative domain: {}", email);
             throw new RuntimeException("Access denied: Administrative accounts cannot be registered through this method.");
         }
 
@@ -63,12 +62,12 @@ public class AuthService {
         newUser.setFullName("");
         newUser.setFaculty("");
         
-        logger.info("Creating new user with role: {}", role);
+        log.info("Creating new user with role: {}", role);
         return userRepository.save(newUser);
     }
     
     public User updateProfile(String uid, User updatedData) {
-        logger.info("Updating profile for UID: {}", uid);
+        log.info("Updating profile for UID: {}", uid);
         
         User existing = userRepository.findById(uid)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -80,12 +79,12 @@ public class AuthService {
         existing.setDescription(updatedData.getDescription());
         existing.setAvatarUrl(updatedData.getAvatarUrl());
         
-        logger.info("Profile updated successfully for: {}", existing.getEmail());
+        log.info("Profile updated successfully for: {}", existing.getEmail());
         return userRepository.save(existing);
     }
     
     public User getUserProfile(String uid) {
-        logger.info("Fetching profile for UID: {}", uid);
+        log.info("Fetching profile for UID: {}", uid);
         return userRepository.findById(uid)
             .orElseThrow(() -> new RuntimeException("User not found"));
     }

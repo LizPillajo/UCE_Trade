@@ -34,7 +34,7 @@ const Navbar = () => {
     queryKey: ['notifications'],
     queryFn: fetchNotifications,
     enabled: !!user,
-    refetchInterval: 30000 
+    refetchInterval: false 
   });
   
   let links = [{ name: 'Home', path: '/' }, { name: 'Explore', path: '/explore' }];

@@ -2,8 +2,10 @@ package ec.edu.uce.trade.ms6_payments.infrastructure.adapters.out.database.maria
 
 import ec.edu.uce.trade.ms6_payments.domain.model.Payment;
 import ec.edu.uce.trade.ms6_payments.domain.ports.out.PaymentRepositoryPort;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class PaymentDatabaseAdapter implements PaymentRepositoryPort {
 
@@ -15,6 +17,7 @@ public class PaymentDatabaseAdapter implements PaymentRepositoryPort {
 
     @Override
     public Payment save(Payment payment) {
+        log.debug("Saving payment to database for venture ID: {}", payment.getVentureId());
         PaymentEntity entity = new PaymentEntity();
         entity.setId(payment.getId());
         entity.setVentureId(payment.getVentureId());

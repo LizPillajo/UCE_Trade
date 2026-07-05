@@ -32,10 +32,34 @@ provider "aws" {
 variable "docker_username" { default = "lizdaisy" }
 variable "key_name" { default = "vockey" }
 
+# ✅ FIX: Variables de entorno para Supabase (leer desde secrets)
+variable "supabase_url" {
+  description = "Supabase API URL"
+  type        = string
+}
+
+variable "supabase_bucket" {
+  description = "Supabase Storage Bucket Name"
+  type        = string
+}
+
+variable "supabase_key" {
+  description = "Supabase Service Role Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "stripe_secret_key" {
+  description = "Stripe Secret Key"
+  type        = string
+  sensitive   = true
+}
+
 # MODO AHORRO (DORMIR PRODUCCION):
 # Cambia desired_capacity = 0 y enable_db = false
-variable "desired_capacity" { default = 2 } # 0 para apagar, 2 para redundancia
+variable "desired_capacity" { default = 0 } # 0 para apagar, 2 para redundancia
 variable "enable_db" { default = true }     # false para apagar bases de datos
+
 
 module "networking" {
   source      = "../../modules/networking"
@@ -88,6 +112,13 @@ module "compute" {
   kafka_brokers          = module.databases.kafka_brokers
   elasticsearch_endpoint = module.databases.elasticsearch_endpoint
   docdb_endpoint         = module.databases.mongodb_endpoint
+
+  supabase_url    = var.supabase_url
+  supabase_bucket = var.supabase_bucket
+  supabase_key    = var.supabase_key
+  stripe_secret_key = var.stripe_secret_key
+  mariadb_endpoint  = module.databases.mariadb_endpoint
+  rabbitmq_endpoint = module.databases.rabbitmq_endpoint
 }
 
 output "alb_dns_name" {
