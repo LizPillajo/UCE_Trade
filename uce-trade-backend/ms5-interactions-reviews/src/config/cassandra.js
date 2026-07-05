@@ -1,10 +1,11 @@
 const cassandra = require('cassandra-driver');
 require('dotenv').config();
+const logger = require('../utils/logger');
 
 // ✅ FIX: Read from environment variable with fallback
 const contactPoint = process.env.CASSANDRA_HOST || '127.0.0.1';
 
-console.log(`🔄 Connecting to Cassandra at: ${contactPoint}`);
+logger.info(`🔄 Connecting to Cassandra at: ${contactPoint}`);
 
 const client = new cassandra.Client({
   contactPoints: [contactPoint],
@@ -34,11 +35,11 @@ const initDB = async () => {
       ) WITH CLUSTERING ORDER BY (created_at DESC);
     `);
     
-    console.log('✅ Cassandra DB connected and "reviews" table ready.');
+    logger.info('✅ Cassandra DB connected and "reviews" table ready.');
   } catch (error) {
-    console.error('❌ Error initializing Cassandra:', error);
+    logger.error(`❌ Error initializing Cassandra: ${error.message}`);
     // ✅ FIX: Don't crash the app if Cassandra is not ready
-    console.log('⚠️ Cassandra not available. Will retry connection...');
+    logger.warn('⚠️ Cassandra not available. Will retry connection...');
   }
 };
 

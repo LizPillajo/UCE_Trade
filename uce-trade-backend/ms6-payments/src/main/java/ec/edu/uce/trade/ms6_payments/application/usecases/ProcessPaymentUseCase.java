@@ -29,7 +29,11 @@ public class ProcessPaymentUseCase {
         log.info("Starting payment intent creation for ventureId: {} by studentId: {}", ventureId, studentId);
         
         String description = "Pay for service: " + (ventureName != null ? ventureName : "Unknown Venture");
-        String clientSecret = stripePort.createPaymentIntent(amount, "USD", description);
+        java.util.Map<String, String> metadata = java.util.Map.of(
+            "ventureId", ventureId.toString(),
+            "studentId", studentId
+        );
+        String clientSecret = stripePort.createPaymentIntent(amount, "USD", description, metadata);
         log.info("Successfully generated client secret for ventureId: {}", ventureId);
         
         return clientSecret;

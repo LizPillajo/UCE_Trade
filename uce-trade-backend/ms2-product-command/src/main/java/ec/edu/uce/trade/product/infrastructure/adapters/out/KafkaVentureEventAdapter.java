@@ -2,9 +2,11 @@ package ec.edu.uce.trade.product.infrastructure.adapters.out;
 
 import ec.edu.uce.trade.product.domain.model.Venture;
 import ec.edu.uce.trade.product.domain.ports.out.VentureEventPort;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class KafkaVentureEventAdapter implements VentureEventPort {
 
@@ -20,18 +22,18 @@ public class KafkaVentureEventAdapter implements VentureEventPort {
     @Override
     public void publishVentureCreatedEvent(Venture venture) {
         kafkaTemplate.send(CREATED_TOPIC, venture.getStudentId(), venture);
-        System.out.println("Event sent to Kafka: Venture created -> " + venture.getTitle());
+        log.info("Event sent to Kafka: Venture created -> {}", venture.getTitle());
     }
 
     @Override
     public void publishVentureUpdatedEvent(Venture venture) {
         kafkaTemplate.send(UPDATED_TOPIC, venture.getStudentId(), venture);
-        System.out.println("Event sent to Kafka: Venture updated -> " + venture.getTitle());
+        log.info("Event sent to Kafka: Venture updated -> {}", venture.getTitle());
     }
 
     @Override
     public void publishVentureDeletedEvent(String ventureId) {
         kafkaTemplate.send(DELETED_TOPIC, ventureId, ventureId);
-        System.out.println("Event sent to Kafka: Venture deleted -> " + ventureId);
+        log.info("Event sent to Kafka: Venture deleted -> {}", ventureId);
     }
 }

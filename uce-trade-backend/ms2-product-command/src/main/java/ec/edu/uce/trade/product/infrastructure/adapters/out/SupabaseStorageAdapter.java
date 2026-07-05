@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Component
 public class SupabaseStorageAdapter implements ImageStoragePort {
 
@@ -23,6 +25,7 @@ public class SupabaseStorageAdapter implements ImageStoragePort {
 
     @Override
     public String uploadImage(MultipartFile file, String fileName) {
+        log.info("Initiating upload to Supabase for file: {}", fileName);
         try {
             RestTemplate restTemplate = new RestTemplate();
             // Supabase Storage REST API Endpoint
@@ -33,11 +36,15 @@ public class SupabaseStorageAdapter implements ImageStoragePort {
             headers.setContentType(MediaType.valueOf(file.getContentType()));
 
             HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);
+            log.debug("Calling Supabase REST API: {}", url);
             restTemplate.postForEntity(url, requestEntity, String.class);
 
             // Return the public URL to save it in MySQL
-            return supabaseUrl + "/storage/v1/object/public/" + bucketName + "/" + fileName;
+            String publicUrl = supabaseUrl + "/storage/v1/object/public/" + bucketName + "/" + fileName;
+            log.info("Upload successful. Public URL: {}", publicUrl);
+            return publicUrl;
         } catch (Exception e) {
+            log.error("Failed to upload image to Supabase: {}", e.getMessage());
             throw new RuntimeException("Error uploading image to Supabase", e);
         }
     }

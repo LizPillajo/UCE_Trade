@@ -56,7 +56,8 @@ public class PaymentController {
         }
     }
 
-    @Operation(summary = "Confirm Payment and Dispatch Event")
+    @Deprecated
+    @Operation(summary = "Confirm Payment and Dispatch Event (DEPRECATED - Use Webhook instead)")
     @PostMapping("/confirm/{ventureId}")
     public ResponseEntity<?> confirmPayment(
             @RequestHeader(value = "Authorization", required = false) String authHeader,

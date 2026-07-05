@@ -85,7 +85,7 @@ module "compute" {
   public_subnets   = [module.networking.public_subnet_1a_id, module.networking.public_subnet_1b_id]
   private_subnets  = [module.networking.private_subnet_1a_id, module.networking.private_subnet_1b_id]
   key_name         = var.key_name
-  instance_type    = "t2.small"
+  instance_type    = "t2.medium"
   docker_username  = var.docker_username
   docker_tag       = "qa"
   desired_capacity = 1
