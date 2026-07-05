@@ -1,0 +1,83 @@
+package ec.edu.uce.trade.ms7_billing.application.usecases;
+
+import ec.edu.uce.trade.ms7_billing.domain.model.Invoice;
+import ec.edu.uce.trade.ms7_billing.domain.ports.out.InvoiceRepositoryPort;
+import ec.edu.uce.trade.ms7_billing.domain.ports.out.N8nWebhookPort;
+import ec.edu.uce.trade.ms7_billing.infrastructure.adapters.out.pdf.PdfGenerationService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class GenerateInvoiceUseCaseTest {
+
+    @Mock
+    private InvoiceRepositoryPort invoiceRepositoryPort;
+
+    @Mock
+    private N8nWebhookPort n8nWebhookPort;
+
+    @Mock
+    private PdfGenerationService pdfGenerationService;
+
+    @InjectMocks
+    private GenerateInvoiceUseCase generateInvoiceUseCase;
+
+    private UUID ventureId;
+    private String studentId;
+    private BigDecimal amount;
+
+    @BeforeEach
+    void setUp() {
+        ventureId = UUID.randomUUID();
+        studentId = "STD-001";
+        amount = new BigDecimal("150.00");
+    }
+
+    @Test
+    void testProcessPaymentSuccess_NewInvoice() {
+        // Arrange
+        when(invoiceRepositoryPort.findByVentureId(ventureId)).thenReturn(Optional.empty());
+        when(pdfGenerationService.generatePdf(any(), eq(ventureId), eq(studentId), eq(amount)))
+                .thenReturn("https://s3.url/invoice.pdf");
+        
+        Invoice mockSavedInvoice = new Invoice();
+        mockSavedInvoice.setId(UUID.randomUUID());
+        when(invoiceRepositoryPort.save(any(Invoice.class))).thenReturn(mockSavedInvoice);
+
+        // Act
+        generateInvoiceUseCase.processPaymentSuccess(ventureId, studentId, amount);
+
+        // Assert
+        verify(invoiceRepositoryPort, times(1)).findByVentureId(ventureId);
+        verify(pdfGenerationService, times(1)).generatePdf(any(), eq(ventureId), eq(studentId), eq(amount));
+        verify(invoiceRepositoryPort, times(1)).save(any(Invoice.class));
+        verify(n8nWebhookPort, times(1)).sendInvoiceEmail(mockSavedInvoice);
+    }
+
+    @Test
+    void testProcessPaymentSuccess_DuplicateEvent() {
+        // Arrange
+        Invoice existingInvoice = new Invoice();
+        when(invoiceRepositoryPort.findByVentureId(ventureId)).thenReturn(Optional.of(existingInvoice));
+
+        // Act
+        generateInvoiceUseCase.processPaymentSuccess(ventureId, studentId, amount);
+
+        // Assert
+        verify(invoiceRepositoryPort, times(1)).findByVentureId(ventureId);
+        verify(pdfGenerationService, never()).generatePdf(any(), any(), any(), any());
+        verify(invoiceRepositoryPort, never()).save(any(Invoice.class));
+        verify(n8nWebhookPort, never()).sendInvoiceEmail(any());
+    }
+}
