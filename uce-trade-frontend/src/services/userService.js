@@ -16,13 +16,12 @@ export const fetchNotifications = async () => {
 };
 
 export const downloadInvoice = async (ventureId) => {
-  const response = await api.get(`/v1/payments/invoice/${ventureId}`, { responseType: 'blob' });
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', `invoice-${ventureId}.pdf`);
-  document.body.appendChild(link);
-  link.click();
+  const response = await api.get(`/v1/billing/invoice/${ventureId}`);
+  if (response.data && response.data.pdfUrl) {
+    window.open(response.data.pdfUrl, '_blank');
+  } else {
+    throw new Error("Invoice not found or pdfUrl is missing");
+  }
 };
 
 export const confirmPayment = async (ventureId, amount) => {

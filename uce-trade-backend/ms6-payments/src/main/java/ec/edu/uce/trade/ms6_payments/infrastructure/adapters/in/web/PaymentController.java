@@ -48,7 +48,9 @@ public class PaymentController {
         BigDecimal amount = (amountStr != null && !amountStr.isEmpty()) ? new BigDecimal(amountStr) : new BigDecimal("0.00");
 
         try {
+            log.info("Creating PaymentIntent for ventureId: {}, studentId: {}, amount: {}", ventureId, studentId, amount);
             String clientSecret = processPaymentUseCase.createIntent(UUID.fromString(ventureId), ventureName, studentId, amount);
+            log.info("PaymentIntent successfully created for ventureId: {}", ventureId);
             return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
         } catch (Exception e) {
             log.error("Error creating payment intent: {}", e.getMessage());

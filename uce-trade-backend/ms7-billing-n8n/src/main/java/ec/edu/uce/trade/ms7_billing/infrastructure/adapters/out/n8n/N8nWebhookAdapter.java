@@ -38,10 +38,12 @@ public class N8nWebhookAdapter implements N8nWebhookPort {
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
             
+            log.debug("N8n Webhook Payload: {}", payload);
+            log.info("Executing POST request to N8n URL: {}", n8nWebhookUrl);
             restTemplate.postForEntity(n8nWebhookUrl, request, String.class);
-            log.info("Successfully triggered n8n workflow for invoice {}", invoice.getId());
+            log.info("Successfully triggered n8n workflow for invoice {}. Email dispatch initiated.", invoice.getId());
         } catch (Exception e) {
-            log.error("Failed to send invoice to n8n", e);
+            log.error("CRITICAL: Failed to send invoice to n8n webhook at {}. Payload was for Invoice ID: {}. Cause: {}", n8nWebhookUrl, invoice.getId(), e.getMessage(), e);
         }
     }
 }
