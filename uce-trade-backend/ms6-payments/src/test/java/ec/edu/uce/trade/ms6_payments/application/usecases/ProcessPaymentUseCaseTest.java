@@ -46,13 +46,13 @@ class ProcessPaymentUseCaseTest {
         BigDecimal amount = new BigDecimal("25.00");
         String expectedClientSecret = "pi_123_secret_456";
 
-        when(stripePort.createPaymentIntent(eq(amount), eq("USD"), eq("Pay for service: Awesome Project")))
+        when(stripePort.createPaymentIntent(eq(amount), eq("USD"), eq("Pay for service: Awesome Project"), any()))
                 .thenReturn(expectedClientSecret);
 
         String actualClientSecret = processPaymentUseCase.createIntent(ventureId, ventureName, studentId, amount);
 
         assertEquals(expectedClientSecret, actualClientSecret);
-        verify(stripePort, times(1)).createPaymentIntent(any(), any(), any());
+        verify(stripePort, times(1)).createPaymentIntent(any(), any(), any(), any());
     }
 
     @Test
