@@ -86,6 +86,7 @@ resource "aws_launch_template" "node1_lt" {
       -e MS4_URI=http://$NODE2_IP:8083 \
       -e MS5_URI=http://$NODE2_IP:8084 \
       -e MS6_URI=http://$NODE2_IP:8085 \
+      -e MS7_URI=http://$NODE2_IP:8086 \
       ${var.docker_username}/ms0-api-gateway:${var.docker_tag}
   EOF
   )
@@ -189,6 +190,15 @@ resource "aws_launch_template" "node2_lt" {
       -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
       -e STRIPE_SECRET_KEY=${var.stripe_secret_key} \
       ${var.docker_username}/ms6-payments:${var.docker_tag}
+
+    echo "Iniciando MS7 (Billing & n8n)..."
+    sudo docker run -d --restart always -p 8086:8086 \
+      -e SPRING_DATASOURCE_URL=jdbc:postgresql://${var.rds_ms7_endpoint}/uce_trade_ms7 \
+      -e SPRING_DATASOURCE_USERNAME=postgres \
+      -e SPRING_DATASOURCE_PASSWORD=postgres \
+      -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
+      -e AWS_S3_BUCKET=${var.s3_bucket_name} \
+      ${var.docker_username}/ms7-billing-n8n:${var.docker_tag}
   EOF
   )
 

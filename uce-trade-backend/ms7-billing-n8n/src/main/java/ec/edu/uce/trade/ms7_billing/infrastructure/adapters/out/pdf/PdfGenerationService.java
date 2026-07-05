@@ -1,6 +1,7 @@
 package ec.edu.uce.trade.ms7_billing.infrastructure.adapters.out.pdf;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import ec.edu.uce.trade.ms7_billing.domain.ports.out.FileStoragePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class PdfGenerationService {
 
     private final TemplateEngine templateEngine;
+    private final FileStoragePort fileStoragePort;
 
     public String generatePdf(UUID invoiceId, UUID ventureId, String studentId, BigDecimal amount) {
         log.info("Generating PDF for Invoice ID: {}", invoiceId);
@@ -34,9 +36,9 @@ public class PdfGenerationService {
         String htmlContent = templateEngine.process("invoice", context);
         
         try {
-            // In a real app, this would be uploaded to S3/Supabase.
-            // For now, we save it locally to a temp directory and return a fake URL or local path.
-            File pdfFile = File.createTempFile("invoice-" + invoiceId, ".pdf");
+            String fileName = invoiceId.toString() + ".pdf";
+            File pdfFile = File.createTempFile("invoice-", ".pdf");
+            
             try (OutputStream os = new FileOutputStream(pdfFile)) {
                 PdfRendererBuilder builder = new PdfRendererBuilder();
                 builder.useFastMode();
@@ -44,8 +46,15 @@ public class PdfGenerationService {
                 builder.toStream(os);
                 builder.run();
             }
-            log.info("PDF generated successfully at {}", pdfFile.getAbsolutePath());
-            return pdfFile.getAbsolutePath(); // Return local path for now
+            log.info("PDF generated successfully at temp file {}", pdfFile.getAbsolutePath());
+            
+            // Upload to S3
+            String s3Url = fileStoragePort.uploadFile(pdfFile, fileName);
+            
+            // Clean up temp file
+            pdfFile.delete();
+            
+            return s3Url;
         } catch (Exception e) {
             log.error("Failed to generate PDF", e);
             throw new RuntimeException("Failed to generate PDF", e);

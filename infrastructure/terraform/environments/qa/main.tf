@@ -57,6 +57,12 @@ variable "stripe_secret_key" {
   sensitive   = true
 }
 
+variable "s3_bucket_name" {
+  description = "AWS S3 Bucket Name for MS7"
+  type        = string
+  default     = "uce-trade-qa-bucket"
+}
+
 module "networking" {
   source      = "../../modules/networking"
   environment = "qa"
@@ -112,6 +118,9 @@ module "compute" {
   mariadb_endpoint  = module.databases.mariadb_endpoint
   rabbitmq_endpoint = module.databases.rabbitmq_endpoint
   stripe_secret_key = var.stripe_secret_key
+  
+  rds_ms7_endpoint = module.databases.rds_ms1_endpoint # Temporary fallback for MS7 using MS1 DB host
+  s3_bucket_name   = var.s3_bucket_name
 }
 
 output "alb_dns_name" {
