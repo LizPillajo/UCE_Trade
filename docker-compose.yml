@@ -63,6 +63,18 @@ services:
     volumes:
       - ms6_db_data:/var/lib/mysql
 
+  ms7-postgres:
+    image: postgres:15
+    container_name: uce_trade_ms7_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-uce_trade_ms7}
+    ports:
+      - "5434:5432"
+    volumes:
+      - ms7_db_data:/var/lib/postgresql/data
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: uce_trade_rabbitmq
@@ -97,3 +109,4 @@ volumes:
   ms4_db_data:
   ms5_db_data:
   ms6_db_data:
+  ms7_db_data:

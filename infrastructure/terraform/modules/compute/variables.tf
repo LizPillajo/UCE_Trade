@@ -158,3 +158,15 @@ variable "stripe_secret_key" {
   type        = string
   sensitive   = true
 }
+
+variable "rds_ms7_endpoint" {
+  description = "Endpoint for MS7 RDS"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket_name" {
+  description = "AWS S3 Bucket Name for MS7"
+  type        = string
+  default     = ""
+}

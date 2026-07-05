@@ -70,3 +70,8 @@ spring:
           uri: ${MS6_URI:http://localhost:8085}
           predicates:
             - Path=/api/v1/payments/**
+
+        - id: ms7-billing
+          uri: ${MS7_URI:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/billing/**
