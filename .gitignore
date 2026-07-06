@@ -18,3 +18,7 @@ labsuserprod.pem
 *.tfstate.backup
 .terraform.lock.hcl
 *.tfvars
+
+# Logs
+logs/
+*.log

@@ -10,3 +10,7 @@ build/
 .settings/
 .factorypath
 application-secrets.properties
+
+# Logs
+logs/
+*.log
