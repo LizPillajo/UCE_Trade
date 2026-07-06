@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+import ec.edu.uce.trade.ms7_billing.application.services.InvoiceDataEnricherService;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class PdfGenerationService {
     private final TemplateEngine templateEngine;
     private final FileStoragePort fileStoragePort;
 
-    public String generatePdf(UUID invoiceId, UUID ventureId, String studentId, BigDecimal amount) {
+    public String generatePdf(UUID invoiceId, UUID ventureId, String studentId, BigDecimal amount, InvoiceDataEnricherService.EnrichedInvoiceData enrichedData) {
         log.info("Generating PDF for Invoice ID: {}", invoiceId);
         Context context = new Context();
         context.setVariable("invoiceId", invoiceId.toString());
@@ -32,6 +34,13 @@ public class PdfGenerationService {
         context.setVariable("studentId", studentId);
         context.setVariable("amount", amount);
         context.setVariable("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        
+        // Enriched Data
+        context.setVariable("buyerName", enrichedData.buyerName);
+        context.setVariable("buyerEmail", enrichedData.buyerEmail);
+        context.setVariable("sellerName", enrichedData.sellerName);
+        context.setVariable("sellerEmail", enrichedData.sellerEmail);
+        context.setVariable("ventureTitle", enrichedData.ventureTitle);
 
         String htmlContent = templateEngine.process("invoice", context);
         

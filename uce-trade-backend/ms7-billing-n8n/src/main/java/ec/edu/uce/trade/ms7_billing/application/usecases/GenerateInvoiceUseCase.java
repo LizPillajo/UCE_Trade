@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import ec.edu.uce.trade.ms7_billing.application.services.InvoiceDataEnricherService;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ public class GenerateInvoiceUseCase {
     private final InvoiceRepositoryPort invoiceRepositoryPort;
     private final N8nWebhookPort n8nWebhookPort;
     private final ec.edu.uce.trade.ms7_billing.infrastructure.adapters.out.pdf.PdfGenerationService pdfGenerationService;
+    private final InvoiceDataEnricherService invoiceDataEnricherService;
 
     public void processPaymentSuccess(UUID ventureId, String studentId, BigDecimal amount) {
         log.info("Processing successful payment for Venture ID: {}", ventureId);
@@ -31,8 +34,11 @@ public class GenerateInvoiceUseCase {
 
         UUID invoiceId = UUID.randomUUID();
 
+        // Fetch enriched data with retry/fallback
+        InvoiceDataEnricherService.EnrichedInvoiceData enrichedData = invoiceDataEnricherService.fetchEnrichedData(ventureId, studentId);
+
         // 1. Generate PDF (MS7-03)
-        String pdfUrl = pdfGenerationService.generatePdf(invoiceId, ventureId, studentId, amount);
+        String pdfUrl = pdfGenerationService.generatePdf(invoiceId, ventureId, studentId, amount, enrichedData);
 
         // 2. Save Invoice
         Invoice invoice = new Invoice();

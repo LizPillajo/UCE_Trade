@@ -16,8 +16,8 @@ public class RabbitMQConfig {
     public static final String ROUTING_KEY = "payment.success";
 
     @Bean
-    public TopicExchange paymentsExchange() {
-        return new TopicExchange(EXCHANGE_NAME);
+    public DirectExchange paymentsExchange() {
+        return new DirectExchange(EXCHANGE_NAME);
     }
 
     @Bean
@@ -26,7 +26,7 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding binding(Queue billingQueue, TopicExchange paymentsExchange) {
+    public Binding binding(Queue billingQueue, DirectExchange paymentsExchange) {
         return BindingBuilder.bind(billingQueue).to(paymentsExchange).with(ROUTING_KEY);
     }
 
