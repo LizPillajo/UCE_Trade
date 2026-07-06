@@ -170,3 +170,9 @@ variable "s3_bucket_name" {
   type        = string
   default     = ""
 }
+
+variable "mosquitto_endpoint" {
+  description = "Endpoint for Mosquitto MQTT broker"
+  type        = string
+  default     = ""
+}

@@ -13,8 +13,21 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3008;
 
+const { getRecentNotifications } = require('./adapters/output/redis.repository');
+
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', service: 'ms8-real-time-notifications' });
+});
+
+app.get('/api/v1/notifications/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const notifications = await getRecentNotifications(userId);
+    res.status(200).json(notifications);
+  } catch (error) {
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.listen(PORT, async () => {

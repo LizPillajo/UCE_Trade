@@ -75,3 +75,8 @@ spring:
           uri: ${MS7_URI:http://localhost:8086}
           predicates:
             - Path=/api/v1/billing/**
+
+        - id: ms8-notifications
+          uri: ${MS8_URI:http://localhost:3008}
+          predicates:
+            - Path=/api/v1/notifications/**
