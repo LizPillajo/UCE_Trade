@@ -102,6 +102,15 @@ services:
     ports:
       - "6379:6379"
 
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: uce_trade_mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./infrastructure/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
 volumes:
   ms1_db_data: 
   ms2_db_data:
