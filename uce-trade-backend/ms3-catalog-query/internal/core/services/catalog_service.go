@@ -8,6 +8,8 @@ import (
 	"time"
 	"uce-trade-ms3/internal/core/domain"
 	"uce-trade-ms3/internal/core/ports"
+
+	"github.com/sirupsen/logrus"
 )
 
 type catalogService struct {
@@ -38,19 +40,19 @@ func (s *catalogService) fetchOwner(studentId string) *domain.Owner {
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Get(url)
 	if err != nil {
-		fmt.Printf("Error fetching owner from MS1: %v\n", err)
+		logrus.Errorf("Error fetching owner from MS1: %v", err)
 		return nil
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("MS1 returned status %d for user %s\n", resp.StatusCode, studentId)
+		logrus.Warnf("MS1 returned status %d for user %s", resp.StatusCode, studentId)
 		return nil
 	}
 
 	var owner domain.Owner
 	if err := json.NewDecoder(resp.Body).Decode(&owner); err != nil {
-		fmt.Printf("Error decoding owner from MS1: %v\n", err)
+		logrus.Errorf("Error decoding owner from MS1: %v", err)
 		return nil
 	}
 

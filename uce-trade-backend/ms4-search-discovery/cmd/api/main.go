@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"strings"
 	"uce-trade-ms4/internal/adapters/handlers/events"
 	"uce-trade-ms4/internal/adapters/handlers/http"
 	"uce-trade-ms4/internal/adapters/repositories/elasticsearch"
 	"uce-trade-ms4/internal/core/services"
+
+	"github.com/sirupsen/logrus"
 
 	es8 "github.com/elastic/go-elasticsearch/v7"
 	"github.com/gin-gonic/gin"
@@ -33,7 +33,7 @@ func main() {
 	}
 	esClient, err := es8.NewClient(cfg)
 	if err != nil {
-		log.Fatalf("Error creating the client: %s", err)
+		logrus.Fatalf("Error creating the Elasticsearch client: %s", err)
 	}
 
 	// Dependency Injection (Hexagonal)
@@ -50,6 +50,9 @@ func main() {
 	kafkaConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-created-topic", searchSvc)
 	go kafkaConsumer.Start()
 
+	kafkaUpdateConsumer := events.NewKafkaConsumer(kafkaBrokers, "venture-updated-topic", searchSvc)
+	go kafkaUpdateConsumer.Start()
+
 	// Router Gin
 	router := gin.Default()
 	
@@ -64,6 +67,6 @@ func main() {
 		v1.GET("/ventures/:id", searchHandler.GetVentureById)
 	}
 
-	fmt.Println("MS4 Search & Discovery built at Port 8083")
+	logrus.Info("MS4 Search & Discovery starting at Port 8083")
 	router.Run(":8083")
 }

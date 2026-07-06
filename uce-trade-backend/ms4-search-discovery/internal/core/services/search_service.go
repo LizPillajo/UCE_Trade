@@ -3,10 +3,13 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"net/http"
 	"time"
 	"uce-trade-ms4/internal/core/domain"
 	"uce-trade-ms4/internal/core/ports"
+
+	"github.com/sirupsen/logrus"
 )
 
 type searchService struct {
@@ -23,24 +26,28 @@ func (s *searchService) fetchOwner(studentId string) *domain.Owner {
 		return nil
 	}
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/users/%s", studentId)
+	ms1Uri := os.Getenv("MS1_URI")
+	if ms1Uri == "" {
+		ms1Uri = "http://localhost:8080"
+	}
+	url := fmt.Sprintf("%s/api/v1/users/%s", ms1Uri, studentId)
 	
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Get(url)
 	if err != nil {
-		fmt.Printf("Error fetching owner from MS1: %v\n", err)
+		logrus.Errorf("Error fetching owner from MS1: %v", err)
 		return nil
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("MS1 returned status %d for user %s\n", resp.StatusCode, studentId)
+		logrus.Warnf("MS1 returned status %d for user %s", resp.StatusCode, studentId)
 		return nil
 	}
 
 	var owner domain.Owner
 	if err := json.NewDecoder(resp.Body).Decode(&owner); err != nil {
-		fmt.Printf("Error decoding owner from MS1: %v\n", err)
+		logrus.Errorf("Error decoding owner from MS1: %v", err)
 		return nil
 	}
 

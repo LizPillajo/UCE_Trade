@@ -33,14 +33,7 @@ const VentureDetailPage = () => {
   const handleDownloadInvoice = async () => {
       try {
           setDownloading(true);
-          const blob = await downloadInvoice(id); 
-          const url = window.URL.createObjectURL(new Blob([blob]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `invoice_${venture?.title}.pdf`);
-          document.body.appendChild(link);
-          link.click();
-          link.parentNode.removeChild(link);
+          await downloadInvoice(id, user?.uid); 
       } catch (error) {
           toast.error("Error generating invoice.");
       } finally {
@@ -48,20 +41,20 @@ const VentureDetailPage = () => {
       }
   };
 
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    if (query.get('redirect_status') === 'succeeded' && !processedRef.current) {
-      processedRef.current = true;
-      setPaymentStatus('succeeded');
-      confirmPayment(id).then(() => setShowSuccessModal(true));
-    }
-  }, [location, id]);
-
   const { data: venture, isLoading, isError } = useQuery({
     queryKey: ['venture', id],
     queryFn: () => fetchServiceById(id),
     retry: 1
   });
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    if (query.get('redirect_status') === 'succeeded' && !processedRef.current && venture) {
+      processedRef.current = true;
+      setPaymentStatus('succeeded');
+      confirmPayment(id, venture.price).then(() => setShowSuccessModal(true));
+    }
+  }, [location, id, venture]);
 
   if (isLoading) return <Box sx={{ pt: 15, display: 'flex', justifyContent: 'center' }}><CircularProgress /></Box>;
   if (isError || !venture) return <Box sx={{ pt: 15, textAlign: 'center' }}><Alert severity="error">Service not found.</Alert></Box>;
@@ -126,6 +119,7 @@ const VentureDetailPage = () => {
         open={openPayment} 
         handleClose={() => setOpenPayment(false)} 
         ventureId={id} 
+        ventureName={venture.title}
         price={venture.price} 
       />
 

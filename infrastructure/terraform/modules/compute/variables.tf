@@ -141,3 +141,32 @@ variable "supabase_key" {
   sensitive   = true
 }
 
+variable "mariadb_endpoint" {
+  description = "Endpoint for MariaDB"
+  type        = string
+  default     = ""
+}
+
+variable "rabbitmq_endpoint" {
+  description = "Endpoint for RabbitMQ"
+  type        = string
+  default     = ""
+}
+
+variable "stripe_secret_key" {
+  description = "Stripe Secret Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "rds_ms7_endpoint" {
+  description = "Endpoint for MS7 RDS"
+  type        = string
+  default     = ""
+}
+
+variable "s3_bucket_name" {
+  description = "AWS S3 Bucket Name for MS7"
+  type        = string
+  default     = ""
+}

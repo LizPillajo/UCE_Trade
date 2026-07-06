@@ -50,15 +50,17 @@ resource "aws_instance" "shared_dbs" {
 
     # 3. Zookeeper & Kafka
     sudo docker run -d --name zookeeper --restart always -p 2181:2181 \
-      wurstmeister/zookeeper:latest
+      -e ALLOW_ANONYMOUS_LOGIN=yes \
+      bitnami/zookeeper:latest
 
     sudo docker run -d --name kafka --restart always -p 9092:9092 \
       --link zookeeper:zookeeper \
-      -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
-      -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 \
-      -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+      -e KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181 \
+      -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092 \
+      -e ALLOW_PLAINTEXT_LISTENER=yes \
+      -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 \
       -e KAFKA_HEAP_OPTS="-Xmx256M -Xms256M" \
-      wurstmeister/kafka:latest
+      bitnami/kafka:latest
 
     # 4. Cassandra
     sudo docker run -d --name cassandra-db --restart always -p 9042:9042 \
@@ -66,6 +68,16 @@ resource "aws_instance" "shared_dbs" {
       -e CASSANDRA_CLUSTER_NAME=UCECluster \
       -e MAX_HEAP_SIZE="512M" -e HEAP_NEWSIZE="100M" \
       cassandra:latest
+
+    # 5. MariaDB (MS6)
+    sudo docker run -d --name mariadb-ms6 --restart always -p 3306:3306 \
+      -e MARIADB_ROOT_PASSWORD=root \
+      -e MARIADB_DATABASE=uce_trade_ms6 \
+      mariadb:10.11
+
+    # 6. RabbitMQ (MS6)
+    sudo docker run -d --name rabbitmq --restart always -p 5672:5672 -p 15672:15672 \
+      rabbitmq:3-management
   EOF
   )
 

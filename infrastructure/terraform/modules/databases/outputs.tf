@@ -42,3 +42,11 @@ output "redis_endpoint" {
   value = var.enable_db ? aws_elasticache_cluster.redis[0].cache_nodes[0].address : ""
 }
 
+output "mariadb_endpoint" {
+  value = var.enable_db ? aws_instance.shared_dbs[0].private_ip : ""
+}
+
+output "rabbitmq_endpoint" {
+  value = var.enable_db ? aws_instance.shared_dbs[0].private_ip : ""
+}
+

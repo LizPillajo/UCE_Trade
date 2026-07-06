@@ -1,0 +1,72 @@
+package ec.edu.uce.trade.ms7_billing.infrastructure.adapters.out.pdf;
+
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import ec.edu.uce.trade.ms7_billing.domain.ports.out.FileStoragePort;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+import ec.edu.uce.trade.ms7_billing.application.services.InvoiceDataEnricherService;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class PdfGenerationService {
+
+    private final TemplateEngine templateEngine;
+    private final FileStoragePort fileStoragePort;
+
+    public String generatePdf(UUID invoiceId, UUID ventureId, String studentId, BigDecimal amount, InvoiceDataEnricherService.EnrichedInvoiceData enrichedData) {
+        log.info("Generating PDF for Invoice ID: {}", invoiceId);
+        Context context = new Context();
+        context.setVariable("invoiceId", invoiceId.toString());
+        context.setVariable("ventureId", ventureId.toString());
+        context.setVariable("studentId", studentId);
+        context.setVariable("amount", amount);
+        context.setVariable("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        
+        // Enriched Data
+        context.setVariable("buyerName", enrichedData.buyerName);
+        context.setVariable("buyerEmail", enrichedData.buyerEmail);
+        context.setVariable("sellerName", enrichedData.sellerName);
+        context.setVariable("sellerEmail", enrichedData.sellerEmail);
+        context.setVariable("ventureTitle", enrichedData.ventureTitle);
+
+        String htmlContent = templateEngine.process("invoice", context);
+        
+        try {
+            String fileName = invoiceId.toString() + ".pdf";
+            File pdfFile = File.createTempFile("invoice-", ".pdf");
+            
+            try (OutputStream os = new FileOutputStream(pdfFile)) {
+                PdfRendererBuilder builder = new PdfRendererBuilder();
+                builder.useFastMode();
+                builder.withHtmlContent(htmlContent, "file:///");
+                builder.toStream(os);
+                builder.run();
+            }
+            log.info("PDF generated successfully at temp file {}", pdfFile.getAbsolutePath());
+            
+            // Upload to S3
+            String s3Url = fileStoragePort.uploadFile(pdfFile, fileName);
+            
+            // Clean up temp file
+            pdfFile.delete();
+            
+            return s3Url;
+        } catch (Exception e) {
+            log.error("Failed to generate PDF", e);
+            throw new RuntimeException("Failed to generate PDF", e);
+        }
+    }
+}

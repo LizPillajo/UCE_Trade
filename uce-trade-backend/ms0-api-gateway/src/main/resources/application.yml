@@ -6,8 +6,15 @@ spring:
     name: ms0-api-gateway
   data:
     redis:
+      # ✅ FIX: Read from environment variable with fallback
       host: ${REDIS_HOST:localhost}
-      port: 6379
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
   cloud:
     compatibility-verifier:
       enabled: false
@@ -55,6 +62,16 @@ spring:
           uri: ${MS2_URI:http://localhost:8081}
           predicates:
             - Path=/api/ventures/**
-            - Method=POST, PUT, DELETE
+            - Method=POST,PUT,DELETE
           filters:
             - RewritePath=/api/ventures(?<segment>/?.*), /api/v1/ventures$\{segment}
+
+        - id: ms6-payments
+          uri: ${MS6_URI:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/payments/**
+
+        - id: ms7-billing
+          uri: ${MS7_URI:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/billing/**

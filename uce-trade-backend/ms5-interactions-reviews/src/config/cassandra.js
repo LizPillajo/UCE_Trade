@@ -1,25 +1,26 @@
-// src/config/cassandra.js
 const cassandra = require('cassandra-driver');
 require('dotenv').config();
+const logger = require('../utils/logger');
 
-// Conection no keyspace to create it
+// ✅ FIX: Read from environment variable with fallback
+const contactPoint = process.env.CASSANDRA_HOST || '127.0.0.1';
+
+logger.info(`🔄 Connecting to Cassandra at: ${contactPoint}`);
+
 const client = new cassandra.Client({
-  contactPoints: [process.env.CASSANDRA_HOST || '127.0.0.1'],
+  contactPoints: [contactPoint],
   localDataCenter: 'datacenter1',
 });
 
 const initDB = async () => {
   try {
-    // 1. Create the Keyspace (Base de datos en Cassandra)
     await client.execute(`
       CREATE KEYSPACE IF NOT EXISTS uce_trade_reviews 
       WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
     `);
     
-    // Change the client so that it points to the newly created keyspace
     client.keyspace = 'uce_trade_reviews';
 
-    // 2. Create the Reviews Table
     await client.execute(`
       CREATE TABLE IF NOT EXISTS uce_trade_reviews.reviews (
         id uuid,
@@ -34,9 +35,11 @@ const initDB = async () => {
       ) WITH CLUSTERING ORDER BY (created_at DESC);
     `);
     
-    console.log('✅ Cassandra DB connected and "reviews" table ready.');
+    logger.info('✅ Cassandra DB connected and "reviews" table ready.');
   } catch (error) {
-    console.error('❌ Error initializing Cassandra:', error);
+    logger.error(`❌ Error initializing Cassandra: ${error.message}`);
+    // ✅ FIX: Don't crash the app if Cassandra is not ready
+    logger.warn('⚠️ Cassandra not available. Will retry connection...');
   }
 };
 

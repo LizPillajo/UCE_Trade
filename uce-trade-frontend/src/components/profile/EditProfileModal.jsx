@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Grid, Box, Typography } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,6 +24,7 @@ const profileSchema = z.object({
 
 const EditProfileModal = ({ open, handleClose, user }) => {
   const updateUser = useAuthStore((state) => state.updateUser);
+  const queryClient = useQueryClient();
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
 
@@ -68,17 +69,16 @@ const EditProfileModal = ({ open, handleClose, user }) => {
 
   const mutation = useMutation({
     mutationFn: (data) => {
-      // FIX: Pass the user.uid correctly
       return updateUserProfile(user.uid, data);
     },
     onSuccess: (updatedUser) => {
       updateUser({
-        name: updatedUser.fullName,
-        faculty: updatedUser.faculty,
-        phoneNumber: updatedUser.phoneNumber,
-        description: updatedUser.description,
-        githubUser: updatedUser.githubUser,
-        avatar: updatedUser.avatarUrl
+        name: updatedUser?.fullName || user.name,
+        faculty: updatedUser?.faculty || user.faculty,
+        phoneNumber: updatedUser?.phoneNumber || '',
+        description: updatedUser?.description || '',
+        githubUser: updatedUser?.githubUser || '',
+        avatar: updatedUser?.avatarUrl || user.avatar
       });
       toast.success("Profile updated successfully!");
       handleClose();

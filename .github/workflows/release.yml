@@ -68,6 +68,8 @@ jobs:
           - MS3 Catalog Query (Go)
           - MS4 Search Discovery (Go)
           - MS5 Interactions & Reviews (Node.js/Express)
+          - MS6 Payments (Java/Spring Boot)
+          - MS7 Billing & n8n (Spring Boot + n8n)
           
           ### 🔧 Infrastructure:
           - Terraform (VPC, Subnets, ALB, Auto Scaling, RDS, Cassandra EC2)

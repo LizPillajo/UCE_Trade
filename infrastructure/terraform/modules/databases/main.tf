@@ -116,6 +116,20 @@ resource "aws_security_group" "cassandra_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    security_groups = [var.microservices_sg_id]
+  }
+
+  ingress {
+    from_port       = 5672
+    to_port         = 5672
+    protocol        = "tcp"
+    security_groups = [var.microservices_sg_id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

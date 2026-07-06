@@ -70,20 +70,25 @@ const CreateVenturePage = () => {
       });
       
       toast.success("Service published successfully! 🚀");
-      queryClient.invalidateQueries({ queryKey: ['myVentures'] });
-      navigate('/student/my-ventures');
+      
+      // Delay to allow Kafka -> MS3 eventual consistency before refetching and navigating
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+        queryClient.invalidateQueries({ queryKey: ['catalog'] });
+        queryClient.invalidateQueries({ queryKey: ['featuredVentures'] });
+        navigate('/student/my-ventures');
+      }, 1500);
 
     } catch (error) {
       console.error(error);
       setGeneralError('Server error o token inválido. Por favor intenta de nuevo.');
       toast.error("Failed to publish service.");
-    } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pt: 12, pb: 8 }}>
+    <Box sx={{ bgcolor: '#f8f9fa', minHeight: '100vh', pt: { xs: 10, sm: 12 }, pb: 8 }}>
       <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
         
         <Box mb={5} textAlign="center">

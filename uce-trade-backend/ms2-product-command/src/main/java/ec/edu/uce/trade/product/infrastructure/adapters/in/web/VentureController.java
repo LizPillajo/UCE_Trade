@@ -146,7 +146,7 @@ public class VentureController {
             return uid;
 
         } catch (Exception e) {
-            log.error("Token processing error: {}", e.getMessage());
+            log.error(" Token processing error: {}", e.getMessage());
             return null;
         }
     }
