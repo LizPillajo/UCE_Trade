@@ -33,7 +33,7 @@ const VentureDetailPage = () => {
   const handleDownloadInvoice = async () => {
       try {
           setDownloading(true);
-          await downloadInvoice(id); 
+          await downloadInvoice(id, user?.id); 
       } catch (error) {
           toast.error("Error generating invoice.");
       } finally {

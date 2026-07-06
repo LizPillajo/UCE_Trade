@@ -8,5 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface SpringDataInvoiceRepository extends JpaRepository<InvoiceEntity, UUID> {
-    Optional<InvoiceEntity> findByVentureId(UUID ventureId);
+    Optional<InvoiceEntity> findByPaymentId(UUID paymentId);
+    Optional<InvoiceEntity> findFirstByVentureIdAndStudentIdOrderByCreatedAtDesc(UUID ventureId, String studentId);
 }

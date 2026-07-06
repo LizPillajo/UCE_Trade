@@ -14,7 +14,7 @@ public class GetInvoiceUseCase {
 
     private final InvoiceRepositoryPort invoiceRepositoryPort;
 
-    public Optional<Invoice> getInvoiceByVentureId(UUID ventureId) {
-        return invoiceRepositoryPort.findByVentureId(ventureId);
+    public Optional<Invoice> getLatestInvoiceByVentureIdAndStudentId(UUID ventureId, String studentId) {
+        return invoiceRepositoryPort.findFirstByVentureIdAndStudentIdOrderByCreatedAtDesc(ventureId, studentId);
     }
 }

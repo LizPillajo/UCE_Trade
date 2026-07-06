@@ -893,3 +893,74 @@ Caused by: java.net.ConnectException: Connection refused: connect
 2026-07-05 20:58:35.678 [http-nio-8086-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
 2026-07-05 20:58:35.763 [http-nio-8086-exec-1] INFO  e.e.u.t.m.i.a.i.w.BillingController - REST Request to get invoice for ventureId: cb4b0d1c-dc1d-44a8-8559-7c95666bf8bb
 2026-07-05 20:58:35.777 [http-nio-8086-exec-1] INFO  e.e.u.t.m.i.a.i.w.BillingController - Invoice found for ventureId cb4b0d1c-dc1d-44a8-8559-7c95666bf8bb: 8e0093a8-8b02-43c0-8ba6-7bb5a1a76de7
+2026-07-05 21:38:17.789 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-07-05 21:38:17.879 [main] INFO  e.e.u.t.m.Ms7BillingApplication - Starting Ms7BillingApplication using Java 21.0.6 with PID 36312 (C:\Users\LENOVO\OneDrive\Escritorio\UCE_Trade\uce-trade-backend\ms7-billing-n8n\build\classes\java\main started by LENOVO in C:\Users\LENOVO\OneDrive\Escritorio\UCE_Trade\uce-trade-backend\ms7-billing-n8n)
+2026-07-05 21:38:17.881 [main] INFO  e.e.u.t.m.Ms7BillingApplication - No active profile set, falling back to 1 default profile: "default"
+2026-07-05 21:38:19.609 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-05 21:38:19.752 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 125 ms. Found 1 JPA repository interface.
+2026-07-05 21:38:21.037 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8086 (http)
+2026-07-05 21:38:21.069 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8086"]
+2026-07-05 21:38:21.076 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-05 21:38:21.077 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.54]
+2026-07-05 21:38:21.253 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-05 21:38:21.253 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3278 ms
+2026-07-05 21:38:21.568 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-05 21:38:21.726 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.49.Final
+2026-07-05 21:38:21.814 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-05 21:38:22.524 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-05 21:38:22.598 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-07-05 21:38:23.149 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@31533eb1
+2026-07-05 21:38:23.155 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-07-05 21:38:23.304 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-05 21:38:23.358 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 15.17
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-05 21:38:25.203 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-05 21:38:25.380 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-05 21:38:27.695 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-05 21:38:28.583 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8086"]
+2026-07-05 21:38:28.618 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8086 (http) with context path '/'
+2026-07-05 21:38:28.625 [main] INFO  o.s.a.r.c.CachingConnectionFactory - Attempting to connect to: [localhost:5672]
+2026-07-05 21:38:28.809 [main] INFO  o.s.a.r.c.CachingConnectionFactory - Created new connection: rabbitConnectionFactory#7f289126:0/SimpleConnection@5fd8302e [delegate=amqp://guest@127.0.0.1:5672/, localPort=53177]
+2026-07-05 21:38:28.962 [main] INFO  e.e.u.t.m.Ms7BillingApplication - Started Ms7BillingApplication in 12.335 seconds (process running for 13.227)
+2026-07-05 21:41:50.559 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Received PaymentSuccess event for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614 Amount: 0.00
+2026-07-05 21:41:50.568 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Starting invoice generation process for event...
+2026-07-05 21:41:50.568 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Processing successful payment for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:41:51.173 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] WARN  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Invoice for Venture ID 298c6532-26c0-44db-8ebe-d2ba7b861614 already exists. Skipping.
+2026-07-05 21:41:51.174 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Successfully completed billing process for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:42:00.300 [http-nio-8086-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-05 21:42:00.302 [http-nio-8086-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-07-05 21:42:00.305 [http-nio-8086-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-07-05 21:42:00.398 [http-nio-8086-exec-1] INFO  e.e.u.t.m.i.a.i.w.BillingController - REST Request to get invoice for ventureId: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:42:00.409 [http-nio-8086-exec-1] INFO  e.e.u.t.m.i.a.i.w.BillingController - Invoice found for ventureId 298c6532-26c0-44db-8ebe-d2ba7b861614: 378bc221-8f0e-47cd-b0c4-502d87c22965
+2026-07-05 21:42:43.512 [http-nio-8086-exec-3] INFO  e.e.u.t.m.i.a.i.w.BillingController - REST Request to get invoice for ventureId: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:42:43.523 [http-nio-8086-exec-3] INFO  e.e.u.t.m.i.a.i.w.BillingController - Invoice found for ventureId 298c6532-26c0-44db-8ebe-d2ba7b861614: 378bc221-8f0e-47cd-b0c4-502d87c22965
+2026-07-05 21:48:45.018 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Received PaymentSuccess event for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614 Amount: 0.00
+2026-07-05 21:48:45.019 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Starting invoice generation process for event...
+2026-07-05 21:48:45.019 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Processing successful payment for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:48:45.031 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] WARN  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Invoice for Venture ID 298c6532-26c0-44db-8ebe-d2ba7b861614 already exists. Skipping.
+2026-07-05 21:48:45.031 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Successfully completed billing process for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:49:28.419 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Received PaymentSuccess event for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614 Amount: 0.00
+2026-07-05 21:49:28.419 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Starting invoice generation process for event...
+2026-07-05 21:49:28.420 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Processing successful payment for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:49:28.431 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] WARN  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Invoice for Venture ID 298c6532-26c0-44db-8ebe-d2ba7b861614 already exists. Skipping.
+2026-07-05 21:49:28.432 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Successfully completed billing process for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:49:32.785 [http-nio-8086-exec-2] INFO  e.e.u.t.m.i.a.i.w.BillingController - REST Request to get invoice for ventureId: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:49:32.798 [http-nio-8086-exec-2] INFO  e.e.u.t.m.i.a.i.w.BillingController - Invoice found for ventureId 298c6532-26c0-44db-8ebe-d2ba7b861614: 378bc221-8f0e-47cd-b0c4-502d87c22965
+2026-07-05 21:49:56.992 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Received PaymentSuccess event for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614 Amount: 0.00
+2026-07-05 21:49:56.993 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Starting invoice generation process for event...
+2026-07-05 21:49:56.993 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Processing successful payment for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:49:57.002 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] WARN  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Invoice for Venture ID 298c6532-26c0-44db-8ebe-d2ba7b861614 already exists. Skipping.
+2026-07-05 21:49:57.003 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Successfully completed billing process for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:51:52.748 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Received PaymentSuccess event for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614 Amount: 0.00
+2026-07-05 21:51:52.748 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Starting invoice generation process for event...
+2026-07-05 21:51:52.748 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Processing successful payment for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:51:52.759 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] WARN  e.e.u.t.m.a.u.GenerateInvoiceUseCase - Invoice for Venture ID 298c6532-26c0-44db-8ebe-d2ba7b861614 already exists. Skipping.
+2026-07-05 21:51:52.760 [org.springframework.amqp.rabbit.RabbitListenerEndpointContainer#0-1] INFO  e.e.u.t.m.i.a.i.m.RabbitMQBillingConsumer - Successfully completed billing process for Venture ID: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:51:57.753 [http-nio-8086-exec-7] INFO  e.e.u.t.m.i.a.i.w.BillingController - REST Request to get invoice for ventureId: 298c6532-26c0-44db-8ebe-d2ba7b861614
+2026-07-05 21:51:57.763 [http-nio-8086-exec-7] INFO  e.e.u.t.m.i.a.i.w.BillingController - Invoice found for ventureId 298c6532-26c0-44db-8ebe-d2ba7b861614: 378bc221-8f0e-47cd-b0c4-502d87c22965

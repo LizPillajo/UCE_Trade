@@ -7,5 +7,6 @@ import java.util.UUID;
 public interface InvoiceRepositoryPort {
     Invoice save(Invoice invoice);
     Optional<Invoice> findById(UUID id);
-    Optional<Invoice> findByVentureId(UUID ventureId);
+    Optional<Invoice> findByPaymentId(UUID paymentId);
+    Optional<Invoice> findFirstByVentureIdAndStudentIdOrderByCreatedAtDesc(UUID ventureId, String studentId);
 }

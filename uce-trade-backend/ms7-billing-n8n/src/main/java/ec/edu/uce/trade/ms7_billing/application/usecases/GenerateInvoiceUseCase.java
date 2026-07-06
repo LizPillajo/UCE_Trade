@@ -23,12 +23,12 @@ public class GenerateInvoiceUseCase {
     private final ec.edu.uce.trade.ms7_billing.infrastructure.adapters.out.pdf.PdfGenerationService pdfGenerationService;
     private final InvoiceDataEnricherService invoiceDataEnricherService;
 
-    public void processPaymentSuccess(UUID ventureId, String studentId, BigDecimal amount) {
-        log.info("Processing successful payment for Venture ID: {}", ventureId);
+    public void processPaymentSuccess(UUID paymentId, UUID ventureId, String studentId, BigDecimal amount) {
+        log.info("Processing successful payment for Venture ID: {} with Payment ID: {}", ventureId, paymentId);
         
-        // Check if invoice already exists to ensure idempotency
-        if (invoiceRepositoryPort.findByVentureId(ventureId).isPresent()) {
-            log.warn("Invoice for Venture ID {} already exists. Skipping.", ventureId);
+        // Check if invoice already exists for this PAYMENT to ensure idempotency
+        if (invoiceRepositoryPort.findByPaymentId(paymentId).isPresent()) {
+            log.warn("Invoice for Payment ID {} already exists. Skipping.", paymentId);
             return;
         }
 
@@ -43,6 +43,7 @@ public class GenerateInvoiceUseCase {
         // 2. Save Invoice
         Invoice invoice = new Invoice();
         invoice.setId(invoiceId);
+        invoice.setPaymentId(paymentId);
         invoice.setVentureId(ventureId);
         invoice.setStudentId(studentId);
         invoice.setAmount(amount);

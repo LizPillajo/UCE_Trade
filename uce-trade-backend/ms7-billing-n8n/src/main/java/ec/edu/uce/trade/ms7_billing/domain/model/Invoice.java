@@ -8,6 +8,7 @@ import java.util.UUID;
 @Data
 public class Invoice {
     private UUID id;
+    private UUID paymentId;
     private UUID ventureId;
     private String studentId;
     private BigDecimal amount;
