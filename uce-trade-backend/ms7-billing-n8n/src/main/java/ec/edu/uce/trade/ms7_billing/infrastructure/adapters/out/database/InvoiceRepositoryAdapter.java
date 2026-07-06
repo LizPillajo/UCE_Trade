@@ -27,13 +27,19 @@ public class InvoiceRepositoryAdapter implements InvoiceRepositoryPort {
     }
 
     @Override
-    public Optional<Invoice> findByVentureId(UUID ventureId) {
-        return repository.findByVentureId(ventureId).map(this::toDomain);
+    public Optional<Invoice> findByPaymentId(UUID paymentId) {
+        return repository.findByPaymentId(paymentId).map(this::toDomain);
+    }
+
+    @Override
+    public Optional<Invoice> findFirstByVentureIdAndStudentIdOrderByCreatedAtDesc(UUID ventureId, String studentId) {
+        return repository.findFirstByVentureIdAndStudentIdOrderByCreatedAtDesc(ventureId, studentId).map(this::toDomain);
     }
 
     private InvoiceEntity toEntity(Invoice domain) {
         InvoiceEntity entity = new InvoiceEntity();
         entity.setId(domain.getId());
+        entity.setPaymentId(domain.getPaymentId());
         entity.setVentureId(domain.getVentureId());
         entity.setStudentId(domain.getStudentId());
         entity.setAmount(domain.getAmount());
@@ -45,6 +51,7 @@ public class InvoiceRepositoryAdapter implements InvoiceRepositoryPort {
     private Invoice toDomain(InvoiceEntity entity) {
         Invoice domain = new Invoice();
         domain.setId(entity.getId());
+        domain.setPaymentId(entity.getPaymentId());
         domain.setVentureId(entity.getVentureId());
         domain.setStudentId(entity.getStudentId());
         domain.setAmount(entity.getAmount());

@@ -15,8 +15,8 @@ export const fetchNotifications = async () => {
     return response.data;
 };
 
-export const downloadInvoice = async (ventureId) => {
-  const response = await api.get(`/v1/billing/invoice/${ventureId}`);
+export const downloadInvoice = async (ventureId, studentId) => {
+  const response = await api.get(`/v1/billing/invoice/${ventureId}?studentId=${studentId}`);
   if (response.data && response.data.pdfUrl) {
     window.open(response.data.pdfUrl, '_blank');
   } else {

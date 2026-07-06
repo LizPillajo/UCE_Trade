@@ -21,15 +21,15 @@ public class BillingController {
     private final GetInvoiceUseCase getInvoiceUseCase;
 
     @GetMapping("/invoice/{ventureId}")
-    public ResponseEntity<Invoice> getInvoice(@PathVariable UUID ventureId) {
-        log.info("REST Request to get invoice for ventureId: {}", ventureId);
-        return getInvoiceUseCase.getInvoiceByVentureId(ventureId)
+    public ResponseEntity<Invoice> getInvoice(@PathVariable UUID ventureId, @org.springframework.web.bind.annotation.RequestParam String studentId) {
+        log.info("REST Request to get latest invoice for ventureId: {} and studentId: {}", ventureId, studentId);
+        return getInvoiceUseCase.getLatestInvoiceByVentureIdAndStudentId(ventureId, studentId)
                 .map(invoice -> {
                     log.info("Invoice found for ventureId {}: {}", ventureId, invoice.getId());
                     return ResponseEntity.ok(invoice);
                 })
                 .orElseGet(() -> {
-                    log.warn("No invoice found for ventureId: {}", ventureId);
+                    log.warn("No invoice found for ventureId: {} and studentId: {}", ventureId, studentId);
                     return ResponseEntity.notFound().build();
                 });
     }

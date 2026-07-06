@@ -38,6 +38,7 @@ public class GenerateInvoiceUseCaseTest {
     @InjectMocks
     private GenerateInvoiceUseCase generateInvoiceUseCase;
 
+    private UUID paymentId;
     private UUID ventureId;
     private String studentId;
     private BigDecimal amount;
@@ -45,6 +46,7 @@ public class GenerateInvoiceUseCaseTest {
 
     @BeforeEach
     void setUp() {
+        paymentId = UUID.randomUUID();
         ventureId = UUID.randomUUID();
         studentId = "STD-001";
         amount = new BigDecimal("150.00");
@@ -54,7 +56,7 @@ public class GenerateInvoiceUseCaseTest {
     @Test
     void testProcessPaymentSuccess_NewInvoice() {
         // Arrange
-        when(invoiceRepositoryPort.findByVentureId(ventureId)).thenReturn(Optional.empty());
+        when(invoiceRepositoryPort.findByPaymentId(paymentId)).thenReturn(Optional.empty());
         when(invoiceDataEnricherService.fetchEnrichedData(ventureId, studentId)).thenReturn(enrichedData);
         when(pdfGenerationService.generatePdf(any(), eq(ventureId), eq(studentId), eq(amount), eq(enrichedData)))
                 .thenReturn("https://s3.url/invoice.pdf");
@@ -64,10 +66,10 @@ public class GenerateInvoiceUseCaseTest {
         when(invoiceRepositoryPort.save(any(Invoice.class))).thenReturn(mockSavedInvoice);
 
         // Act
-        generateInvoiceUseCase.processPaymentSuccess(ventureId, studentId, amount);
+        generateInvoiceUseCase.processPaymentSuccess(paymentId, ventureId, studentId, amount);
 
         // Assert
-        verify(invoiceRepositoryPort, times(1)).findByVentureId(ventureId);
+        verify(invoiceRepositoryPort, times(1)).findByPaymentId(paymentId);
         verify(invoiceDataEnricherService, times(1)).fetchEnrichedData(ventureId, studentId);
         verify(pdfGenerationService, times(1)).generatePdf(any(), eq(ventureId), eq(studentId), eq(amount), eq(enrichedData));
         verify(invoiceRepositoryPort, times(1)).save(any(Invoice.class));
@@ -78,13 +80,13 @@ public class GenerateInvoiceUseCaseTest {
     void testProcessPaymentSuccess_DuplicateEvent() {
         // Arrange
         Invoice existingInvoice = new Invoice();
-        when(invoiceRepositoryPort.findByVentureId(ventureId)).thenReturn(Optional.of(existingInvoice));
+        when(invoiceRepositoryPort.findByPaymentId(paymentId)).thenReturn(Optional.of(existingInvoice));
 
         // Act
-        generateInvoiceUseCase.processPaymentSuccess(ventureId, studentId, amount);
+        generateInvoiceUseCase.processPaymentSuccess(paymentId, ventureId, studentId, amount);
 
         // Assert
-        verify(invoiceRepositoryPort, times(1)).findByVentureId(ventureId);
+        verify(invoiceRepositoryPort, times(1)).findByPaymentId(paymentId);
         verify(invoiceDataEnricherService, never()).fetchEnrichedData(any(), any());
         verify(pdfGenerationService, never()).generatePdf(any(), any(), any(), any(), any());
         verify(invoiceRepositoryPort, never()).save(any(Invoice.class));

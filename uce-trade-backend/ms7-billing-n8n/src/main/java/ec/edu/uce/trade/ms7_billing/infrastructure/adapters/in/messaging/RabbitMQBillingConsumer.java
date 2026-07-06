@@ -21,7 +21,7 @@ public class RabbitMQBillingConsumer {
         log.debug("Full event payload: {}", event);
         try {
             log.info("Starting invoice generation process for event...");
-            generateInvoiceUseCase.processPaymentSuccess(event.getVentureId(), event.getStudentId(), event.getAmount());
+            generateInvoiceUseCase.processPaymentSuccess(event.getId(), event.getVentureId(), event.getStudentId(), event.getAmount());
             log.info("Successfully completed billing process for Venture ID: {}", event.getVentureId());
         } catch (Exception e) {
             log.error("CRITICAL: Error processing billing for event: {}. Cause: {}", event, e.getMessage(), e);
