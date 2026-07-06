@@ -24,21 +24,34 @@
             <div class="invoice-details">
                 <div class="details-row"><strong>Invoice #:</strong> <span th:text="${invoiceId}">123</span></div>
                 <div class="details-row"><strong>Date:</strong> <span th:text="${date}">2023-01-01</span></div>
-                <div class="details-row"><strong>Student ID:</strong> <span th:text="${studentId}">STD-001</span></div>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+            <div>
+                <strong style="color: #efb034;">BUYER (Student):</strong><br/>
+                Name: <span th:text="${buyerName}">Student Name</span><br/>
+                Email: <span th:text="${buyerEmail}">student@uce.edu.ec</span><br/>
+                ID: <span th:text="${studentId}">STD-001</span>
+            </div>
+            <div style="text-align: right;">
+                <strong style="color: #efb034;">SELLER (Provider):</strong><br/>
+                Name: <span th:text="${sellerName}">Seller Name</span><br/>
+                Email: <span th:text="${sellerEmail}">seller@uce.edu.ec</span>
             </div>
         </div>
         
         <table>
             <thead>
                 <tr>
-                    <th>Description</th>
+                    <th>Product / Description</th>
                     <th>Venture ID</th>
                     <th style="text-align: right;">Amount</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Payment for Service</td>
+                    <td th:text="${ventureTitle}">Venture Title</td>
                     <td th:text="${ventureId}">V-100</td>
                     <td style="text-align: right;" th:text="'$' + ${amount}">$0.00</td>
                 </tr>

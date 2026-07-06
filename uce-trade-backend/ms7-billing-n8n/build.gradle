@@ -7,6 +7,8 @@ dependencies {
     implementation platform('software.amazon.awssdk:bom:2.25.11')
     implementation 'software.amazon.awssdk:s3'
 
+    implementation 'org.springframework.retry:spring-retry'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'com.h2database:h2'
 }

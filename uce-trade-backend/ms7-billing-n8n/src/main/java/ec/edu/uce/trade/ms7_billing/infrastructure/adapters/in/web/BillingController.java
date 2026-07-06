@@ -33,4 +33,21 @@ public class BillingController {
                     return ResponseEntity.notFound().build();
                 });
     }
+
+    @GetMapping("/mock-invoices/{fileName}")
+    public ResponseEntity<org.springframework.core.io.Resource> getMockInvoice(@PathVariable String fileName) {
+        try {
+            java.nio.file.Path file = java.nio.file.Paths.get(System.getProperty("java.io.tmpdir"), "mock-invoices", fileName);
+            if (!java.nio.file.Files.exists(file)) {
+                return ResponseEntity.notFound().build();
+            }
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(file.toUri());
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                    .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "application/pdf")
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

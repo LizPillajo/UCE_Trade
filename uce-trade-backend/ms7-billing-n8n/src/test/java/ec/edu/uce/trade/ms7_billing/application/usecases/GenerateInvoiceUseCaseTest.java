@@ -18,6 +18,8 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import ec.edu.uce.trade.ms7_billing.application.services.InvoiceDataEnricherService;
+
 @ExtendWith(MockitoExtension.class)
 public class GenerateInvoiceUseCaseTest {
 
@@ -30,25 +32,31 @@ public class GenerateInvoiceUseCaseTest {
     @Mock
     private PdfGenerationService pdfGenerationService;
 
+    @Mock
+    private InvoiceDataEnricherService invoiceDataEnricherService;
+
     @InjectMocks
     private GenerateInvoiceUseCase generateInvoiceUseCase;
 
     private UUID ventureId;
     private String studentId;
     private BigDecimal amount;
+    private InvoiceDataEnricherService.EnrichedInvoiceData enrichedData;
 
     @BeforeEach
     void setUp() {
         ventureId = UUID.randomUUID();
         studentId = "STD-001";
         amount = new BigDecimal("150.00");
+        enrichedData = new InvoiceDataEnricherService.EnrichedInvoiceData();
     }
 
     @Test
     void testProcessPaymentSuccess_NewInvoice() {
         // Arrange
         when(invoiceRepositoryPort.findByVentureId(ventureId)).thenReturn(Optional.empty());
-        when(pdfGenerationService.generatePdf(any(), eq(ventureId), eq(studentId), eq(amount)))
+        when(invoiceDataEnricherService.fetchEnrichedData(ventureId, studentId)).thenReturn(enrichedData);
+        when(pdfGenerationService.generatePdf(any(), eq(ventureId), eq(studentId), eq(amount), eq(enrichedData)))
                 .thenReturn("https://s3.url/invoice.pdf");
         
         Invoice mockSavedInvoice = new Invoice();
@@ -60,7 +68,8 @@ public class GenerateInvoiceUseCaseTest {
 
         // Assert
         verify(invoiceRepositoryPort, times(1)).findByVentureId(ventureId);
-        verify(pdfGenerationService, times(1)).generatePdf(any(), eq(ventureId), eq(studentId), eq(amount));
+        verify(invoiceDataEnricherService, times(1)).fetchEnrichedData(ventureId, studentId);
+        verify(pdfGenerationService, times(1)).generatePdf(any(), eq(ventureId), eq(studentId), eq(amount), eq(enrichedData));
         verify(invoiceRepositoryPort, times(1)).save(any(Invoice.class));
         verify(n8nWebhookPort, times(1)).sendInvoiceEmail(mockSavedInvoice);
     }
@@ -76,7 +85,8 @@ public class GenerateInvoiceUseCaseTest {
 
         // Assert
         verify(invoiceRepositoryPort, times(1)).findByVentureId(ventureId);
-        verify(pdfGenerationService, never()).generatePdf(any(), any(), any(), any());
+        verify(invoiceDataEnricherService, never()).fetchEnrichedData(any(), any());
+        verify(pdfGenerationService, never()).generatePdf(any(), any(), any(), any(), any());
         verify(invoiceRepositoryPort, never()).save(any(Invoice.class));
         verify(n8nWebhookPort, never()).sendInvoiceEmail(any());
     }
