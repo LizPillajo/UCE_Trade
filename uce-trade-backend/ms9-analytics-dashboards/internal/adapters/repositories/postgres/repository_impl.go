@@ -35,7 +35,7 @@ func (db *Database) SaveDimVenture(venture *domain.DimVenture) error {
 func (db *Database) GetAdminStats(period string) (map[string]interface{}, error) {
 	// Here we will implement complex SQL groupings like:
 	// SELECT SUM(amount) FROM fact_sales WHERE created_at > now() - interval...
-	
+
 	// Stub return for now
 	return map[string]interface{}{
 		"kpi": map[string]interface{}{
@@ -53,8 +53,8 @@ func (db *Database) GetStudentStats(studentID, period string) (map[string]interf
 	// Stub return for now
 	return map[string]interface{}{
 		"kpi": map[string]interface{}{
-			"totalSales":    0,
-			"totalRevenue":  0,
+			"totalSales":     0,
+			"totalRevenue":   0,
 			"activeServices": 0,
 		},
 		"chartSales":    map[string]interface{}{},

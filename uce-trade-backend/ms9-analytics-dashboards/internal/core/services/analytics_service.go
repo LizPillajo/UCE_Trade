@@ -1,20 +1,21 @@
 package services
 
 import (
-	"log"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"uce-trade-ms9/internal/core/domain"
 	"uce-trade-ms9/internal/core/ports"
 )
 
 type AnalyticsService struct {
-	Repo ports.AnalyticsRepository
+	Repo      ports.AnalyticsRepository
+	Publisher ports.NotificationPublisher
 }
 
-func NewAnalyticsService(repo ports.AnalyticsRepository) *AnalyticsService {
-	return &AnalyticsService{Repo: repo}
+func NewAnalyticsService(repo ports.AnalyticsRepository, pub ports.NotificationPublisher) *AnalyticsService {
+	return &AnalyticsService{Repo: repo, Publisher: pub}
 }
 
 // ProcessPayment formats the event and stores it in the Data Warehouse
@@ -34,8 +35,15 @@ func (s *AnalyticsService) ProcessPayment(payload map[string]interface{}) error 
 		CreatedAt:    time.Now(),
 	}
 
-	log.Printf("[Core] Saving FactSale: %v", fact.Amount)
-	return s.Repo.SaveFactSale(fact)
+	logrus.Infof("[Core] Saving FactSale: %v", fact.Amount)
+	err := s.Repo.SaveFactSale(fact)
+	if err == nil && s.Publisher != nil {
+		s.Publisher.PublishDashboardRefresh("analytics/admin")
+		if studentID != "" {
+			s.Publisher.PublishDashboardRefresh("analytics/student/" + studentID)
+		}
+	}
+	return err
 }
 
 func (s *AnalyticsService) ProcessVenture(payload map[string]interface{}) error {
@@ -54,8 +62,15 @@ func (s *AnalyticsService) ProcessVenture(payload map[string]interface{}) error 
 		CreatedAt:    time.Now(),
 	}
 
-	log.Printf("[Core] Saving DimVenture: %v", dim.ID)
-	return s.Repo.SaveDimVenture(dim)
+	logrus.Infof("[Core] Saving DimVenture: %v", dim.ID)
+	err := s.Repo.SaveDimVenture(dim)
+	if err == nil && s.Publisher != nil {
+		s.Publisher.PublishDashboardRefresh("analytics/admin")
+		if studentID != "" {
+			s.Publisher.PublishDashboardRefresh("analytics/student/" + studentID)
+		}
+	}
+	return err
 }
 
 func (s *AnalyticsService) ProcessUser(payload map[string]interface{}) error {
@@ -68,8 +83,12 @@ func (s *AnalyticsService) ProcessUser(payload map[string]interface{}) error {
 		CreatedAt: time.Now(),
 	}
 
-	log.Printf("[Core] Saving DimUser: %v", dim.ID)
-	return s.Repo.SaveDimUser(dim)
+	logrus.Infof("[Core] Saving DimUser: %v", dim.ID)
+	err := s.Repo.SaveDimUser(dim)
+	if err == nil && s.Publisher != nil {
+		s.Publisher.PublishDashboardRefresh("analytics/admin")
+	}
+	return err
 }
 
 // GetAdminDashboards executes the logic for the Admin UI

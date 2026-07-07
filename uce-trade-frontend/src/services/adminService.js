@@ -1,7 +1,7 @@
 import api from './axiosInstance';
 
 export const fetchAdminStats = async (period = 'ALL') => {
-  const response = await api.get(`/admin/stats?period=${period}`);
+  const response = await api.get(`/analytics/admin?period=${period}`);
   return response.data;
 };
 
