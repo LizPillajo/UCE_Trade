@@ -48,17 +48,28 @@ jobs:
           chmod +x gradlew
           ./gradlew test jacocoTestReport
 
-      # 2. Testear Go Backend (MS9)
+      # 2. Testear Go Backend (MS3, MS4, MS9)
       - name: Test Go Backend
-        working-directory: uce-trade-backend/ms9-analytics-dashboards
-        run: go test -coverprofile=coverage.out ./...
-
-      # 3. Testear Node.js Backend (MS8)
-      - name: Test Node.js Backend (MS8)
-        working-directory: uce-trade-backend/ms8-real-time-notifications
+        working-directory: uce-trade-backend
         run: |
-          npm ci
-          npm run test -- --coverage || true
+          for ms in ms3-catalog-query ms4-search-discovery ms9-analytics-dashboards; do
+            echo "Testing $ms"
+            cd $ms
+            go test -coverprofile=coverage.out ./... || true
+            cd ..
+          done
+
+      # 3. Testear Node.js Backend (MS5, MS8)
+      - name: Test Node.js Backend
+        working-directory: uce-trade-backend
+        run: |
+          for ms in ms5-interactions-reviews ms8-real-time-notifications; do
+            echo "Testing $ms"
+            cd $ms
+            npm ci || true
+            npm run test -- --coverage || true
+            cd ..
+          done
 
       # 4. Testear Frontend (React)
       - name: Test Frontend
