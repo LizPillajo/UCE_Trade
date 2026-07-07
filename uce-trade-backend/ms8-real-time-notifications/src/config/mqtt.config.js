@@ -1,4 +1,5 @@
 const mqtt = require('mqtt');
+const logger = require('../utils/logger');
 
 let mqttClient = null;
 
@@ -8,12 +9,12 @@ const connectMQTT = () => {
     mqttClient = mqtt.connect(brokerUrl);
 
     mqttClient.on('connect', () => {
-      console.log('[MQTT] Connected successfully to Mosquitto');
+      logger.info('[MQTT] Connected successfully to Mosquitto');
       resolve(mqttClient);
     });
 
     mqttClient.on('error', (err) => {
-      console.error('[MQTT] Connection error:', err);
+      logger.error('[MQTT] Connection error:', err);
       reject(err);
     });
   });

@@ -1,5 +1,5 @@
 import { AppRouter } from './routes/AppRouter';
-import { useWebSocket } from './hooks/useWebSocket';
+import { useMqttNotifications } from './hooks/useMqttNotifications';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -7,7 +7,7 @@ function App() {
   
   console.log("📢📢📢 EJECUTANDO APP.JSX 📢📢📢");
   
-  useWebSocket();
+  useMqttNotifications();
   
   return (
     <div className="App">
