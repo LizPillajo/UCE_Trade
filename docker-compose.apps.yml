@@ -40,3 +40,10 @@ services:
     container_name: uce_trade_frontend
     ports:
       - "3000:5173"
+
+  ms9-analytics-dashboards:
+    build:
+      context: ./uce-trade-backend/ms9-analytics-dashboards
+    container_name: uce_trade_ms9_app
+    ports:
+      - "3009:3009"

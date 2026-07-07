@@ -1,0 +1,9 @@
+basePath: /api/v1/analytics
+host: localhost:8000
+info:
+  contact: {}
+  description: REST API for Real-time Dashboards and Analytics in UCE Trade
+  title: MS9 Analytics & Dashboards API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

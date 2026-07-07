@@ -1,0 +1,54 @@
+name: MS9 Analytics Dashboards Pipeline
+
+on:
+  push:
+    paths:
+      - 'uce-trade-backend/ms9-analytics-dashboards/**'
+  pull_request:
+    paths:
+      - 'uce-trade-backend/ms9-analytics-dashboards/**'
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./uce-trade-backend/ms9-analytics-dashboards
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        
+    - name: Install Dependencies
+      run: go mod tidy
+
+    - name: Run Unit Tests
+      run: go test ./... -v
+
+    - name: Build
+      run: go build -o ms9-app ./cmd/main.go
+
+  docker-push:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./uce-trade-backend/ms9-analytics-dashboards
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/uce_trade_ms9:latest
