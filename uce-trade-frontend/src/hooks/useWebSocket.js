@@ -1,61 +1,19 @@
 import { useEffect, useRef } from 'react';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 import mqtt from 'mqtt';
 import { toast } from 'react-toastify';
-import { useAuthStore} from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useWebSocket = () => {
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   
-  const stompClientRef = useRef(null);
   const mqttClientRef = useRef(null);
 
   useEffect(() => {
     if (!user) return;
 
-    // --- STOMP Connection (Real-Time Notifications) ---
-    if (!stompClientRef.current) {
-        console.log("🔌 Iniciando conexión STOMP...");
-        const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/ws';
-        
-        const stompClient = new Client({
-        webSocketFactory: () => new SockJS(WS_URL),
-        reconnectDelay: 5000,
-        onConnect: () => {
-            console.log('✅ STOMP SOCKET CONECTADO');
-
-            if (user.role === 'UCE_STUDENT') {
-            stompClient.subscribe(`/topic/sales/${user.email}`, (message) => {
-                const notif = JSON.parse(message.body);
-                toast.success(`💰 ${notif.title}: ${notif.body}`, { toastId: 'sale-notif' });
-                
-                queryClient.invalidateQueries({ queryKey: ['studentStats'] });
-                queryClient.invalidateQueries({ queryKey: ['myVentures'] });
-            });
-            }
-
-            if (user.role === 'UCE_ADMIN') {
-            stompClient.subscribe('/topic/admin/notifications', (msg) => {
-                const notif = JSON.parse(msg.body);
-                toast.info(`🔔 ${notif.title}: ${notif.body}`, { toastId: 'admin-notif' });
-                
-                queryClient.invalidateQueries({ queryKey: ['adminStats'] });
-            });
-            }
-        },
-        onStompError: (frame) => {
-            console.error('❌ Error STOMP:', frame.headers['message']);
-        }
-        });
-
-        stompClient.activate();
-        stompClientRef.current = stompClient;
-    }
-
-    // --- MQTT Connection (Analytics Dashboards) ---
+    // --- MQTT Connection (Analytics Dashboards & Notifications) ---
     if (!mqttClientRef.current) {
         console.log("🔌 Iniciando conexión MQTT...");
         const MQTT_URL = import.meta.env.VITE_MQTT_WS_URL || 'ws://localhost:9001';
@@ -69,6 +27,11 @@ export const useWebSocket = () => {
         mqttClient.on('connect', () => {
             console.log('✅ MQTT SOCKET CONECTADO');
             
+            // Suscribirse a las notificaciones personales
+            mqttClient.subscribe(`notifications/user/${user.id}`, (err) => {
+                if (!err) console.log(`[MQTT] Suscrito a notifications/user/${user.id}`);
+            });
+            
             if (user.role === 'UCE_ADMIN') {
                 mqttClient.subscribe('analytics/admin', (err) => {
                     if (!err) console.log('📡 Suscrito a analytics/admin');
@@ -81,12 +44,34 @@ export const useWebSocket = () => {
         });
 
         mqttClient.on('message', (topic, message) => {
-            console.log(`[MQTT] Mensaje recibido en ${topic}:`, message.toString());
+            console.log(`[MQTT] Mensaje recibido en ${topic}`);
             
+            // Refrescar Dashboards
             if (topic === 'analytics/admin') {
                 queryClient.invalidateQueries({ queryKey: ['adminStats'] });
             } else if (topic.startsWith('analytics/student/')) {
                 queryClient.invalidateQueries({ queryKey: ['studentStats'] });
+                queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+            }
+            
+            // Mostrar Notificaciones (Toasts)
+            if (topic.startsWith('notifications/user/')) {
+                try {
+                    const notif = JSON.parse(message.toString());
+                    if (notif.type === 'NEW_SALE') {
+                        toast.success(`🎉 ${notif.title}: ${notif.message}`, { toastId: `sale-${Date.now()}` });
+                        // Refrescar al instante el dashboard del vendedor
+                        queryClient.invalidateQueries({ queryKey: ['studentStats'] });
+                    } else if (notif.type === 'PAYMENT_SUCCESS') {
+                        toast.info(`💰 ${notif.title}: ${notif.message}`, { toastId: `pay-${Date.now()}` });
+                    } else {
+                        toast.info(`🔔 ${notif.title}: ${notif.message}`);
+                    }
+                    // Refrescar el contador visual (campanita)
+                    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                } catch (e) {
+                    console.error("Error parsing MQTT message:", e);
+                }
             }
         });
 
@@ -99,10 +84,6 @@ export const useWebSocket = () => {
 
     return () => {
       console.log("🛑 Limpiando sockets...");
-      if (stompClientRef.current) {
-        stompClientRef.current.deactivate();
-        stompClientRef.current = null;
-      }
       if (mqttClientRef.current) {
           mqttClientRef.current.end();
           mqttClientRef.current = null;

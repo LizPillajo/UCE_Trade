@@ -63,16 +63,16 @@ export const deleteVenture = async (id) => {
 };
 
 export const fetchStudentStats = async (period = 'ALL') => {
-  const userId = useAuthStore.getState().user?.id;
+  const userId = useAuthStore.getState().user?.uid;
   if (!userId) return null;
-  const response = await api.get(`/analytics/student/${userId}?period=${period}`);
+  const response = await api.get(`/v1/analytics/student/${userId}?period=${period}`);
   return response.data;
 };
 
 export const downloadStudentReport = async (period = 'ALL') => {
-    const userId = useAuthStore.getState().user?.id;
+    const userId = useAuthStore.getState().user?.uid;
     if (!userId) return null;
-    const response = await api.get(`/analytics/student/${userId}/report?period=${period}`, {
+    const response = await api.get(`/v1/analytics/student/${userId}/report?period=${period}`, {
         responseType: 'blob'
     });
     return response.data;

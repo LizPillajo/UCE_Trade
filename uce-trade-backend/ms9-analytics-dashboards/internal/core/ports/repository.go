@@ -13,4 +13,5 @@ type AnalyticsRepository interface {
 	// Methods for aggregations (period can be "ALL", "MONTHLY", "WEEKLY")
 	GetAdminStats(period string) (map[string]interface{}, error)
 	GetStudentStats(studentID, period string) (map[string]interface{}, error)
+	GetVentureSellerID(ventureID string) string
 }

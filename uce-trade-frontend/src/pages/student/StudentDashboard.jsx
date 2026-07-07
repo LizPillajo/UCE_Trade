@@ -47,12 +47,20 @@ const StudentDashboard = () => {
   if (isLoading) return <PageLayout><DashboardSkeleton /></PageLayout>;
   if (isError) return <PageLayout title="Error">Error loading dashboard.</PageLayout>;
 
-  // Transformaciones de datos
-  const lineChartData = stats?.chartSales 
-    ? Object.keys(stats.chartSales)
+    // Transformaciones de datos
+  const safeStats = stats || {};
+  const kpiData = safeStats.kpi || {
+    totalSales: 0,
+    totalRevenue: 0,
+    activeServices: 0,
+    avgRating: 0
+  };
+
+  const lineChartData = safeStats.chartSales 
+    ? Object.keys(safeStats.chartSales)
       .map(key => ({ 
         name: key, 
-        income: stats.chartSales[key] 
+        income: safeStats.chartSales[key] 
       }))
       .sort((a, b) => {
           const [dayA, monthA] = a.name.split('/').map(Number);
@@ -63,8 +71,8 @@ const StudentDashboard = () => {
         })
     : [];
 
-  const barChartData = stats?.chartCategory
-    ? Object.keys(stats.chartCategory).map(cat => ({ category: cat, value: stats.chartCategory[cat] })) 
+  const barChartData = safeStats.chartCategory
+    ? Object.keys(safeStats.chartCategory).map(cat => ({ category: cat, value: safeStats.chartCategory[cat] })) 
     : [];
 
   return (
@@ -86,7 +94,7 @@ const StudentDashboard = () => {
             </>
         }
     >
-        <StudentKpiCards kpi={stats.kpi} />
+        <StudentKpiCards kpi={kpiData} />
         <IncomeHistoryChart lineData={lineChartData} />
 
         <Grid container spacing={4}>
@@ -94,7 +102,7 @@ const StudentDashboard = () => {
             <CategoryBarChart barData={barChartData} />
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
-            <StudentPerformanceList topServices={stats.topServices} />
+            <StudentPerformanceList topServices={safeStats.topServices || []} />
           </Grid>
         </Grid>
     </PageLayout>

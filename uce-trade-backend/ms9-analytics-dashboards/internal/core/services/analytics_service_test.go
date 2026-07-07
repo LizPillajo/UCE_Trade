@@ -40,6 +40,11 @@ func (m *MockAnalyticsRepository) GetStudentStats(studentID, period string) (map
 	return args.Get(0).(map[string]interface{}), args.Error(1)
 }
 
+func (m *MockAnalyticsRepository) GetVentureSellerID(ventureID string) string {
+	args := m.Called(ventureID)
+	return args.String(0)
+}
+
 // MockNotificationPublisher
 type MockNotificationPublisher struct {
 	mock.Mock
@@ -62,6 +67,7 @@ func TestProcessPayment(t *testing.T) {
 	}
 
 	// Expect repository save to be called and succeed
+	mockRepo.On("GetVentureSellerID", "v123").Return("s123")
 	mockRepo.On("SaveFactSale", mock.MatchedBy(func(fact *domain.FactSale) bool {
 		return fact.Amount == 50.0 && fact.VentureID == "v123" && fact.StudentID == "s123"
 	})).Return(nil)
@@ -89,6 +95,7 @@ func TestProcessPayment_RepoError(t *testing.T) {
 	}
 
 	expectedErr := errors.New("db error")
+	mockRepo.On("GetVentureSellerID", "v123").Return("s123")
 	mockRepo.On("SaveFactSale", mock.Anything).Return(expectedErr)
 
 	err := service.ProcessPayment(payload)
