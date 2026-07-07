@@ -70,6 +70,7 @@ jobs:
           - MS5 Interactions & Reviews (Node.js/Express)
           - MS6 Payments (Java/Spring Boot)
           - MS7 Billing & n8n (Spring Boot + n8n)
+          - MS8 Real Time Notifications (Node.js/Express)
           
           ### 🔧 Infrastructure:
           - Terraform (VPC, Subnets, ALB, Auto Scaling, RDS, Cassandra EC2)
