@@ -2,11 +2,15 @@ name: MS9 Analytics Dashboards Pipeline
 
 on:
   push:
+    branches: [ "q/a", "main" ]
     paths:
       - 'uce-trade-backend/ms9-analytics-dashboards/**'
+      - '.github/workflows/ms9-pipeline.yml'
   pull_request:
+    branches: [ "q/a", "main" ]
     paths:
       - 'uce-trade-backend/ms9-analytics-dashboards/**'
+      - '.github/workflows/ms9-pipeline.yml'
 
 jobs:
   test-and-build:
@@ -35,7 +39,6 @@ jobs:
   docker-push:
     needs: test-and-build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     steps:
     - uses: actions/checkout@v3
@@ -46,9 +49,17 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
+    - name: Determine Docker Tag
+      run: |
+        if [ "${{ github.ref_name }}" == "main" ]; then
+          echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+        else
+          echo "IMAGE_TAG=qa" >> $GITHUB_ENV
+        fi
+
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v4
       with:
         context: ./uce-trade-backend/ms9-analytics-dashboards
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/uce_trade_ms9:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/ms9-analytics-dashboards:${{ env.IMAGE_TAG }}
