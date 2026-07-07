@@ -85,3 +85,8 @@ spring:
           uri: ${MS9_URI:http://localhost:3009}
           predicates:
             - Path=/api/v1/analytics/**
+
+        - id: mosquitto-ws
+          uri: ws://${MOSQUITTO_ENDPOINT:localhost}:9001
+          predicates:
+            - Path=/mqtt
