@@ -13,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
+import ec.edu.uce.trade.ms7_billing.application.services.InvoiceDataEnricherService;
+
 @Slf4j
 @Component
 public class N8nWebhookAdapter implements N8nWebhookPort {
@@ -23,7 +25,7 @@ public class N8nWebhookAdapter implements N8nWebhookPort {
     private String n8nWebhookUrl;
 
     @Override
-    public void sendInvoiceEmail(Invoice invoice) {
+    public void sendInvoiceEmail(Invoice invoice, InvoiceDataEnricherService.EnrichedInvoiceData enrichedData) {
         log.info("Sending invoice to n8n webhook for email dispatch. Invoice ID: {}", invoice.getId());
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -35,6 +37,13 @@ public class N8nWebhookAdapter implements N8nWebhookPort {
             payload.put("ventureId", invoice.getVentureId().toString());
             payload.put("amount", invoice.getAmount());
             payload.put("pdfUrl", invoice.getPdfUrl());
+            
+            // Enriched Data for emails
+            payload.put("buyerName", enrichedData.buyerName);
+            payload.put("buyerEmail", enrichedData.buyerEmail);
+            payload.put("sellerName", enrichedData.sellerName);
+            payload.put("sellerEmail", enrichedData.sellerEmail);
+            payload.put("ventureTitle", enrichedData.ventureTitle);
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
             

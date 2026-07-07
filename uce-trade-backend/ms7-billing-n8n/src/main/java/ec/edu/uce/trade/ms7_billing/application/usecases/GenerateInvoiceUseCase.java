@@ -56,7 +56,7 @@ public class GenerateInvoiceUseCase {
 
         // 3. Send email via n8n (MS7-04)
         log.info("Triggering n8n webhook for invoice email dispatch...");
-        n8nWebhookPort.sendInvoiceEmail(savedInvoice);
+        n8nWebhookPort.sendInvoiceEmail(savedInvoice, enrichedData);
         log.info("n8n webhook triggered successfully for Invoice ID: {}", savedInvoice.getId());
     }
 

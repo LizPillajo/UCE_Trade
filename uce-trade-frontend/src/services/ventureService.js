@@ -32,8 +32,12 @@ export const fetchServiceById = async (id) => {
 
 export const fetchSuggestions = async (query) => {
   if (!query) return [];
-  const response = await api.get(`/ventures/suggestions?query=${query}`);
-  return response.data; 
+  try {
+    const response = await api.get(`/ventures/suggestions?query=${query}`);
+    return response.data; 
+  } catch (error) {
+    return []; // El backend no tiene este endpoint, devolvemos vacío para evitar crashes
+  }
 };
 
 // --- GESTIÓN ESTUDIANTE (CRUD) ---
@@ -58,8 +62,10 @@ export const deleteVenture = async (id) => {
 };
 
 export const fetchStudentStats = async (period = 'ALL') => {
-  const response = await api.get(`/dashboard/student?period=${period}`);
-  return response.data;
+  // El backend no tiene este endpoint, devolvemos mock temporal para evitar 404
+  return {
+    kpi: { sales: 0, rating: 0.0, totalEarnings: 0 }
+  };
 };
 
 export const downloadStudentReport = async (period = 'ALL') => {

@@ -11,20 +11,25 @@ const NotificationMenu = ({ notifications }) => {
   // Hook para poder invalidar queries y refrescar la UI
   const queryClient = useQueryClient();
 
+  // Local state to instantly clear the badge when menu opens
+  const [cleared, setCleared] = useState(false);
+
   // Contamos visualmente cuántas no están leídas para el globito rojo
-  const unreadCount = notifications?.filter(n => !n.read).length || 0;
+  const unreadCount = cleared ? 0 : (notifications?.filter(n => !n.read).length || 0);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
+    setCleared(true); // Instant visual feedback
 
     // 3. LÓGICA MAGICA: Si hay notificaciones sin leer, avisamos al backend
-    if (unreadCount > 0) {
+    const hasUnread = notifications?.some(n => !n.read);
+    if (hasUnread) {
       // Recorremos las notificaciones
       notifications.forEach(async (notif) => {
         // Solo enviamos petición si NO está leída
         if (!notif.read) {
           try {
-            await api.put(`/notifications/${notif.id}/read`);
+            await api.put(`/v1/notifications/${notif.userId}/${notif.id}/read`);
           } catch (error) {
             console.error("Error marcando notificación como leída", error);
           }
@@ -32,8 +37,6 @@ const NotificationMenu = ({ notifications }) => {
       });
 
       // 4. Refrescamos los datos en el Frontend
-      // Ponemos un pequeño delay (1s) para que se vea el efecto visual
-      // y dar tiempo a que el backend procese las peticiones.
       setTimeout(() => {
          queryClient.invalidateQueries(['notifications']); 
       }, 1000);
@@ -88,7 +91,7 @@ const NotificationMenu = ({ notifications }) => {
                       {notif.message}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(notif.date).toLocaleString()}
+                      {new Date(notif.createdAt).toLocaleString()}
                     </Typography>
                   </>
                 }

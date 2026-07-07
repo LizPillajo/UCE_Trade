@@ -19,8 +19,14 @@ export const useMqttNotifications = () => {
     const mqttClient = mqtt.connect(brokerUrl);
 
     mqttClient.on('connect', () => {
+      // Prevent subscribing if component unmounted before connection established
+      if (clientRef.current !== mqttClient) {
+        mqttClient.end();
+        return;
+      }
+      
       console.log('✅ MQTT CONECTADO');
-      const topic = `notifications/user/${user.id}`;
+      const topic = `notifications/user/${user.uid}`; // Use user.uid
       
       mqttClient.subscribe(topic, (err) => {
         if (!err) {
@@ -44,9 +50,11 @@ export const useMqttNotifications = () => {
           toast.success(`💰 ${payload.title}: ${payload.message}`, { toastId: payload.id || 'notif' });
           queryClient.invalidateQueries({ queryKey: ['studentStats'] });
           queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+          queryClient.invalidateQueries({ queryKey: ['notifications', user.uid] });
         } else if (user.role === 'UCE_ADMIN') {
           toast.info(`🔔 ${payload.title}: ${payload.message}`, { toastId: payload.id || 'notif' });
           queryClient.invalidateQueries({ queryKey: ['adminStats'] });
+          queryClient.invalidateQueries({ queryKey: ['notifications', user.uid] });
         }
       } catch (error) {
         console.error('[MQTT] Failed to parse message:', error);
