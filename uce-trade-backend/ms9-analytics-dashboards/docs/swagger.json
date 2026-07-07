@@ -1,0 +1,12 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "REST API for Real-time Dashboards and Analytics in UCE Trade",
+        "title": "MS9 Analytics \u0026 Dashboards API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8000",
+    "basePath": "/api/v1/analytics",
+    "paths": {}
+}

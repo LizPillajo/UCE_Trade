@@ -80,3 +80,8 @@ spring:
           uri: ${MS8_URI:http://localhost:3008}
           predicates:
             - Path=/api/v1/notifications/**
+
+        - id: ms9-analytics-dashboards
+          uri: ${MS9_URI:http://localhost:3009}
+          predicates:
+            - Path=/api/v1/analytics/**
