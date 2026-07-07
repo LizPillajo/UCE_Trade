@@ -3,7 +3,8 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"log"
+	
+	"github.com/sirupsen/logrus"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -25,7 +26,7 @@ func Connect(connString string) (*Database, error) {
 		return nil, fmt.Errorf("unable to ping database: %v", err)
 	}
 
-	log.Println("Connected to PostgreSQL Data Warehouse")
+	logrus.Info("Connected to PostgreSQL Data Warehouse")
 	return &Database{Pool: pool}, nil
 }
 
@@ -77,6 +78,6 @@ func (db *Database) RunMigrations() error {
 		}
 	}
 
-	log.Println("Data Warehouse schemas created successfully.")
+	logrus.Info("Data Warehouse schemas created successfully.")
 	return nil
 }

@@ -2,8 +2,8 @@ package rabbitmq
 
 import (
 	"encoding/json"
-	"log"
 
+	"github.com/sirupsen/logrus"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"uce-trade-ms9/internal/core/services"
 )
@@ -34,7 +34,7 @@ func NewConsumer(rabbitURL string, service *services.AnalyticsService) (*Consume
 
 func (c *Consumer) StartConsuming() error {
 	// We will listen to the same exchanges as MS8/MS6/MS2/MS1
-	
+
 	// 1. Payment Success
 	err := c.setupQueue("payments-exchange", "payment.success", "ms9.analytics.payment.queue", c.handlePayment)
 	if err != nil {
@@ -80,7 +80,7 @@ func (c *Consumer) setupQueue(exchange, routingKey, queueName string, handler fu
 	go func() {
 		for d := range msgs {
 			if err := handler(d.Body); err != nil {
-				log.Printf("Error processing message from %s: %v", queueName, err)
+				logrus.Errorf("Error processing message from %s: %v", queueName, err)
 				d.Nack(false, false)
 			} else {
 				d.Ack(false)
@@ -88,7 +88,7 @@ func (c *Consumer) setupQueue(exchange, routingKey, queueName string, handler fu
 		}
 	}()
 
-	log.Printf("[RabbitMQ] Listening on queue: %s", queueName)
+	logrus.Infof("[RabbitMQ] Listening on queue: %s", queueName)
 	return nil
 }
 

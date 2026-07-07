@@ -1,4 +1,5 @@
 import api from './axiosInstance';
+import { useAuthStore } from '../store/authStore';
 
 // --- PÚBLICO ---
 export const fetchFeaturedServices = async () => {
@@ -62,14 +63,16 @@ export const deleteVenture = async (id) => {
 };
 
 export const fetchStudentStats = async (period = 'ALL') => {
-  // El backend no tiene este endpoint, devolvemos mock temporal para evitar 404
-  return {
-    kpi: { sales: 0, rating: 0.0, totalEarnings: 0 }
-  };
+  const userId = useAuthStore.getState().user?.id;
+  if (!userId) return null;
+  const response = await api.get(`/analytics/student/${userId}?period=${period}`);
+  return response.data;
 };
 
 export const downloadStudentReport = async (period = 'ALL') => {
-    const response = await api.get(`/dashboard/student/report?period=${period}`, {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) return null;
+    const response = await api.get(`/analytics/student/${userId}/report?period=${period}`, {
         responseType: 'blob'
     });
     return response.data;
