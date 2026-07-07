@@ -52,7 +52,7 @@ const StudentPerformanceList = ({ topServices }) => (
             key={index} 
             rank={index + 1} 
             title={service.title} 
-            details={`${service.category} • ${service.sales} Sales`} 
+            details={`${service.categoryName || 'General'} • ${service.reviewsCount || 0} Reviews`} 
             rating={service.rating}
           />
         ))

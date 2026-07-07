@@ -33,15 +33,22 @@ func (db *Database) SaveDimVenture(venture *domain.DimVenture) error {
 
 // GetAdminStats calculates the aggregations for the Admin UI based on period
 func (db *Database) GetAdminStats(period string) (map[string]interface{}, error) {
-	// Here we will implement complex SQL groupings like:
-	// SELECT SUM(amount) FROM fact_sales WHERE created_at > now() - interval...
+	ctx := context.Background()
 
-	// Stub return for now
+	var totalUsers int
+	db.Pool.QueryRow(ctx, `SELECT COUNT(id) FROM dim_users`).Scan(&totalUsers)
+
+	var totalStartups int
+	db.Pool.QueryRow(ctx, `SELECT COUNT(id) FROM dim_ventures WHERE status = 'ACTIVE'`).Scan(&totalStartups)
+
+	var totalRevenue float64
+	db.Pool.QueryRow(ctx, `SELECT COALESCE(SUM(amount), 0) FROM fact_sales`).Scan(&totalRevenue)
+
 	return map[string]interface{}{
 		"kpi": map[string]interface{}{
-			"totalUsers":    0,
-			"totalStartups": 0,
-			"totalRevenue":  0,
+			"totalUsers":    totalUsers,
+			"totalStartups": totalStartups,
+			"totalRevenue":  totalRevenue,
 		},
 		"growthData": []map[string]interface{}{},
 		"pieData":    map[string]interface{}{},
@@ -50,15 +57,86 @@ func (db *Database) GetAdminStats(period string) (map[string]interface{}, error)
 
 // GetStudentStats calculates the aggregations for the Student UI
 func (db *Database) GetStudentStats(studentID, period string) (map[string]interface{}, error) {
-	// Stub return for now
+	ctx := context.Background()
+
+	// 1. Calculate KPI
+	var totalSales int
+	var totalRevenue float64
+	queryKpi := `
+		SELECT COUNT(f.id), COALESCE(SUM(f.amount), 0)
+		FROM fact_sales f
+		JOIN dim_ventures v ON f.venture_id = v.id
+		WHERE v.student_id = $1
+	`
+	db.Pool.QueryRow(ctx, queryKpi, studentID).Scan(&totalSales, &totalRevenue)
+
+	// 2. Calculate Active Services
+	var activeServices int
+	queryActive := `SELECT COUNT(id) FROM dim_ventures WHERE student_id = $1 AND status = 'ACTIVE'`
+	db.Pool.QueryRow(ctx, queryActive, studentID).Scan(&activeServices)
+
+	// 3. chartSales (Group by date)
+	chartSales := make(map[string]interface{})
+	queryChartSales := `
+		SELECT to_char(f.created_at, 'DD/MM'), COALESCE(SUM(f.amount), 0)
+		FROM fact_sales f
+		JOIN dim_ventures v ON f.venture_id = v.id
+		WHERE v.student_id = $1
+		GROUP BY to_char(f.created_at, 'DD/MM')
+	`
+	rows, err := db.Pool.Query(ctx, queryChartSales, studentID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var date string
+			var amount float64
+			if err := rows.Scan(&date, &amount); err == nil {
+				chartSales[date] = amount
+			}
+		}
+	}
+
+	// 4. chartCategory (Group by category)
+	chartCategory := make(map[string]interface{})
+	queryChartCategory := `
+		SELECT v.category_name, COALESCE(SUM(f.amount), 0)
+		FROM fact_sales f
+		JOIN dim_ventures v ON f.venture_id = v.id
+		WHERE v.student_id = $1
+		GROUP BY v.category_name
+	`
+	rowsCat, err := db.Pool.Query(ctx, queryChartCategory, studentID)
+	if err == nil {
+		defer rowsCat.Close()
+		for rowsCat.Next() {
+			var cat string
+			var amount float64
+			if err := rowsCat.Scan(&cat, &amount); err == nil {
+				chartCategory[cat] = amount
+			}
+		}
+	}
+
 	return map[string]interface{}{
 		"kpi": map[string]interface{}{
-			"totalSales":     0,
-			"totalRevenue":   0,
-			"activeServices": 0,
+			"totalSales":     totalSales,
+			"totalRevenue":   totalRevenue,
+			"activeServices": activeServices,
 		},
-		"chartSales":    map[string]interface{}{},
-		"chartCategory": map[string]interface{}{},
+		"chartSales":    chartSales,
+		"chartCategory": chartCategory,
 		"topServices":   []map[string]interface{}{},
 	}, nil
+}
+
+// GetVentureSellerID retrieves the studentID of the seller who owns the venture
+func (db *Database) GetVentureSellerID(ventureID string) string {
+	ctx := context.Background()
+	var sellerID string
+	query := `SELECT student_id FROM dim_ventures WHERE id = $1`
+	err := db.Pool.QueryRow(ctx, query, ventureID).Scan(&sellerID)
+	if err != nil {
+		return ""
+	}
+	return sellerID
 }

@@ -26,9 +26,11 @@ func main() {
 	logrus.Info("Starting MS9 Analytics & Dashboards...")
 
 	// Normally this comes from env vars (e.g., os.Getenv("DATABASE_URL"))
-	// For testing, we use a placeholder connection string.
-	// The real string will be configured in docker-compose later.
-	dbURL := "postgres://postgres:postgres@localhost:5432/ms9_db?sslmode=disable"
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		// The real string will be configured in docker-compose later.
+		dbURL = "postgres://postgres:root@localhost:5435/ms9_db?sslmode=disable"
+	}
 
 	db, err := postgres.Connect(dbURL)
 	if err != nil {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IconButton, Badge, Menu, MenuItem, ListItemText, Typography, Divider, Box } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useQueryClient } from '@tanstack/react-query'; // <--- 1. Importamos esto para refrescar datos
@@ -13,6 +13,11 @@ const NotificationMenu = ({ notifications }) => {
 
   // Local state to instantly clear the badge when menu opens
   const [cleared, setCleared] = useState(false);
+
+  // Reset visual clear if backend returns new notifications
+  useEffect(() => {
+    setCleared(false);
+  }, [notifications]);
 
   // Contamos visualmente cuántas no están leídas para el globito rojo
   const unreadCount = cleared ? 0 : (notifications?.filter(n => !n.read).length || 0);
