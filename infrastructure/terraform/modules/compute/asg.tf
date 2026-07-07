@@ -87,6 +87,7 @@ resource "aws_launch_template" "node1_lt" {
       -e MS5_URI=http://$NODE2_IP:8084 \
       -e MS6_URI=http://$NODE2_IP:8085 \
       -e MS7_URI=http://$NODE2_IP:8086 \
+      -e MS8_URI=http://$NODE2_IP:3008 \
       ${var.docker_username}/ms0-api-gateway:${var.docker_tag}
   EOF
   )
@@ -199,6 +200,14 @@ resource "aws_launch_template" "node2_lt" {
       -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
       -e AWS_S3_BUCKET=${var.s3_bucket_name} \
       ${var.docker_username}/ms7-billing-n8n:${var.docker_tag}
+
+    echo "Iniciando MS8 (Real-Time Notifications)..."
+    sudo docker run -d --restart always -p 3008:3008 \
+      -e PORT=3008 \
+      -e REDIS_URL=redis://${var.redis_address}:6379 \
+      -e RABBITMQ_URL=amqp://${var.rabbitmq_endpoint}:5672 \
+      -e MQTT_URL=mqtt://${var.mosquitto_endpoint}:1883 \
+      ${var.docker_username}/ms8-real-time-notifications:${var.docker_tag}
   EOF
   )
 

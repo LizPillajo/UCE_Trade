@@ -50,7 +50,14 @@ resource "aws_security_group" "microservices_sg" {
 
   ingress {
     from_port       = 8000
-    to_port         = 8084
+    to_port         = 8086
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id, aws_security_group.bastion_sg.id]
+  }
+
+  ingress {
+    from_port       = 3008
+    to_port         = 3008
     protocol        = "tcp"
     security_groups = [aws_security_group.alb_sg.id, aws_security_group.bastion_sg.id]
   }

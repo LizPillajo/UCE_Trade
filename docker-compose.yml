@@ -102,6 +102,30 @@ services:
     ports:
       - "6379:6379"
 
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: uce_trade_mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./infrastructure/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  ms8-notifications:
+    build: ./uce-trade-backend/ms8-real-time-notifications
+    container_name: uce_trade_ms8
+    ports:
+      - "3008:3008"
+    environment:
+      - PORT=3008
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MQTT_URL=mqtt://mosquitto:1883
+    depends_on:
+      - redis
+      - rabbitmq
+      - mosquitto
+
 volumes:
   ms1_db_data: 
   ms2_db_data:
