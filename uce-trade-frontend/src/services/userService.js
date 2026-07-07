@@ -10,8 +10,8 @@ export const updateUserProfile = async (uid, userData) => {
   return response.data;
 };
 
-export const fetchNotifications = async () => {
-    const response = await api.get('/notifications/my-notifications');
+export const fetchNotifications = async (userId) => {
+    const response = await api.get(`/v1/notifications/${userId}`);
     return response.data;
 };
 

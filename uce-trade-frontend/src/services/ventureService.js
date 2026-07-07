@@ -1,4 +1,5 @@
 import api from './axiosInstance';
+import { useAuthStore } from '../store/authStore';
 
 // --- PÚBLICO ---
 export const fetchFeaturedServices = async () => {
@@ -32,8 +33,12 @@ export const fetchServiceById = async (id) => {
 
 export const fetchSuggestions = async (query) => {
   if (!query) return [];
-  const response = await api.get(`/ventures/suggestions?query=${query}`);
-  return response.data; 
+  try {
+    const response = await api.get(`/ventures/suggestions?query=${query}`);
+    return response.data; 
+  } catch (error) {
+    return []; // El backend no tiene este endpoint, devolvemos vacío para evitar crashes
+  }
 };
 
 // --- GESTIÓN ESTUDIANTE (CRUD) ---
@@ -58,12 +63,16 @@ export const deleteVenture = async (id) => {
 };
 
 export const fetchStudentStats = async (period = 'ALL') => {
-  const response = await api.get(`/dashboard/student?period=${period}`);
+  const userId = useAuthStore.getState().user?.uid;
+  if (!userId) return null;
+  const response = await api.get(`/v1/analytics/student/${userId}?period=${period}`);
   return response.data;
 };
 
 export const downloadStudentReport = async (period = 'ALL') => {
-    const response = await api.get(`/dashboard/student/report?period=${period}`, {
+    const userId = useAuthStore.getState().user?.uid;
+    if (!userId) return null;
+    const response = await api.get(`/v1/analytics/student/${userId}/report?period=${period}`, {
         responseType: 'blob'
     });
     return response.data;

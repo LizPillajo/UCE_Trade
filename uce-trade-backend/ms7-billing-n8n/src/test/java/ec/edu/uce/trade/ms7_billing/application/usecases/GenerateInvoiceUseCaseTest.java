@@ -73,7 +73,7 @@ public class GenerateInvoiceUseCaseTest {
         verify(invoiceDataEnricherService, times(1)).fetchEnrichedData(ventureId, studentId);
         verify(pdfGenerationService, times(1)).generatePdf(any(), eq(ventureId), eq(studentId), eq(amount), eq(enrichedData));
         verify(invoiceRepositoryPort, times(1)).save(any(Invoice.class));
-        verify(n8nWebhookPort, times(1)).sendInvoiceEmail(mockSavedInvoice);
+        verify(n8nWebhookPort, times(1)).sendInvoiceEmail(mockSavedInvoice, enrichedData);
     }
 
     @Test
@@ -90,6 +90,6 @@ public class GenerateInvoiceUseCaseTest {
         verify(invoiceDataEnricherService, never()).fetchEnrichedData(any(), any());
         verify(pdfGenerationService, never()).generatePdf(any(), any(), any(), any(), any());
         verify(invoiceRepositoryPort, never()).save(any(Invoice.class));
-        verify(n8nWebhookPort, never()).sendInvoiceEmail(any());
+        verify(n8nWebhookPort, never()).sendInvoiceEmail(any(), any());
     }
 }

@@ -35,7 +35,11 @@ const VentureDetailPage = () => {
           setDownloading(true);
           await downloadInvoice(id, user?.uid); 
       } catch (error) {
-          toast.error("Error generating invoice.");
+          if (error.response && error.response.status === 404) {
+              toast.info("Invoice is being generated. Please wait a few seconds and try again. ⏳");
+          } else {
+              toast.error("Error generating invoice.");
+          }
       } finally {
           setDownloading(false);
       }

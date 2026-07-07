@@ -31,9 +31,9 @@ const Navbar = () => {
 
   // 1. Obtener Notificaciones (Solo si hay usuario)
   const { data: notifications } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: fetchNotifications,
-    enabled: !!user,
+    queryKey: ['notifications', user?.uid],
+    queryFn: () => fetchNotifications(user?.uid),
+    enabled: !!user?.uid,
     refetchInterval: false 
   });
   

@@ -6,6 +6,7 @@ import ec.edu.uce.trade.ms6_payments.domain.ports.out.PaymentRepositoryPort;
 import ec.edu.uce.trade.ms6_payments.domain.ports.out.StripePort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ public class ProcessPaymentUseCase {
         return clientSecret;
     }
 
+    @Transactional
     public Payment confirmPayment(UUID ventureId, String studentId, BigDecimal amount) {
         log.info("Confirming payment for ventureId: {} by studentId: {}", ventureId, studentId);
         
@@ -54,7 +56,7 @@ public class ProcessPaymentUseCase {
         log.info("Payment persisted in database with ID: {}", savedPayment.getId());
         
         eventPort.publishPaymentSuccess(savedPayment);
-        log.info("Payment success event published to Message Broker");
+        log.info("Payment success event saved to Outbox");
 
         return savedPayment;
     }

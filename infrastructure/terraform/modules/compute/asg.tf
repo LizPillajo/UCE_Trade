@@ -75,7 +75,8 @@ resource "aws_launch_template" "node1_lt" {
       ${var.docker_username}/ms3-catalog-query:${var.docker_tag}
 
     echo "Buscando IP de Node 2 (MS4, MS5, MS6)..."
-    NODE2_IP=$(get_ip "${var.project}-${var.environment}-node2-asg*")
+    echo "Buscando IP de Node 3 (MS7, MS8, MS9)..."
+    NODE3_IP=$(get_ip "${var.project}-${var.environment}-node3-asg*")
 
     echo "Iniciando MS0 (API Gateway)..."
     sudo docker run -d --restart always -p 8000:8000 \
@@ -86,7 +87,10 @@ resource "aws_launch_template" "node1_lt" {
       -e MS4_URI=http://$NODE2_IP:8083 \
       -e MS5_URI=http://$NODE2_IP:8084 \
       -e MS6_URI=http://$NODE2_IP:8085 \
-      -e MS7_URI=http://$NODE2_IP:8086 \
+      -e MS7_URI=http://$NODE3_IP:8086 \
+      -e MS8_URI=http://$NODE3_IP:3008 \
+      -e MS9_URI=http://$NODE3_IP:3009 \
+      -e MOSQUITTO_ENDPOINT=${var.mosquitto_endpoint} \
       ${var.docker_username}/ms0-api-gateway:${var.docker_tag}
   EOF
   )
@@ -190,15 +194,6 @@ resource "aws_launch_template" "node2_lt" {
       -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
       -e STRIPE_SECRET_KEY=${var.stripe_secret_key} \
       ${var.docker_username}/ms6-payments:${var.docker_tag}
-
-    echo "Iniciando MS7 (Billing & n8n)..."
-    sudo docker run -d --restart always -p 8086:8086 \
-      -e SPRING_DATASOURCE_URL=jdbc:postgresql://${var.rds_ms7_endpoint}/uce_trade_ms7 \
-      -e SPRING_DATASOURCE_USERNAME=postgres \
-      -e SPRING_DATASOURCE_PASSWORD=postgres \
-      -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
-      -e AWS_S3_BUCKET=${var.s3_bucket_name} \
-      ${var.docker_username}/ms7-billing-n8n:${var.docker_tag}
   EOF
   )
 
@@ -216,6 +211,108 @@ resource "aws_autoscaling_group" "node2_asg" {
 
   launch_template {
     id      = aws_launch_template.node2_lt.id
+    version = "$Latest"
+  }
+
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 0
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Node 3: MS7, MS8, MS9
+resource "aws_launch_template" "node3_lt" {
+  name_prefix   = "${var.project}-${var.environment}-node3-lt-"
+  image_id      = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = [aws_security_group.microservices_sg.id]
+  }
+
+  iam_instance_profile {
+    name = "LabInstanceProfile"
+  }
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+
+    sudo dnf update -y
+    sudo dnf install -y docker
+    sudo systemctl start docker
+    sudo systemctl enable docker
+
+    get_ip() {
+      local asg_pattern=$1
+      local ip=""
+      local retries=0
+      while [ -z "$ip" ] && [ $retries -lt 30 ]; do
+        ip=$(aws ec2 describe-instances --region us-east-1 --filters "Name=tag:aws:autoscaling:groupName,Values=$asg_pattern" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*].PrivateIpAddress" --output text | tr '\t' '\n' | head -n 1)
+        if [ -z "$ip" ]; then
+          sleep 10
+          retries=$((retries+1))
+        fi
+      done
+      echo "$${ip:-localhost}"
+    }
+
+    echo "Buscando IP de Node 1 (MS1, MS3)..."
+    NODE1_IP=$(get_ip "${var.project}-${var.environment}-node1-asg*")
+
+    echo "Iniciando MS7 (Billing & n8n)..."
+    sudo docker run -d --restart always -p 8086:8086 \
+      -e SPRING_DATASOURCE_URL=jdbc:postgresql://${var.rds_ms7_endpoint}/uce_trade_ms7 \
+      -e SPRING_DATASOURCE_USERNAME=postgres \
+      -e SPRING_DATASOURCE_PASSWORD=postgres \
+      -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
+      -e AWS_S3_BUCKET=${var.s3_bucket_name} \
+      ${var.docker_username}/ms7-billing-n8n:${var.docker_tag}
+
+    echo "Iniciando MS8 (Real-Time Notifications)..."
+    sudo docker run -d --restart always -p 3008:3008 \
+      -e PORT=3008 \
+      -e REDIS_URL=redis://${var.redis_address}:6379 \
+      -e RABBITMQ_URL=amqp://${var.rabbitmq_endpoint}:5672 \
+      -e MQTT_URL=mqtt://${var.mosquitto_endpoint}:1883 \
+      ${var.docker_username}/ms8-real-time-notifications:${var.docker_tag}
+
+    echo "Iniciando MS9 (Analytics Dashboards)..."
+    sudo docker run -d --restart always -p 3009:3009 \
+      -e POSTGRES_URL=postgres://postgres:postgres@${var.rds_ms7_endpoint}:5432/uce_trade_ms7?sslmode=disable \
+      -e MQTT_BROKER=tcp://${var.mosquitto_endpoint}:1883 \
+      -e RABBITMQ_URL=amqp://${var.rabbitmq_endpoint}:5672/ \
+      -e CATALOG_URL=http://$NODE1_IP:8082 \
+      ${var.docker_username}/ms9-analytics-dashboards:${var.docker_tag}
+  EOF
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_autoscaling_group" "node3_asg" {
+  name_prefix         = "${var.project}-${var.environment}-node3-asg-"
+  desired_capacity    = var.desired_capacity
+  max_size            = var.max_size
+  min_size            = var.min_size
+  vpc_zone_identifier = var.private_subnets
+
+  launch_template {
+    id      = aws_launch_template.node3_lt.id
     version = "$Latest"
   }
 

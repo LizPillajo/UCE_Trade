@@ -110,6 +110,7 @@ module "compute" {
   kafka_brokers          = module.databases.kafka_brokers
   elasticsearch_endpoint = module.databases.elasticsearch_endpoint
   docdb_endpoint         = module.databases.mongodb_endpoint
+  mosquitto_endpoint     = module.databases.cassandra_ip
 
   supabase_url    = var.supabase_url
   supabase_bucket = var.supabase_bucket

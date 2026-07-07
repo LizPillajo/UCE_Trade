@@ -78,6 +78,20 @@ resource "aws_instance" "shared_dbs" {
     # 6. RabbitMQ (MS6)
     sudo docker run -d --name rabbitmq --restart always -p 5672:5672 -p 15672:15672 \
       rabbitmq:3-management
+
+    # 7. Mosquitto (MQTT + WebSockets)
+    mkdir -p /mnt/mosquitto/config
+    cat << 'EOT' > /mnt/mosquitto/config/mosquitto.conf
+listener 1883
+allow_anonymous true
+listener 9001
+protocol websockets
+allow_anonymous true
+EOT
+
+    sudo docker run -d --name mosquitto --restart always -p 1883:1883 -p 9001:9001 \
+      -v /mnt/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf \
+      eclipse-mosquitto:2
   EOF
   )
 

@@ -1,0 +1,94 @@
+basePath: /api/v1/analytics
+host: localhost:8000
+info:
+  contact: {}
+  description: REST API for Real-time Dashboards and Analytics in UCE Trade
+  title: MS9 Analytics & Dashboards API
+  version: "1.0"
+paths:
+  /admin:
+    get:
+      consumes:
+      - application/json
+      description: Fetch KPI and chart data for the admin dashboard based on time
+        period
+      parameters:
+      - description: Time period filter (ALL, MONTHLY, WEEKLY)
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Admin Dashboard Stats
+      tags:
+      - analytics
+  /student/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetch KPI and chart data for the student dashboard based on time
+        period
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Time period filter (ALL, MONTHLY, WEEKLY)
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Student Dashboard Stats
+      tags:
+      - analytics
+  /student/{id}/report:
+    get:
+      description: Dynamically generate and download a CSV report for the student's
+        sales
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Time period filter
+        in: query
+        name: period
+        type: string
+      produces:
+      - text/csv
+      responses:
+        "200":
+          description: CSV file
+          schema:
+            type: string
+      summary: Download Student Report CSV
+      tags:
+      - analytics
+swagger: "2.0"

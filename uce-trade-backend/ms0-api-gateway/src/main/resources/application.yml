@@ -75,3 +75,18 @@ spring:
           uri: ${MS7_URI:http://localhost:8086}
           predicates:
             - Path=/api/v1/billing/**
+
+        - id: ms8-notifications
+          uri: ${MS8_URI:http://localhost:3008}
+          predicates:
+            - Path=/api/v1/notifications/**
+
+        - id: ms9-analytics-dashboards
+          uri: ${MS9_URI:http://localhost:3009}
+          predicates:
+            - Path=/api/v1/analytics/**
+
+        - id: mosquitto-ws
+          uri: ws://${MOSQUITTO_ENDPOINT:localhost}:9001
+          predicates:
+            - Path=/mqtt

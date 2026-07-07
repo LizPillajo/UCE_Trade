@@ -1,63 +1,92 @@
 import { useEffect, useRef } from 'react';
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+import mqtt from 'mqtt';
 import { toast } from 'react-toastify';
-import { useAuthStore} from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 
 export const useWebSocket = () => {
   const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
   
-  const clientRef = useRef(null);
+  const mqttClientRef = useRef(null);
 
   useEffect(() => {
-    if (!user || clientRef.current) return;
+    if (!user) return;
 
-    console.log("🔌 Iniciando conexión WebSocket...");
+    // --- MQTT Connection (Analytics Dashboards & Notifications) ---
+    if (!mqttClientRef.current) {
+        console.log("🔌 Iniciando conexión MQTT...");
+        const MQTT_URL = import.meta.env.VITE_MQTT_WS_URL || 'ws://localhost:9001';
+        
+        const mqttClient = mqtt.connect(MQTT_URL, {
+            clientId: `react-client-${user.id}-${Math.random().toString(16).slice(2)}`,
+            clean: true,
+            reconnectPeriod: 5000,
+        });
 
-    const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/ws';
-    
-    const client = new Client({
-      webSocketFactory: () => new SockJS(WS_URL),
-      reconnectDelay: 5000,
-      onConnect: () => {
-        console.log('✅ SOCKET CONECTADO');
-
-        if (user.role === 'UCE_STUDENT') {
-          client.subscribe(`/topic/sales/${user.email}`, (message) => {
-            const notif = JSON.parse(message.body);
-            toast.success(`💰 ${notif.title}: ${notif.body}`, { toastId: 'sale-notif' });
+        mqttClient.on('connect', () => {
+            console.log('✅ MQTT SOCKET CONECTADO');
             
-            queryClient.invalidateQueries({ queryKey: ['studentStats'] });
-            queryClient.invalidateQueries({ queryKey: ['myVentures'] });
-          });
-        }
-
-        // Suscripción Admin (General)
-        if (user.role === 'UCE_ADMIN') {
-          client.subscribe('/topic/admin/notifications', (msg) => {
-            const notif = JSON.parse(msg.body);
-            toast.info(`🔔 ${notif.title}: ${notif.body}`, { toastId: 'admin-notif' });
+            // Suscribirse a las notificaciones personales
+            mqttClient.subscribe(`notifications/user/${user.id}`, (err) => {
+                if (!err) console.log(`[MQTT] Suscrito a notifications/user/${user.id}`);
+            });
             
-            // Recargar Dashboard
-            queryClient.invalidateQueries({ queryKey: ['adminStats'] });
-          });
-        }
-      },
-      onStompError: (frame) => {
-        console.error('❌ Error STOMP:', frame.headers['message']);
-      }
-    });
+            if (user.role === 'UCE_ADMIN') {
+                mqttClient.subscribe('analytics/admin', (err) => {
+                    if (!err) console.log('📡 Suscrito a analytics/admin');
+                });
+            } else if (user.role === 'UCE_STUDENT') {
+                mqttClient.subscribe(`analytics/student/${user.id}`, (err) => {
+                    if (!err) console.log(`📡 Suscrito a analytics/student/${user.id}`);
+                });
+            }
+        });
 
-    client.activate();
-    clientRef.current = client; 
+        mqttClient.on('message', (topic, message) => {
+            console.log(`[MQTT] Mensaje recibido en ${topic}`);
+            
+            // Refrescar Dashboards
+            if (topic === 'analytics/admin') {
+                queryClient.invalidateQueries({ queryKey: ['adminStats'] });
+            } else if (topic.startsWith('analytics/student/')) {
+                queryClient.invalidateQueries({ queryKey: ['studentStats'] });
+                queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+            }
+            
+            // Mostrar Notificaciones (Toasts)
+            if (topic.startsWith('notifications/user/')) {
+                try {
+                    const notif = JSON.parse(message.toString());
+                    if (notif.type === 'NEW_SALE') {
+                        toast.success(`🎉 ${notif.title}: ${notif.message}`, { toastId: `sale-${Date.now()}` });
+                        // Refrescar al instante el dashboard del vendedor
+                        queryClient.invalidateQueries({ queryKey: ['studentStats'] });
+                    } else if (notif.type === 'PAYMENT_SUCCESS') {
+                        toast.info(`💰 ${notif.title}: ${notif.message}`, { toastId: `pay-${Date.now()}` });
+                    } else {
+                        toast.info(`🔔 ${notif.title}: ${notif.message}`);
+                    }
+                    // Refrescar el contador visual (campanita)
+                    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                } catch (e) {
+                    console.error("Error parsing MQTT message:", e);
+                }
+            }
+        });
+
+        mqttClient.on('error', (err) => {
+            console.error('❌ Error MQTT:', err);
+        });
+
+        mqttClientRef.current = mqttClient;
+    }
 
     return () => {
-      console.log("🛑 Limpiando socket...");
-      if (clientRef.current) {
-        clientRef.current.deactivate();
-        clientRef.current = null;
+      console.log("🛑 Limpiando sockets...");
+      if (mqttClientRef.current) {
+          mqttClientRef.current.end();
+          mqttClientRef.current = null;
       }
     };
   }, [user, queryClient]); 

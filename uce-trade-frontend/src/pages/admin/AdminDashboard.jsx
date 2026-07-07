@@ -32,7 +32,14 @@ const AdminDashboard = () => {
   
   if (isError) return <PageLayout><Alert severity="error">Error connecting to admin server.</Alert></PageLayout>;
 
-  const pieData = stats?.pieData ? Object.entries(stats.pieData).map(([name, value], index) => ({
+  const safeStats = stats || {};
+  const kpiData = safeStats.kpi || {
+    totalUsers: 0,
+    totalStartups: 0,
+    totalRevenue: 0
+  };
+
+  const pieData = safeStats.pieData ? Object.entries(safeStats.pieData).map(([name, value], index) => ({
     name: name || "Other",
     value,
     color: COLORS[index % COLORS.length]
@@ -50,9 +57,9 @@ const AdminDashboard = () => {
             </>
         }
     >
-      <AdminKpiGroup kpi={stats.kpi} />
+      <AdminKpiGroup kpi={kpiData} />
       <Box mb={5}>
-        <GrowthChart data={stats.growthData || []} />        
+        <GrowthChart data={safeStats.growthData || []} />        
       </Box>
       <CategoryCharts pieData={pieData} />   
 

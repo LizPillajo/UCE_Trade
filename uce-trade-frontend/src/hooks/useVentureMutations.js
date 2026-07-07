@@ -11,9 +11,11 @@ export const useVentureMutations = () => {
     onSuccess: () => {
       toast.success("Venture deleted successfully");
       // Invalidamos ambas listas (Admin y Estudiante) para que se refresquen solas
-      queryClient.invalidateQueries(['myVentures']);
-      queryClient.invalidateQueries(['adminVentures']);
-      queryClient.invalidateQueries(['studentStats']);
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+        queryClient.invalidateQueries({ queryKey: ['adminVentures'] });
+        queryClient.invalidateQueries({ queryKey: ['studentStats'] });
+      }, 1500);
     },
     onError: () => toast.error("Failed to delete venture")
   });
@@ -23,7 +25,10 @@ export const useVentureMutations = () => {
     mutationFn: ({ id, data }) => updateVenture(id, data),
     onSuccess: () => {
       toast.success("Venture updated successfully");
-      queryClient.invalidateQueries(['myVentures']);
+      // Esperar 1.5s para CQRS
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['myVentures'] });
+      }, 1500);
     },
     onError: () => toast.error("Failed to update venture")
   });
@@ -33,7 +38,7 @@ export const useVentureMutations = () => {
     mutationFn: ({ id, status }) => updateVentureStatus(id, status),
     onSuccess: () => {
       toast.success("Status updated!");
-      queryClient.invalidateQueries(['adminVentures']);
+      queryClient.invalidateQueries({ queryKey: ['adminVentures'] });
     },
     onError: () => toast.error("Failed to update status")
   });
