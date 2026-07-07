@@ -6,10 +6,16 @@ const { connectRedis } = require('./config/redis.config');
 const { connectRabbitMQ } = require('./config/rabbitmq.config');
 const { connectMQTT } = require('./config/mqtt.config');
 const { startConsumer } = require('./adapters/input/rabbitmq.consumer');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger.config');
+const logger = require('./utils/logger');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Swagger Documentation Route
+app.use('/api/v1/notifications/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 const PORT = process.env.PORT || 3008;
 
@@ -19,19 +25,59 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', service: 'ms8-real-time-notifications' });
 });
 
+/**
+ * @swagger
+ * /api/v1/notifications/{userId}:
+ *   get:
+ *     summary: Retrieve recent notifications for a user
+ *     description: Fetches the last 50 notifications from the Redis cache for the specified user ID.
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user
+ *     responses:
+ *       200:
+ *         description: An array of notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   userId:
+ *                     type: string
+ *                   type:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   message:
+ *                     type: string
+ *                   read:
+ *                     type: boolean
+ *                   createdAt:
+ *                     type: string
+ *       500:
+ *         description: Internal server error
+ */
 app.get('/api/v1/notifications/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const notifications = await getRecentNotifications(userId);
     res.status(200).json(notifications);
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    logger.error('Error fetching notifications:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.listen(PORT, async () => {
-  console.log(`[MS8] Real-Time Notifications running on port ${PORT}`);
+  logger.info(`[MS8] Real-Time Notifications running on port ${PORT}`);
   
   try {
     await connectRedis();
@@ -39,6 +85,6 @@ app.listen(PORT, async () => {
     await connectMQTT();
     await startConsumer();
   } catch (error) {
-    console.error('Failed to initialize messaging services:', error);
+    logger.error('Failed to initialize messaging services:', error);
   }
 });

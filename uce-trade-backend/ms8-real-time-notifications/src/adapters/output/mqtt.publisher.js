@@ -1,4 +1,5 @@
 const { getMQTTClient } = require('../../config/mqtt.config');
+const logger = require('../../utils/logger');
 
 const publishNotification = (notification) => {
   const client = getMQTTClient();
@@ -13,9 +14,9 @@ const publishNotification = (notification) => {
 
   client.publish(topic, payload, { qos: 1 }, (err) => {
     if (err) {
-      console.error(`[MQTT] Failed to publish to ${topic}:`, err);
+      logger.error(`[MQTT] Failed to publish to ${topic}:`, err);
     } else {
-      console.log(`[MQTT] Successfully published to ${topic}`);
+      logger.info(`[MQTT] Successfully published to ${topic}`);
     }
   });
 };

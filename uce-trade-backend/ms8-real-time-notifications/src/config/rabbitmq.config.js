@@ -1,4 +1,5 @@
 const amqp = require('amqplib');
+const logger = require('../utils/logger');
 
 let channel = null;
 
@@ -7,10 +8,10 @@ const connectRabbitMQ = async () => {
     const amqpServer = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
     const connection = await amqp.connect(amqpServer);
     channel = await connection.createChannel();
-    console.log('[RabbitMQ] Connected successfully');
+    logger.info('[RabbitMQ] Connected successfully');
     return channel;
   } catch (error) {
-    console.error('[RabbitMQ] Connection error:', error);
+    logger.error('[RabbitMQ] Connection error:', error);
     throw error;
   }
 };
