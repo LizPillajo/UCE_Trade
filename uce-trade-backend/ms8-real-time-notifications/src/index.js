@@ -19,7 +19,7 @@ app.use('/api/v1/notifications/api-docs', swaggerUi.serve, swaggerUi.setup(swagg
 
 const PORT = process.env.PORT || 3008;
 
-const { getRecentNotifications } = require('./adapters/output/redis.repository');
+const { getRecentNotifications, markNotificationAsRead } = require('./adapters/output/redis.repository');
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', service: 'ms8-real-time-notifications' });
@@ -72,6 +72,17 @@ app.get('/api/v1/notifications/:userId', async (req, res) => {
     res.status(200).json(notifications);
   } catch (error) {
     logger.error('Error fetching notifications:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.put('/api/v1/notifications/:userId/:notificationId/read', async (req, res) => {
+  try {
+    const { userId, notificationId } = req.params;
+    await markNotificationAsRead(userId, notificationId);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    logger.error('Error marking notification as read:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

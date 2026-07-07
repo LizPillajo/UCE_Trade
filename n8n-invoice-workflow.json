@@ -1,0 +1,117 @@
+{
+  "name": "UCE Trade Invoice Email Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoice",
+        "options": {}
+      },
+      "id": "e98e4f1f-4b08-41e8-9ef4-9d587c4f4a38",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "invoice"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.pdfUrl }}",
+        "responseFormat": "file",
+        "dataPropertyName": "invoice_pdf",
+        "options": {}
+      },
+      "id": "fetch-pdf-node",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "UCE Trade - Invoicing <diamondk0908@gmail.com>",
+        "toEmail": "={{ $json.body.buyerEmail }}",
+        "subject": "=Purchase Confirmation - {{ $json.body.ventureTitle }}",
+        "html": "=Hello {{ $json.body.buyerName }},<br><br>Here is your receipt for <b>{{ $json.body.ventureTitle }}</b>.<br><br>Please contact the seller ({{ $json.body.sellerName }}) at {{ $json.body.sellerEmail }}.<br><br>You will find your invoice attached.",
+        "attachments": "invoice_pdf",
+        "options": {}
+      },
+      "id": "b0a51f2f-1a1b-4f51-a207-6b45f4d8b598",
+      "name": "Send Email to Buyer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        650,
+        200
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "1",
+          "name": "UCE Trade Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "UCE Trade - Invoicing <diamondk0908@gmail.com>",
+        "toEmail": "={{ $json.body.sellerEmail }}",
+        "subject": "=New Sale! - {{ $json.body.ventureTitle }}",
+        "html": "=Hello {{ $json.body.sellerName }},<br><br>Good news! You have sold <b>{{ $json.body.ventureTitle }}</b> to {{ $json.body.buyerName }} ({{ $json.body.buyerEmail }}).<br><br>They will contact you soon.<br><br>A copy of the invoice is attached.",
+        "attachments": "invoice_pdf",
+        "options": {}
+      },
+      "id": "c1b51f3f-2a1b-4f51-a207-7b45f4d8b599",
+      "name": "Send Email to Seller",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        650,
+        400
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "1",
+          "name": "UCE Trade Gmail"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Download PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF": {
+      "main": [
+        [
+          {
+            "node": "Send Email to Buyer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Email to Seller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
