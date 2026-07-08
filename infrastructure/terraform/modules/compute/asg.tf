@@ -275,9 +275,10 @@ resource "aws_launch_template" "node3_lt" {
 
     echo "Iniciando MS7 (Billing & n8n)..."
     sudo docker run -d --restart always -p 8086:8086 \
-      -e SPRING_DATASOURCE_URL=jdbc:postgresql://${var.rds_ms7_endpoint}/uce_trade_ms7 \
+      -e SPRING_DATASOURCE_URL=jdbc:postgresql://${var.rds_ms7_endpoint}/uce_trade_ms1 \
       -e SPRING_DATASOURCE_USERNAME=postgres \
-      -e SPRING_DATASOURCE_PASSWORD=postgres \
+      -e SPRING_DATASOURCE_PASSWORD=root1234 \
+      -e SPRING_RABBITMQ_HOST=${var.rabbitmq_endpoint} \
       -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
       -e AWS_S3_BUCKET=${var.s3_bucket_name} \
       ${var.docker_username}/ms7-billing-n8n:${var.docker_tag}
@@ -292,7 +293,7 @@ resource "aws_launch_template" "node3_lt" {
 
     echo "Iniciando MS9 (Analytics Dashboards)..."
     sudo docker run -d --restart always -p 3009:3009 \
-      -e DATABASE_URL=postgres://postgres:postgres@${var.rds_ms7_endpoint}:5432/uce_trade_ms7?sslmode=disable \
+      -e DATABASE_URL=postgres://postgres:root1234@${var.rds_ms7_endpoint}/uce_trade_ms1?sslmode=require \
       -e MQTT_BROKER=tcp://${var.mosquitto_endpoint}:1883 \
       -e RABBITMQ_URL=amqp://guest:guest@${var.rabbitmq_endpoint}:5672/ \
       -e CATALOG_URL=http://$NODE1_IP:8082 \

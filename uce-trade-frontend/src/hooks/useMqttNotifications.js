@@ -15,7 +15,7 @@ export const useMqttNotifications = () => {
 
     console.log("🔌 Iniciando conexión MQTT por WebSockets...");
 
-    const brokerUrl = import.meta.env.VITE_MQTT_URL || 'ws://localhost:9001';
+    const brokerUrl = import.meta.env.VITE_MQTT_WS_URL || 'ws://localhost:9001';
     const mqttClient = mqtt.connect(brokerUrl);
 
     mqttClient.on('connect', () => {
