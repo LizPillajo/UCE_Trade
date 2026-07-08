@@ -34,7 +34,11 @@ public class OutboxScheduler {
                 log.info("Publishing outbox event: {} to exchange: {}", event.getId(), EXCHANGE_NAME);
                 
                 // Publish to RabbitMQ using event type as routing key
-                rabbitTemplate.convertAndSend(EXCHANGE_NAME, event.getType(), event.getPayload());
+                org.springframework.amqp.core.MessageProperties properties = new org.springframework.amqp.core.MessageProperties();
+                properties.setContentType(org.springframework.amqp.core.MessageProperties.CONTENT_TYPE_JSON);
+                org.springframework.amqp.core.Message message = new org.springframework.amqp.core.Message(
+                        event.getPayload().getBytes(java.nio.charset.StandardCharsets.UTF_8), properties);
+                rabbitTemplate.send(EXCHANGE_NAME, event.getType(), message);
                 
                 // Mark as processed
                 event.setStatus("PROCESSED");

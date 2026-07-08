@@ -25,17 +25,19 @@ import (
 func main() {
 	logrus.Info("Starting MS9 Analytics & Dashboards...")
 
-	// Normally this comes from env vars (e.g., os.Getenv("DATABASE_URL"))
+	// Read DB URL: prefer DATABASE_URL, fall back to POSTGRES_URL (set by Terraform)
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		// The real string will be configured in docker-compose later.
+		dbURL = os.Getenv("POSTGRES_URL")
+	}
+	if dbURL == "" {
 		dbURL = "postgres://postgres:root@localhost:5435/ms9_db?sslmode=disable"
 	}
 
 	db, err := postgres.Connect(dbURL)
 	if err != nil {
 		logrus.Errorf("Warning: Failed to connect to DB on startup: %v", err)
-		logrus.Warn("Continuing without DB for now (Wait for Docker setup in next tasks).")
+		logrus.Warn("Continuing without DB for now.")
 	} else {
 		defer db.Close()
 
@@ -45,9 +47,11 @@ func main() {
 		}
 	}
 
-	// Setup MQTT Publisher
+	// Setup MQTT Publisher — read from MQTT_BROKER or MQTT_URL env var
 	mqttURL := "tcp://localhost:1883" // Default local fallback
-	if envMqtt := os.Getenv("MQTT_URL"); envMqtt != "" {
+	if envMqtt := os.Getenv("MQTT_BROKER"); envMqtt != "" {
+		mqttURL = envMqtt
+	} else if envMqtt := os.Getenv("MQTT_URL"); envMqtt != "" {
 		mqttURL = envMqtt
 	}
 	publisher, err := mqtt.NewPublisher(mqttURL)
@@ -63,8 +67,11 @@ func main() {
 		service = services.NewAnalyticsService(db, publisher)
 	}
 
-	// Connect to RabbitMQ (Default port 5672 from your Docker setup)
-	rabbitURL := "amqp://guest:guest@localhost:5672/"
+	// Connect to RabbitMQ — read from RABBITMQ_URL env var (set by Terraform)
+	rabbitURL := os.Getenv("RABBITMQ_URL")
+	if rabbitURL == "" {
+		rabbitURL = "amqp://guest:guest@localhost:5672/"
+	}
 	if service != nil {
 		consumer, err := rabbitmq.NewConsumer(rabbitURL, service)
 		if err != nil {

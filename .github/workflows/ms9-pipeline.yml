@@ -1,54 +1,73 @@
-name: MS9 Analytics Dashboards Pipeline
+name: MS9 Analytics Dashboards CI/CD
 
 on:
   push:
+    branches: [ "q/a", "main" ]
     paths:
       - 'uce-trade-backend/ms9-analytics-dashboards/**'
+      - '.github/workflows/ms9-pipeline.yml'
   pull_request:
+    branches: [ "q/a", "main" ]
     paths:
       - 'uce-trade-backend/ms9-analytics-dashboards/**'
+      - '.github/workflows/ms9-pipeline.yml'
 
 jobs:
-  test-and-build:
+  # Job 1: Unit Tests (PRs and Pushes)
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./uce-trade-backend/ms9-analytics-dashboards
-
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    - name: Set up Go
+    - name: Set up Go 1.26
       uses: actions/setup-go@v4
       with:
-        go-version: '1.21'
-        
-    - name: Install Dependencies
-      run: go mod tidy
+        go-version: '1.26'
 
-    - name: Run Unit Tests
-      run: go test ./... -v
+    - name: Run Unit Tests (MS9)
+      run: go test -v ./...
 
-    - name: Build
-      run: go build -o ms9-app ./cmd/main.go
-
-  docker-push:
-    needs: test-and-build
+  # Job 2: Build y Push (Merges to q/a or main)
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-
+    defaults:
+      run:
+        working-directory: ./uce-trade-backend/ms9-analytics-dashboards
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Go 1.26
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.26'
+
+    - name: Build Go App (MS9)
+      run: go build -v ./...
 
     - name: Log in to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v4
+    - name: Determine Docker Tag
+      run: |
+        if [ "${{ github.ref_name }}" == "main" ]; then
+          echo "IMAGE_TAG=prod" >> $GITHUB_ENV
+        else
+          echo "IMAGE_TAG=qa" >> $GITHUB_ENV
+        fi
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
       with:
         context: ./uce-trade-backend/ms9-analytics-dashboards
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/uce_trade_ms9:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/ms9-analytics-dashboards:${{ env.IMAGE_TAG }}

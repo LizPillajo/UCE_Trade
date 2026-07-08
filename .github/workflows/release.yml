@@ -71,6 +71,7 @@ jobs:
           - MS6 Payments (Java/Spring Boot)
           - MS7 Billing & n8n (Spring Boot + n8n)
           - MS8 Real Time Notifications (Node.js/Express)
+          - MS9 Analytics Dashboards (Go)
           
           ### 🔧 Infrastructure:
           - Terraform (VPC, Subnets, ALB, Auto Scaling, RDS, Cassandra EC2)

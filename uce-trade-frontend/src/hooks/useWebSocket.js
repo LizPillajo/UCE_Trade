@@ -19,7 +19,7 @@ export const useWebSocket = () => {
         const MQTT_URL = import.meta.env.VITE_MQTT_WS_URL || 'ws://localhost:9001';
         
         const mqttClient = mqtt.connect(MQTT_URL, {
-            clientId: `react-client-${user.id}-${Math.random().toString(16).slice(2)}`,
+            clientId: `react-client-${user.uid}-${Math.random().toString(16).slice(2)}`,
             clean: true,
             reconnectPeriod: 5000,
         });
@@ -28,8 +28,8 @@ export const useWebSocket = () => {
             console.log('✅ MQTT SOCKET CONECTADO');
             
             // Suscribirse a las notificaciones personales
-            mqttClient.subscribe(`notifications/user/${user.id}`, (err) => {
-                if (!err) console.log(`[MQTT] Suscrito a notifications/user/${user.id}`);
+            mqttClient.subscribe(`notifications/user/${user.uid}`, (err) => {
+                if (!err) console.log(`[MQTT] Suscrito a notifications/user/${user.uid}`);
             });
             
             if (user.role === 'UCE_ADMIN') {
@@ -37,8 +37,8 @@ export const useWebSocket = () => {
                     if (!err) console.log('📡 Suscrito a analytics/admin');
                 });
             } else if (user.role === 'UCE_STUDENT') {
-                mqttClient.subscribe(`analytics/student/${user.id}`, (err) => {
-                    if (!err) console.log(`📡 Suscrito a analytics/student/${user.id}`);
+                mqttClient.subscribe(`analytics/student/${user.uid}`, (err) => {
+                    if (!err) console.log(`📡 Suscrito a analytics/student/${user.uid}`);
                 });
             }
         });
