@@ -188,16 +188,44 @@ func (s *AnalyticsService) GetStudentDashboards(studentID, period string) (map[s
 	for _, v := range allVentures {
 		vStudentId, ok := v["studentId"].(string)
 		if ok && vStudentId == studentID {
-			rating, _ := v["rating"].(float64)
-			totalRating += rating
-			ratingCount++
+			vID, _ := v["id"].(string)
+
+			// Fetch reviews from MS5 (via API Gateway)
+			apiGatewayURL := "http://localhost:8000"
+			if ms3URL != "" {
+				apiGatewayURL = ms3URL[:len(ms3URL)-4] + "8000" // Replace 8082 with 8000
+			}
+			reviewResp, err := http.Get(apiGatewayURL + "/api/ventures/" + vID + "/reviews")
+			var reviews []map[string]interface{}
+			var avgRating float64 = 0
+			var revCount int = 0
+			
+			if err == nil && reviewResp.StatusCode == 200 {
+				if err := json.NewDecoder(reviewResp.Body).Decode(&reviews); err == nil {
+					revCount = len(reviews)
+					if revCount > 0 {
+						var sum float64
+						for _, r := range reviews {
+							ratingVal, _ := r["rating"].(float64)
+							sum += ratingVal
+						}
+						avgRating = sum / float64(revCount)
+					}
+				}
+				reviewResp.Body.Close()
+			}
+
+			totalRating += avgRating
+			if revCount > 0 {
+				ratingCount++
+			}
 
 			topServices = append(topServices, map[string]interface{}{
 				"id":           v["id"],
 				"title":        v["title"],
 				"categoryName": v["categoryName"],
-				"rating":       rating,
-				"reviewsCount": v["reviewsCount"],
+				"rating":       avgRating,
+				"reviewsCount": revCount,
 				"price":        v["price"],
 			})
 		}
