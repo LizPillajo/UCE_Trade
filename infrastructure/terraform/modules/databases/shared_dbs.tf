@@ -7,10 +7,11 @@
 resource "aws_instance" "shared_dbs" {
   count                  = var.enable_db ? 1 : 0
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = "t3.medium" # 2 vCPU, 4GB RAM para aguantar las 4 DBs
+  instance_type          = "t3.large" # 2 vCPU, 8GB RAM para aguantar las 4 DBs
   subnet_id              = var.cassandra_public_subnet
   vpc_security_group_ids = [aws_security_group.cassandra_sg.id]
   key_name               = var.key_name
+  iam_instance_profile   = "LabInstanceProfile"
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
@@ -19,7 +20,9 @@ resource "aws_instance" "shared_dbs" {
     sudo systemctl start docker
     sudo systemctl enable docker
 
-    LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+    # Use IMDSv2 to get the local IP (required when IMDSv1 is disabled)
+    TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+    LOCAL_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
 
     # Esperar y montar volumen EBS de Cassandra
     sleep 30
@@ -50,17 +53,15 @@ resource "aws_instance" "shared_dbs" {
 
     # 3. Zookeeper & Kafka
     sudo docker run -d --name zookeeper --restart always -p 2181:2181 \
-      -e ALLOW_ANONYMOUS_LOGIN=yes \
-      bitnami/zookeeper:latest
+      wurstmeister/zookeeper
 
     sudo docker run -d --name kafka --restart always -p 9092:9092 \
       --link zookeeper:zookeeper \
-      -e KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181 \
-      -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092 \
-      -e ALLOW_PLAINTEXT_LISTENER=yes \
-      -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 \
+      -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+      -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+      -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 \
       -e KAFKA_HEAP_OPTS="-Xmx256M -Xms256M" \
-      bitnami/kafka:latest
+      wurstmeister/kafka
 
     # 4. Cassandra
     sudo docker run -d --name cassandra-db --restart always -p 9042:9042 \
