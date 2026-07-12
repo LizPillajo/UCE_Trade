@@ -80,7 +80,7 @@ jobs:
 
       # 5. Análisis de Composición de Software (SCA) con OWASP Dependency-Check
       - name: Run OWASP Dependency-Check
-        uses: owasp/dependency-check-action@main
+        uses: dependency-check/Dependency-Check_Action@main
         with:
           project: 'UCE_Trade'
           path: '.' # Analiza todo el monorepo (Java, Node, Go)
