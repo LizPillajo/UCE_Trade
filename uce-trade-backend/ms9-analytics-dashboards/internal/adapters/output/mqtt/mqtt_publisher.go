@@ -26,7 +26,7 @@ func NewPublisher(brokerURL string) (*Publisher, error) {
 
 func (p *Publisher) PublishDashboardRefresh(topic string) error {
 	payload := map[string]string{
-		"event": "dashboard-refresh",
+		"type": "dashboard-refresh",
 	}
 	bytes, _ := json.Marshal(payload)
 

@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"os"
 	"sort"
@@ -28,10 +29,15 @@ func (s *AnalyticsService) ProcessPayment(payload map[string]interface{}) error 
 	amount, _ := payload["amount"].(float64)
 	ventureID, _ := payload["ventureId"].(string)
 	buyerID, _ := payload["studentId"].(string)
-	
+
+	if ventureID == "" {
+		logrus.Warnf("[Core] Ignoring payment with empty ventureId in payload")
+		return nil
+	}
+
 	sellerID := s.Repo.GetVentureSellerID(ventureID)
 	categoryName := "General"
-	
+
 	// Lazy load missing venture from MS3 (Kafka/RabbitMQ broker mismatch workaround)
 	if sellerID == "" {
 		logrus.Infof("[Core] Venture %s missing in Data Warehouse. Fetching from MS3...", ventureID)
@@ -55,7 +61,7 @@ func (s *AnalyticsService) ProcessPayment(payload map[string]interface{}) error 
 		ID:           uuid.New().String(),
 		VentureID:    ventureID,
 		StudentID:    buyerID, // fact_sales student_id represents the buyer
-		CategoryName: categoryName, 
+		CategoryName: categoryName,
 		Amount:       amount,
 		CreatedAt:    time.Now(),
 	}
@@ -80,18 +86,30 @@ func fetchVentureFromMS3(ventureID string) (studentID, categoryName string) {
 	if ms3URL == "" {
 		ms3URL = "http://localhost:8082"
 	}
+	logrus.Infof("[Core] Calling MS3 at %s/api/v1/catalog/ventures", ms3URL)
 	resp, err := http.Get(ms3URL + "/api/v1/catalog/ventures")
 	if err != nil {
+		logrus.Errorf("[Core] fetchVentureFromMS3 HTTP error: %v", err)
 		return "", ""
 	}
 	defer resp.Body.Close()
 
-	var allVentures []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&allVentures); err != nil {
+	if resp.StatusCode != 200 {
+		logrus.Errorf("[Core] fetchVentureFromMS3 returned status code: %v", resp.StatusCode)
 		return "", ""
 	}
 
-	for _, v := range allVentures {
+	body, _ := io.ReadAll(resp.Body)
+
+	var response []map[string]interface{}
+	if err := json.Unmarshal(body, &response); err != nil {
+		logrus.Errorf("[Core] fetchVentureFromMS3 JSON decode error: %v (body size: %d)", err, len(body))
+		return "", ""
+	}
+
+	logrus.Infof("[Core] fetchVentureFromMS3 got %d ventures from MS3", len(response))
+
+	for _, v := range response {
 		vid, _ := v["id"].(string)
 		if vid == ventureID {
 			sID, _ := v["studentId"].(string)
@@ -99,16 +117,21 @@ func fetchVentureFromMS3(ventureID string) (studentID, categoryName string) {
 			if cat == "" {
 				cat = "Other"
 			}
+			logrus.Infof("[Core] fetchVentureFromMS3 FOUND venture %s, returning sID %s", ventureID, sID)
 			return sID, cat
 		}
 	}
+	logrus.Warnf("[Core] fetchVentureFromMS3 DID NOT FIND venture %s in MS3 response!", ventureID)
 	return "", ""
 }
 
 func (s *AnalyticsService) ProcessVenture(payload map[string]interface{}) error {
 	id, _ := payload["id"].(string)
 	studentID, _ := payload["studentId"].(string)
-	category, _ := payload["categoryName"].(string)
+	category, _ := payload["category"].(string)
+	if category == "" {
+		category, _ = payload["categoryName"].(string)
+	}
 	if category == "" {
 		category = "Other"
 	}
@@ -199,7 +222,7 @@ func (s *AnalyticsService) GetStudentDashboards(studentID, period string) (map[s
 			var reviews []map[string]interface{}
 			var avgRating float64 = 0
 			var revCount int = 0
-			
+
 			if err == nil && reviewResp.StatusCode == 200 {
 				if err := json.NewDecoder(reviewResp.Body).Decode(&reviews); err == nil {
 					revCount = len(reviews)

@@ -9,6 +9,17 @@ jest.mock('../src/adapters/output/mqtt.publisher');
 describe('ProcessEventUseCase', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([{ id: 'venture-999', title: 'Test Venture Title' }]),
+      })
+    );
+  });
+
+  afterEach(() => {
+    global.fetch.mockClear();
+    delete global.fetch;
   });
 
   it('should format payment data into a Notification, save to Redis, and publish to MQTT', async () => {

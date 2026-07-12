@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/jackc/pgx/v5/pgxpool"

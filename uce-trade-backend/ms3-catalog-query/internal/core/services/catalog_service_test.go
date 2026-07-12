@@ -8,7 +8,7 @@ import (
 	"uce-trade-ms3/internal/core/domain"
 )
 
-// 1. Repository mock 
+// 1. Repository mock
 type mockCatalogRepository struct {
 	mockData []domain.VentureReadModel
 }

@@ -97,5 +97,6 @@ app.listen(PORT, async () => {
     await startConsumer();
   } catch (error) {
     logger.error('Failed to initialize messaging services:', error);
+    process.exit(1);
   }
 });

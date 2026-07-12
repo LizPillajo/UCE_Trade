@@ -93,6 +93,15 @@ EOT
     sudo docker run -d --name mosquitto --restart always -p 1883:1883 -p 9001:9001 \
       -v /mnt/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf \
       eclipse-mosquitto:2
+
+    # 8. Create Cassandra Keyspace
+    (
+      # Wait for Cassandra to be ready
+      until sudo docker exec cassandra-db cqlsh -e "DESCRIBE KEYSPACES;" > /dev/null 2>&1; do
+        sleep 10
+      done
+      sudo docker exec cassandra-db cqlsh -e "CREATE KEYSPACE IF NOT EXISTS uce_trade_reviews WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};"
+    ) &
   EOF
   )
 

@@ -75,7 +75,8 @@ async function seed() {
                 formData.append('file', new Blob([imageBuffer], { type: 'image/jpeg' }), 'venture.jpg');
 
                 const BASE_API = API_GATEWAY.replace('/v1', '');
-                await axios.post(`${BASE_API}/ventures`, formData, {
+                const ventureApi = BASE_API.replace('/v1', '');
+                await axios.post(`${ventureApi}/ventures`, formData, {
                     headers: { 
                         'Authorization': `Bearer ${token}`
                         // axios sets the multipart header automatically when passing formData

@@ -1,4 +1,5 @@
 rds_snapshot_id = ""
 key_name        = "vockey"
-instance_type   = "t3.medium"
+instance_type   = "t3.large"
 docker_username = "lizdaisy"
+s3_bucket_name  = "uce-trade-frontend-qa-v2"  

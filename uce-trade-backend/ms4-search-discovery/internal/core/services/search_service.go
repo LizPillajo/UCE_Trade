@@ -3,8 +3,8 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"net/http"
+	"os"
 	"time"
 	"uce-trade-ms4/internal/core/domain"
 	"uce-trade-ms4/internal/core/ports"
@@ -31,7 +31,7 @@ func (s *searchService) fetchOwner(studentId string) *domain.Owner {
 		ms1Uri = "http://localhost:8080"
 	}
 	url := fmt.Sprintf("%s/api/v1/users/%s", ms1Uri, studentId)
-	
+
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Get(url)
 	if err != nil {
@@ -67,7 +67,7 @@ func (s *searchService) Search(query string, category string, page int, size int
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Inject owner data before returning
 	return s.populateOwners(ventures), total, nil
 }
@@ -91,20 +91,20 @@ func (s *searchService) GetVentureById(id string) (*domain.Venture, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Inject owner data before returning
 	if venture != nil {
 		venture.Owner = s.fetchOwner(venture.StudentId)
 	}
-	
+
 	return venture, nil
 }
 
 func (s *searchService) GetFeaturedVentures() ([]domain.Venture, error) {
-    ventures, err := s.repo.GetFeaturedVentures()
-    if err != nil {
-        return nil, err
-    }
-    
-    return s.populateOwners(ventures), nil
+	ventures, err := s.repo.GetFeaturedVentures()
+	if err != nil {
+		return nil, err
+	}
+
+	return s.populateOwners(ventures), nil
 }

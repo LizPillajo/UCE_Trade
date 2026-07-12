@@ -16,7 +16,7 @@ import PeriodSelector from '../../components/common/PeriodSelector';
 import PageLayout from '../../components/layout/PageLayout'; 
 
 const StudentDashboard = () => {
-  useWebSocket(); 
+  // useWebSocket is now handled globally in App.jsx
   const [period, setPeriod] = useState('ALL');
   const [downloading, setDownloading] = useState(false);
 

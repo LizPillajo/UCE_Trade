@@ -22,9 +22,9 @@ func NewESRepository(client *elasticsearch.Client, index string) ports.SearchRep
 
 func (r *esRepository) SearchVentures(query string, category string, page int, size int, sort string) ([]domain.Venture, int, error) {
 	var buf bytes.Buffer
-	
+
 	mustClauses := []map[string]interface{}{}
-	
+
 	if query != "" {
 		mustClauses = append(mustClauses, map[string]interface{}{
 			"multi_match": map[string]interface{}{
@@ -52,7 +52,7 @@ func (r *esRepository) SearchVentures(query string, category string, page int, s
 		"size": size,
 		"query": map[string]interface{}{
 			"bool": map[string]interface{}{
-				"must": mustClauses,
+				"must":   mustClauses,
 				"filter": filterClauses,
 			},
 		},
@@ -211,56 +211,56 @@ func (r *esRepository) GetVentureById(id string) (*domain.Venture, error) {
 }
 
 func (r *esRepository) GetFeaturedVentures() ([]domain.Venture, error) {
-    var buf bytes.Buffer
+	var buf bytes.Buffer
 
-    // Use a simpler query that always works without _id sorting
-    searchQuery := map[string]interface{}{
-        "size": 4,
-        "query": map[string]interface{}{
-            "match_all": map[string]interface{}{},
-        },
-    }
-    
-    if err := json.NewEncoder(&buf).Encode(searchQuery); err != nil {
-        return nil, err
-    }
-    
-    res, err := r.client.Search(
-        r.client.Search.WithContext(context.Background()),
-        r.client.Search.WithIndex(r.index),
-        r.client.Search.WithBody(&buf),
-        r.client.Search.WithTrackTotalHits(true),
-    )
-    if err != nil {
-        return nil, err
-    }
-    defer res.Body.Close()
-    
-    if res.IsError() {
-        if res.StatusCode == 404 {
-            return []domain.Venture{}, nil
-        }
-        return nil, fmt.Errorf("error in response: %s", res.String())
-    }
-    
-    var rMap map[string]interface{}
-    if err := json.NewDecoder(res.Body).Decode(&rMap); err != nil {
-        return nil, err
-    }
-    
-    var ventures []domain.Venture
-    hits, ok := rMap["hits"].(map[string]interface{})["hits"].([]interface{})
-    if !ok {
-        return []domain.Venture{}, nil
-    }
-    
-    for _, hit := range hits {
-        source := hit.(map[string]interface{})["_source"]
-        sourceBytes, _ := json.Marshal(source)
-        var venture domain.Venture
-        json.Unmarshal(sourceBytes, &venture)
-        ventures = append(ventures, venture)
-    }
-    
-    return ventures, nil
+	// Use a simpler query that always works without _id sorting
+	searchQuery := map[string]interface{}{
+		"size": 4,
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
+		},
+	}
+
+	if err := json.NewEncoder(&buf).Encode(searchQuery); err != nil {
+		return nil, err
+	}
+
+	res, err := r.client.Search(
+		r.client.Search.WithContext(context.Background()),
+		r.client.Search.WithIndex(r.index),
+		r.client.Search.WithBody(&buf),
+		r.client.Search.WithTrackTotalHits(true),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		if res.StatusCode == 404 {
+			return []domain.Venture{}, nil
+		}
+		return nil, fmt.Errorf("error in response: %s", res.String())
+	}
+
+	var rMap map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&rMap); err != nil {
+		return nil, err
+	}
+
+	var ventures []domain.Venture
+	hits, ok := rMap["hits"].(map[string]interface{})["hits"].([]interface{})
+	if !ok {
+		return []domain.Venture{}, nil
+	}
+
+	for _, hit := range hits {
+		source := hit.(map[string]interface{})["_source"]
+		sourceBytes, _ := json.Marshal(source)
+		var venture domain.Venture
+		json.Unmarshal(sourceBytes, &venture)
+		ventures = append(ventures, venture)
+	}
+
+	return ventures, nil
 }

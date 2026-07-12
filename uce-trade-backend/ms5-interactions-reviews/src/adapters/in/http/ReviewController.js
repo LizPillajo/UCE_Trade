@@ -43,7 +43,7 @@ function createReviewController(reviewUseCases) {
       const reviewData = {
         ventureId: req.params.ventureId,
         userId: payloadData.user_id || payloadData.sub,
-        userName: payloadData.name || payloadData.email.split('@')[0], 
+        userName: payloadData.name || (payloadData.email ? payloadData.email.split('@')[0] : 'UnknownUser'), 
         userAvatar: payloadData.picture || '',
         rating,
         comment

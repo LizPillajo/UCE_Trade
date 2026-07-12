@@ -7,9 +7,11 @@ const processPaymentSuccess = async (paymentData) => {
   let sellerId = null;
   
   try {
-    const response = await fetch(`http://host.docker.internal:8082/api/v1/catalog/ventures`);
+    const catalogUrl = process.env.CATALOG_URL || 'http://localhost:8082';
+    const response = await fetch(`${catalogUrl}/api/v1/catalog/ventures`);
     if (response.ok) {
-      const ventures = await response.json();
+      const responseData = await response.json();
+      const ventures = responseData.content || responseData;
       const ventureData = ventures.find(v => v.id === paymentData.ventureId);
       if (ventureData) {
         if (ventureData.title) ventureTitle = ventureData.title;

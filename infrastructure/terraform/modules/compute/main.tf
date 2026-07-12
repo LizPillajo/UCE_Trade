@@ -63,6 +63,13 @@ resource "aws_security_group" "microservices_sg" {
   }
 
   ingress {
+    from_port       = 5678
+    to_port         = 5678
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion_sg.id]
+  }
+
+  ingress {
     from_port = 0
     to_port   = 0
     protocol  = "-1"

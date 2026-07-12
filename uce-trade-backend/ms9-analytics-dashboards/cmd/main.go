@@ -56,7 +56,7 @@ func main() {
 	}
 	publisher, err := mqtt.NewPublisher(mqttURL)
 	if err != nil {
-		logrus.Warnf("Warning: Failed to connect to MQTT on startup: %v", err)
+		logrus.Fatalf("Failed to connect to MQTT on startup: %v", err)
 	} else {
 		defer publisher.Close()
 	}
@@ -75,11 +75,11 @@ func main() {
 	if service != nil {
 		consumer, err := rabbitmq.NewConsumer(rabbitURL, service)
 		if err != nil {
-			logrus.Warnf("Warning: Failed to connect to RabbitMQ on startup: %v", err)
+			logrus.Fatalf("Failed to connect to RabbitMQ on startup: %v", err)
 		} else {
 			defer consumer.Close()
 			if err := consumer.StartConsuming(); err != nil {
-				logrus.Warnf("Warning: Failed to start consuming: %v", err)
+				logrus.Fatalf("Failed to start consuming: %v", err)
 			}
 		}
 	}

@@ -135,7 +135,7 @@ func TestGetStudentDashboards(t *testing.T) {
 
 	expectedData := map[string]interface{}{
 		"kpi": map[string]interface{}{
-			"sales": 50,
+			"sales":  50,
 			"rating": 4.8,
 		},
 	}

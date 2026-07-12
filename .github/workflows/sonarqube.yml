@@ -3,14 +3,13 @@ name: SonarQube Analysis
 on:
   push:
     branches:
-      - q/a
+      - feature/sonar-analysis
   pull_request:
     branches:
-      - q/a
+      - feature/sonar-analysis
 
 jobs:
   sonarqube:
-    if: false
     name: SonarQube Scan
     runs-on: ubuntu-latest
     steps:
@@ -79,14 +78,32 @@ jobs:
           npm ci
           npm run test -- --coverage || true
 
-      # 5. Escaneo de SonarQube Global
+      # 5. Análisis de Composición de Software (SCA) con OWASP Dependency-Check
+      - name: Run OWASP Dependency-Check
+        uses: owasp/dependency-check-action@main
+        with:
+          project: 'UCE_Trade'
+          path: '.' # Analiza todo el monorepo (Java, Node, Go)
+          format: 'ALL'
+          out: 'reports'
+          args: >
+            --enableExperimental
+
+      # 6. Publicar el Reporte HTML como un Artefacto descargable
+      - name: Upload SCA Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reporte-SCA-UCE-Trade
+          path: reports/dependency-check-report.html
+
+      # 7. Escaneo de SonarQube Global
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: sqa_e748b664de249963aa85c1392b8e415565554508
-          SONAR_HOST_URL: http://98.90.146.42:9000
+          SONAR_HOST_URL: https://server2.distribuidauce.org
 
-      # 6. Check de Quality Gate (Opcional, previene merges con fallos graves)
+      # 8. Check de Quality Gate (Opcional, previene merges con fallos graves)
       - name: SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@v1
         timeout-minutes: 5

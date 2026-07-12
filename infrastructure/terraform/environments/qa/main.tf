@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket  = "uce-trade-terraform-state-liz-qa"
+    bucket  = "uce-trade-terraform-state-liz-qa2"
     key     = "qa/terraform.tfstate"
     region  = "us-east-1"
     encrypt = true
@@ -60,7 +60,7 @@ variable "stripe_secret_key" {
 variable "s3_bucket_name" {
   description = "AWS S3 Bucket Name for MS7"
   type        = string
-  default     = "uce-trade-qa-bucket"
+  default     = "uce-trade-frontend-qa"
 }
 
 module "networking" {
@@ -120,7 +120,7 @@ module "compute" {
   rabbitmq_endpoint = module.databases.rabbitmq_endpoint
   stripe_secret_key = var.stripe_secret_key
   
-  rds_ms7_endpoint = module.databases.rds_ms1_endpoint # Temporary fallback for MS7 using MS1 DB host
+  rds_ms7_endpoint = module.databases.rds_ms1_endpoint # MS7 and MS9 use MS1 RDS PostgreSQL
   s3_bucket_name   = var.s3_bucket_name
 }
 

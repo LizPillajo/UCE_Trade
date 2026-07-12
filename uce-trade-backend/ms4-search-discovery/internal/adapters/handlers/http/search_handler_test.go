@@ -132,9 +132,9 @@ func TestSearchHandler_GetFeaturedVentures_Empty(t *testing.T) {
 	type emptyMockService struct {
 		mockSearchService
 	}
-	
+
 	emptyMock := &emptyMockService{}
-	
+
 	handler := NewSearchHandler(emptyMock)
 
 	router.GET("/api/v1/search/ventures/featured", handler.GetFeaturedVentures)

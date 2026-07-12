@@ -23,10 +23,10 @@ func NewKafkaConsumer(brokers []string, topic string, service ports.CatalogServi
 		Topic:     topic,
 		Partition: 0,
 	})
-	
+
 	// Logs in JSON format so that tools like Grafana and Loki can easily read them
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	
+
 	return &KafkaConsumer{
 		service: service,
 		reader:  reader,

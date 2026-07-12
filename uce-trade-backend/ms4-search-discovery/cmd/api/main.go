@@ -15,7 +15,7 @@ import (
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "uce-trade-ms4/docs" 
+	_ "uce-trade-ms4/docs"
 )
 
 // @title MS4 Search & Discovery API
@@ -55,7 +55,7 @@ func main() {
 
 	// Router Gin
 	router := gin.Default()
-	
+
 	// Swagger Endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -63,7 +63,7 @@ func main() {
 	{
 		v1.GET("/ventures", searchHandler.Search)
 		v1.GET("/ventures/my-ventures", searchHandler.GetMyVentures)
-		v1.GET("/ventures/featured", searchHandler.GetFeaturedVentures) 
+		v1.GET("/ventures/featured", searchHandler.GetFeaturedVentures)
 		v1.GET("/ventures/:id", searchHandler.GetVentureById)
 	}
 

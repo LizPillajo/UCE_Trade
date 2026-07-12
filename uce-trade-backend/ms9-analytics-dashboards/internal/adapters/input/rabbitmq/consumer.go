@@ -3,8 +3,8 @@ package rabbitmq
 import (
 	"encoding/json"
 
-	"github.com/sirupsen/logrus"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/sirupsen/logrus"
 	"uce-trade-ms9/internal/core/services"
 )
 

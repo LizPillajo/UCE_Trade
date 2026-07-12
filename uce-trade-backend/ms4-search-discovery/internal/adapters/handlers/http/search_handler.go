@@ -166,16 +166,16 @@ func (h *SearchHandler) GetVentureById(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/search/ventures/featured [get]
 func (h *SearchHandler) GetFeaturedVentures(c *gin.Context) {
-    ventures, err := h.service.GetFeaturedVentures()
-    if err != nil {
-        log.Printf("Error getting featured ventures: %v", err)
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch featured data"})
-        return
-    }
-    
-    if ventures == nil {
-        ventures = []domain.Venture{}
-    }
-    
-    c.JSON(http.StatusOK, ventures)
+	ventures, err := h.service.GetFeaturedVentures()
+	if err != nil {
+		log.Printf("Error getting featured ventures: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch featured data"})
+		return
+	}
+
+	if ventures == nil {
+		ventures = []domain.Venture{}
+	}
+
+	c.JSON(http.StatusOK, ventures)
 }

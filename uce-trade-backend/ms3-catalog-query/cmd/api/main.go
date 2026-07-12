@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
-	
+
 	"uce-trade-ms3/internal/adapters/handlers/events"
 	httpHandler "uce-trade-ms3/internal/adapters/handlers/http"
 	"uce-trade-ms3/internal/adapters/repositories/mongodb"
@@ -51,7 +51,7 @@ func main() {
 
 	// 4. INPUT ADAPTER: Router Gin
 	router := gin.Default()
-	
+
 	// Swagger Endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -62,5 +62,5 @@ func main() {
 
 	log.Println("🚀 MS3 Catalog Query running on port 8082")
 	router.Run(":8082")
-	
+
 }

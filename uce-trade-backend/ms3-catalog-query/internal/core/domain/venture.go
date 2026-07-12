@@ -14,7 +14,7 @@ type VentureReadModel struct {
 
 // Owner represents the user details from MS1
 type Owner struct {
-	ID          string `json:"uid"` 
+	ID          string `json:"uid"`
 	FullName    string `json:"fullName"`
 	Faculty     string `json:"faculty"`
 	PhoneNumber string `json:"phoneNumber"`

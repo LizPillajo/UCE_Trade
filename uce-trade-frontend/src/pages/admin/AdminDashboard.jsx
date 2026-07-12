@@ -18,7 +18,7 @@ const COLORS = ["#0d2149", "#efb034", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  useWebSocket();
+  // useWebSocket is now handled globally in App.jsx
   const [period, setPeriod] = useState('ALL');
 
   const { data: stats, isLoading, isError } = useQuery({

@@ -20,6 +20,9 @@ public class S3StorageAdapter implements FileStoragePort {
     @Value("${aws.s3.bucket:uce-trade-qa-bucket}")
     private String bucketName;
 
+    @Value("${gateway.url:http://localhost:8000}")
+    private String gatewayUrl;
+
     public S3StorageAdapter() {
         this.s3Client = S3Client.builder()
                 .region(Region.US_EAST_1)
@@ -57,7 +60,7 @@ public class S3StorageAdapter implements FileStoragePort {
                 log.error("Failed to save mock invoice locally", ex);
             }
             // Return a mock URL so the local testing flow doesn't break
-            return "http://localhost:8086/api/v1/billing/mock-invoices/" + fileName;
+            return gatewayUrl + "/api/v1/billing/mock-invoices/" + fileName;
         }
     }
 }

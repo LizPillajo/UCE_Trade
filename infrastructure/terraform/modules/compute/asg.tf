@@ -16,6 +16,12 @@ resource "aws_launch_template" "node1_lt" {
     name = "LabInstanceProfile"
   }
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
+
   user_data = base64encode(<<-EOF
     #!/bin/bash
     # Configurar SWAP de 2GB
@@ -142,6 +148,12 @@ resource "aws_launch_template" "node2_lt" {
     name = "LabInstanceProfile"
   }
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
+
   user_data = base64encode(<<-EOF
     #!/bin/bash
     # Configurar SWAP de 2GB
@@ -182,10 +194,16 @@ resource "aws_launch_template" "node2_lt" {
       ${var.docker_username}/ms4-search-discovery:${var.docker_tag}
 
     echo "Iniciando MS5 (Interactions)..."
+    mkdir -p /home/ec2-user/ms5
+    aws s3 cp s3://${var.s3_bucket_name}/temp/backend/zips/ms5-interactions-reviews.zip /home/ec2-user/ms5.zip
+    unzip -o /home/ec2-user/ms5.zip -d /home/ec2-user/ms5
+    cd /home/ec2-user/ms5
+    sudo docker build -t ${var.docker_username}/ms5-interactions-reviews:qa .
+    
     sudo docker run -d --restart always -p 8084:8084 \
       -e CASSANDRA_HOST=${var.cassandra_ip} \
       -e KAFKA_BROKER=${var.kafka_brokers} \
-      ${var.docker_username}/ms5-interactions-reviews:${var.docker_tag}
+      ${var.docker_username}/ms5-interactions-reviews:qa
 
     echo "Iniciando MS6 (Payments)..."
     sudo docker run -d --restart always -p 8085:8085 \
@@ -243,6 +261,12 @@ resource "aws_launch_template" "node3_lt" {
     name = "LabInstanceProfile"
   }
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+  }
+
   user_data = base64encode(<<-EOF
     #!/bin/bash
     sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
@@ -273,7 +297,27 @@ resource "aws_launch_template" "node3_lt" {
     echo "Buscando IP de Node 1 (MS1, MS3)..."
     NODE1_IP=$(get_ip "${var.project}-${var.environment}-node1-asg*")
 
+    echo "Buscando IP de Node 3 (Self)..."
+    TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+    NODE3_IP=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
+
+    echo "Iniciando n8n..."
+    sudo docker run -d --restart always --name n8n -p 5678:5678 \
+      -e N8N_HOST=$NODE3_IP \
+      -e N8N_PORT=5678 \
+      -e N8N_PROTOCOL=http \
+      -e NODE_ENV=production \
+      -e WEBHOOK_URL=http://$NODE3_IP:5678/ \
+      -e GENERIC_TIMEZONE="America/Guayaquil" \
+      n8nio/n8n:latest
+
     echo "Iniciando MS7 (Billing & n8n)..."
+    mkdir -p /home/ec2-user/ms7
+    aws s3 cp s3://${var.s3_bucket_name}/temp/backend/zips/ms7-billing-n8n.zip /home/ec2-user/ms7.zip
+    unzip -o /home/ec2-user/ms7.zip -d /home/ec2-user/ms7
+    cd /home/ec2-user/ms7
+    sudo docker build -t ${var.docker_username}/ms7-billing-n8n:qa .
+    
     sudo docker run -d --restart always -p 8086:8086 \
       -e SPRING_DATASOURCE_URL=jdbc:postgresql://${var.rds_ms7_endpoint}/uce_trade_ms1 \
       -e SPRING_DATASOURCE_USERNAME=postgres \
@@ -281,23 +325,39 @@ resource "aws_launch_template" "node3_lt" {
       -e SPRING_RABBITMQ_HOST=${var.rabbitmq_endpoint} \
       -e RABBITMQ_HOST=${var.rabbitmq_endpoint} \
       -e AWS_S3_BUCKET=${var.s3_bucket_name} \
-      ${var.docker_username}/ms7-billing-n8n:${var.docker_tag}
+      -e GATEWAY_URL=http://$NODE1_IP:8000 \
+      -e N8N_WEBHOOK_URL=http://$NODE3_IP:5678/webhook/invoice \
+      ${var.docker_username}/ms7-billing-n8n:qa
 
     echo "Iniciando MS8 (Real-Time Notifications)..."
+    mkdir -p /home/ec2-user/ms8
+    aws s3 cp s3://${var.s3_bucket_name}/temp/backend/zips/ms8-real-time-notifications.zip /home/ec2-user/ms8.zip
+    unzip -o /home/ec2-user/ms8.zip -d /home/ec2-user/ms8
+    cd /home/ec2-user/ms8
+    sudo docker build -t ${var.docker_username}/ms8-real-time-notifications:qa .
+    
     sudo docker run -d --restart always -p 3008:3008 \
       -e PORT=3008 \
       -e REDIS_URL=redis://${var.redis_address}:6379 \
       -e RABBITMQ_URL=amqp://${var.rabbitmq_endpoint}:5672 \
       -e MQTT_URL=mqtt://${var.mosquitto_endpoint}:1883 \
-      ${var.docker_username}/ms8-real-time-notifications:${var.docker_tag}
+      -e CATALOG_URL=http://$NODE1_IP:8082 \
+      ${var.docker_username}/ms8-real-time-notifications:qa
 
-    echo "Iniciando MS9 (Analytics Dashboards)..."
-    sudo docker run -d --restart always -p 3009:3009 \
+    echo "Reconstruyendo e Iniciando MS9 (Analytics Dashboards)..."
+    # Descargar MS9 corregido desde S3 y construir localmente
+    mkdir -p /home/ec2-user/ms9
+    aws s3 sync s3://${var.s3_bucket_name}/temp/backend/ms9-analytics-dashboards /home/ec2-user/ms9
+    cd /home/ec2-user/ms9
+    chmod +x ms9-app
+    sudo docker build -t lizdaisy/ms9-analytics-dashboards:qa .
+
+    sudo docker run -d --name ms9-analytics-dashboards --restart always -p 3009:3009 \
       -e DATABASE_URL=postgres://postgres:root1234@${var.rds_ms7_endpoint}/uce_trade_ms1?sslmode=require \
       -e MQTT_BROKER=tcp://${var.mosquitto_endpoint}:1883 \
       -e RABBITMQ_URL=amqp://guest:guest@${var.rabbitmq_endpoint}:5672/ \
       -e CATALOG_URL=http://$NODE1_IP:8082 \
-      ${var.docker_username}/ms9-analytics-dashboards:${var.docker_tag}
+      lizdaisy/ms9-analytics-dashboards:qa
   EOF
   )
 

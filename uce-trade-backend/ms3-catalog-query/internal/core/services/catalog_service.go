@@ -14,13 +14,13 @@ import (
 
 type catalogService struct {
 	repo       ports.CatalogRepository
-	ms1BaseURL string 
+	ms1BaseURL string
 }
 
 func NewCatalogService(repo ports.CatalogRepository) ports.CatalogService {
 	ms1URL := os.Getenv("MS1_BASE_URL")
 	if ms1URL == "" {
-		ms1URL = "http://localhost:8080" 
+		ms1URL = "http://localhost:8080"
 	}
 
 	return &catalogService{
