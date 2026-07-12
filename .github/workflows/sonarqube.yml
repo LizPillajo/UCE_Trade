@@ -88,6 +88,8 @@ jobs:
           out: 'reports'
           args: >
             --enableExperimental
+        env:
+          JAVA_HOME: /opt/jdk
 
       # 6. Publicar el Reporte HTML como un Artefacto descargable
       - name: Upload SCA Report Artifact
